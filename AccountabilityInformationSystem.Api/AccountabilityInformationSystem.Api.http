@@ -1,0 +1,6 @@
+@AccountabilityInformationSystem.Api_HostAddress = http://localhost:4000
+
+GET {{AccountabilityInformationSystem.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
