@@ -1,8 +1,10 @@
-name: your_new_project_name
+name: ais
 
 services:
   ais.api:
     image: ${DOCKER_REGISTRY-}accountabilityinformationsystemapi
+    depends_on:
+      - ais.mssql
     build:
       context: .
       dockerfile: AccountabilityInformationSystem.Api/Dockerfile
@@ -10,8 +12,30 @@ services:
       - 4000:8080
       - 4001:8081
     environment:
+      - ASPNETCORE_ENVIRONMENT=Development
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://ais.aspire-dashboard:18889
       - OTEL_EXPORTER_OTLP_PROTOCOL=grpc
+      - ConnectionStrings__AccountabilityInformationSystemDb=Server=ais.mssql;Database=AccountabilityInformationSystemDb;User Id=sa;Password=Test@123;Trust Server Certificate=true;MultipleActiveResultSets=true
+    networks:
+      - ais-network
+
+  ais.mssql:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    ports:
+      - "1433:1433"
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=Test@123
+    volumes:
+      - mssqldata:/var/opt/mssql
+    networks:
+      - ais-network
+    healthcheck:
+      test: ["CMD-SHELL", " /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P Test@123 -Q 'SELECT 1' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
     
   ais.aspire-dashboard:
     image: mcr.microsoft.com/dotnet/aspire-dashboard:latest
@@ -19,3 +43,12 @@ services:
       DOTNET_DASHBOARD_UNSECURED_ALLOW_ANONYMOUS: true
     ports:
       - 18888:18888
+    networks:
+      - ais-network
+
+volumes:
+  mssqldata:
+
+networks:
+  ais-network:
+    driver: bridge
