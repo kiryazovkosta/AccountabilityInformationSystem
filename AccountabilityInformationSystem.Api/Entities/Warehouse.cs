@@ -1,7 +1,8 @@
 ﻿using AccountabilityInformationSystem.Api.Entities.Abstraction;
+using AccountabilityInformationSystem.Api.Entities.Flow;
 using Microsoft.AspNetCore.Http.Metadata;
 
-namespace AccountabilityInformationSystem.Api.Entities.Flow;
+namespace AccountabilityInformationSystem.Api.Entities;
 
 public sealed class Warehouse 
     : AuditableEntity, IEntity, IActivableEntity, IOrderPositionEntity 

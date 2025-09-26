@@ -1,5 +1,5 @@
 ﻿using AccountabilityInformationSystem.Api.Common.Constants;
-using AccountabilityInformationSystem.Api.Entities.Flow;
+using AccountabilityInformationSystem.Api.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
