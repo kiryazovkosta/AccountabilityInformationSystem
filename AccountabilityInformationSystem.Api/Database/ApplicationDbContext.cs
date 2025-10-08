@@ -12,7 +12,7 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
     public DbSet<Ikunk> Ikunks { get; set; }
     public DbSet<MeasurementPoint> MeasurementPoints { get; set; }
 
-    override protected void OnModelCreating(ModelBuilder modelBuilder)
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasDefaultSchema(ShemasConstants.Application);
 

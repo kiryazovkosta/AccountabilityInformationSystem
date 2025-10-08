@@ -52,6 +52,9 @@ public sealed class MeasuringPointConfiguration : IEntityTypeConfiguration<Measu
                 val => val.ToString(),
                 val => Enum.Parse<TransportType>(val));
 
+        builder.HasIndex(e => e.Name)
+            .IsUnique();
+
         builder.HasIndex(e => e.ControlPoint)
             .IsUnique();
     }

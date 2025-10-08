@@ -83,6 +83,9 @@ namespace AccountabilityInformationSystem.Api.Migrations.Application
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Name")
+                        .IsUnique();
+
                     b.HasIndex("WarehouseId");
 
                     b.ToTable("Ikunks", "flow");
@@ -168,10 +171,13 @@ namespace AccountabilityInformationSystem.Api.Migrations.Application
 
                     b.HasIndex("IkunkId");
 
+                    b.HasIndex("Name")
+                        .IsUnique();
+
                     b.ToTable("MeasurementPoints", "flow");
                 });
 
-            modelBuilder.Entity("AccountabilityInformationSystem.Api.Entities.Flow.Warehouse", b =>
+            modelBuilder.Entity("AccountabilityInformationSystem.Api.Entities.Warehouse", b =>
                 {
                     b.Property<string>("Id")
                         .HasMaxLength(50)
@@ -240,7 +246,7 @@ namespace AccountabilityInformationSystem.Api.Migrations.Application
 
             modelBuilder.Entity("AccountabilityInformationSystem.Api.Entities.Flow.Ikunk", b =>
                 {
-                    b.HasOne("AccountabilityInformationSystem.Api.Entities.Flow.Warehouse", "Warehouse")
+                    b.HasOne("AccountabilityInformationSystem.Api.Entities.Warehouse", "Warehouse")
                         .WithMany("Ikunks")
                         .HasForeignKey("WarehouseId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -265,7 +271,7 @@ namespace AccountabilityInformationSystem.Api.Migrations.Application
                     b.Navigation("MeasurementPoints");
                 });
 
-            modelBuilder.Entity("AccountabilityInformationSystem.Api.Entities.Flow.Warehouse", b =>
+            modelBuilder.Entity("AccountabilityInformationSystem.Api.Entities.Warehouse", b =>
                 {
                     b.Navigation("Ikunks");
                 });

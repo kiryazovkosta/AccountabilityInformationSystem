@@ -1,8 +1,13 @@
-﻿namespace AccountabilityInformationSystem.Api.Entities.Flow;
+﻿using System.ComponentModel;
+
+namespace AccountabilityInformationSystem.Api.Entities.Flow;
 
 public enum FlowDirectionType
 {
+    [Description("Вход")]
     Incoming = 0,
+    [Description("Изход")]
     Outgoing = 1,
-    Internal = 2
+    [Description("Вход/Изход")]
+    Both = 2
 }

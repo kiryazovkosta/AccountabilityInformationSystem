@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace AccountabilityInformationSystem.Api.Migrations.Application
 {
     /// <inheritdoc />
-    public partial class AddFlow : Migration
+    public partial class Initialization : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -114,6 +114,13 @@ namespace AccountabilityInformationSystem.Api.Migrations.Application
                 });
 
             migrationBuilder.CreateIndex(
+                name: "IX_Ikunks_Name",
+                schema: "flow",
+                table: "Ikunks",
+                column: "Name",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Ikunks_WarehouseId",
                 schema: "flow",
                 table: "Ikunks",
@@ -131,6 +138,13 @@ namespace AccountabilityInformationSystem.Api.Migrations.Application
                 schema: "flow",
                 table: "MeasurementPoints",
                 column: "IkunkId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_MeasurementPoints_Name",
+                schema: "flow",
+                table: "MeasurementPoints",
+                column: "Name",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Warehouses_ExciseNumber",

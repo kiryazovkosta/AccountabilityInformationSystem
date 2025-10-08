@@ -53,13 +53,13 @@ internal static class WarehouseMappings
 
     public static void UpdateFromRequest(this Warehouse warehouse, UpdateWarehouseRequest request)
     {
-        warehouse.Name = request.Name;
-        warehouse.FullName = request.FullName;
-        warehouse.Description = request.Description;
-        warehouse.OrderPosition = request.OrderPosition;
-        warehouse.ExciseNumber = request.ExciseNumber;
-        warehouse.ActiveFrom = request.ActiveFrom;
-        warehouse.ActiveTo = request.ActiveTo;
+        warehouse.Name = request.Name ?? warehouse.Name;
+        warehouse.FullName = request.FullName ?? warehouse.FullName;
+        warehouse.Description = request.Description ?? warehouse.Description;
+        warehouse.OrderPosition = request.OrderPosition ?? warehouse.OrderPosition;
+        warehouse.ExciseNumber = request.ExciseNumber ?? warehouse.ExciseNumber;
+        warehouse.ActiveFrom = request.ActiveFrom ?? warehouse.ActiveFrom;
+        warehouse.ActiveTo = request.ActiveTo ?? warehouse.ActiveTo;
         // TODO: Replace with actual user
         warehouse.ModifiedBy = "System User";
         warehouse.ModifiedAt = DateTime.UtcNow;

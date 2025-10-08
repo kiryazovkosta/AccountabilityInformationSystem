@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AccountabilityInformationSystem.Api.Migrations.Application
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250926072841_AddFlow")]
-    partial class AddFlow
+    [Migration("20250930113229_Initialization")]
+    partial class Initialization
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -85,6 +85,9 @@ namespace AccountabilityInformationSystem.Api.Migrations.Application
                         .HasColumnType("nvarchar(50)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
 
                     b.HasIndex("WarehouseId");
 
@@ -171,10 +174,13 @@ namespace AccountabilityInformationSystem.Api.Migrations.Application
 
                     b.HasIndex("IkunkId");
 
+                    b.HasIndex("Name")
+                        .IsUnique();
+
                     b.ToTable("MeasurementPoints", "flow");
                 });
 
-            modelBuilder.Entity("AccountabilityInformationSystem.Api.Entities.Flow.Warehouse", b =>
+            modelBuilder.Entity("AccountabilityInformationSystem.Api.Entities.Warehouse", b =>
                 {
                     b.Property<string>("Id")
                         .HasMaxLength(50)
@@ -243,7 +249,7 @@ namespace AccountabilityInformationSystem.Api.Migrations.Application
 
             modelBuilder.Entity("AccountabilityInformationSystem.Api.Entities.Flow.Ikunk", b =>
                 {
-                    b.HasOne("AccountabilityInformationSystem.Api.Entities.Flow.Warehouse", "Warehouse")
+                    b.HasOne("AccountabilityInformationSystem.Api.Entities.Warehouse", "Warehouse")
                         .WithMany("Ikunks")
                         .HasForeignKey("WarehouseId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -268,7 +274,7 @@ namespace AccountabilityInformationSystem.Api.Migrations.Application
                     b.Navigation("MeasurementPoints");
                 });
 
-            modelBuilder.Entity("AccountabilityInformationSystem.Api.Entities.Flow.Warehouse", b =>
+            modelBuilder.Entity("AccountabilityInformationSystem.Api.Entities.Warehouse", b =>
                 {
                     b.Navigation("Ikunks");
                 });

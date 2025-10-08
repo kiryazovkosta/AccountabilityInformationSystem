@@ -37,6 +37,9 @@ public sealed class IkunkConfiguration : IEntityTypeConfiguration<Ikunk>
             .HasMaxLength(EntitiesConstants.DeletedByMaxLength)
             .IsRequired(false);
 
+        builder.HasIndex(e => e.Name)
+            .IsUnique();
+
         builder.HasMany(e => e.MeasurementPoints)
             .WithOne(e => e.Ikunk)
             .HasForeignKey(e => e.IkunkId)
