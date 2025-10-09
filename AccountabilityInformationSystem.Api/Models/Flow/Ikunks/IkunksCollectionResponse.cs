@@ -1,6 +1,8 @@
-﻿namespace AccountabilityInformationSystem.Api.Models.Flow.Ikunks;
+﻿using AccountabilityInformationSystem.Api.Models.Common;
 
-public sealed record IkunksCollectionResponse
+namespace AccountabilityInformationSystem.Api.Models.Flow.Ikunks;
+
+public sealed record IkunksCollectionResponse : ICollectionResponse<IkunkResponse>
 {
     public List<IkunkResponse> Items { get; init; }
 }

@@ -1,13 +1,18 @@
 using AccountabilityInformationSystem.Api.Common.Constants;
 using AccountabilityInformationSystem.Api.Database;
+using AccountabilityInformationSystem.Api.Entities;
 using AccountabilityInformationSystem.Api.Entities.Flow;
 using AccountabilityInformationSystem.Api.Extensions;
 using AccountabilityInformationSystem.Api.Middleware;
+using AccountabilityInformationSystem.Api.Models.Flow.Ikunks;
 using AccountabilityInformationSystem.Api.Models.Flow.MeasurementPoints;
+using AccountabilityInformationSystem.Api.Models.Warehouses;
+using AccountabilityInformationSystem.Api.Services.DataShaping;
 using AccountabilityInformationSystem.Api.Services.Sorting;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Migrations;
+using Newtonsoft.Json.Serialization;
 using OpenTelemetry;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
@@ -19,7 +24,12 @@ WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers(options =>
 {
     options.ReturnHttpNotAcceptable = true;
-}).AddXmlSerializerFormatters();
+})
+.AddNewtonsoftJson(options =>
+{
+    options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+})
+.AddXmlSerializerFormatters();
 
 builder.Services.AddValidatorsFromAssemblyContaining<Program>(includeInternalTypes: true);
 
@@ -66,6 +76,14 @@ builder.Services.AddTransient<SortMappingProvider>();
 builder.Services
     .AddSingleton<ISortMappingDefinition, SortMappingDefinition<MeasurementPointResponse, MeasurementPoint>>(_ =>
         MeasurementPointMappings.SortMapping);
+builder.Services
+    .AddSingleton<ISortMappingDefinition, SortMappingDefinition<WarehouseResponse, Warehouse>>(_ =>
+        WarehouseMappings.SortMapping);
+builder.Services
+    .AddSingleton<ISortMappingDefinition, SortMappingDefinition<IkunkResponse, Ikunk>>(_ =>
+        IkunkMappings.SortMapping);
+
+builder.Services.AddTransient<DataShapingService>();
 
 WebApplication app = builder.Build();
 

@@ -1,6 +1,7 @@
 ﻿using System.Linq.Expressions;
 using AccountabilityInformationSystem.Api.Entities;
 using AccountabilityInformationSystem.Api.Models.Flow.Ikunks;
+using AccountabilityInformationSystem.Api.Models.Flow.MeasurementPoints;
 
 namespace AccountabilityInformationSystem.Api.Models.Warehouses;
 
@@ -26,10 +27,11 @@ internal static class WarehouseQueries
                     FullName = ikunk.FullName,
                     MeasurementPoints = ikunk.MeasurementPoints
                         .OrderBy(mp => mp.OrderPosition)
-                        .Select(mp => new Models.Flow.MeasurementPoints.MeasurementPointListResponse()
+                        .Select(mp => new MeasurementPointListResponse()
                         {
                             Id = mp.Id,
-                            FullName = mp.FullName
+                            FullName = mp.FullName,
+                            ControlPoint = mp.ControlPoint
                         })
                         .ToList()
                 })

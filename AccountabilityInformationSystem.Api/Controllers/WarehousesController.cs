@@ -1,8 +1,15 @@
-﻿using System.Linq.Expressions;
+﻿using System.Dynamic;
+using System.Linq.Expressions;
 using AccountabilityInformationSystem.Api.Database;
 using AccountabilityInformationSystem.Api.Entities;
+using AccountabilityInformationSystem.Api.Entities.Flow;
+using AccountabilityInformationSystem.Api.Extensions;
+using AccountabilityInformationSystem.Api.Models.Common;
 using AccountabilityInformationSystem.Api.Models.Flow.Ikunks;
+using AccountabilityInformationSystem.Api.Models.Flow.MeasurementPoints;
 using AccountabilityInformationSystem.Api.Models.Warehouses;
+using AccountabilityInformationSystem.Api.Services.DataShaping;
+using AccountabilityInformationSystem.Api.Services.Sorting;
 using FluentValidation;
 using FluentValidation.Results;
 using Microsoft.AspNetCore.Http;
@@ -16,27 +23,77 @@ namespace AccountabilityInformationSystem.Api.Controllers;
 public sealed class WarehousesController(ApplicationDbContext dbContext) : ControllerBase
 {
     [HttpGet]
-    public async Task<ActionResult<WarehousesCollectionResponse>> GetWarehouses(CancellationToken cancellationToken)
+    public async Task<IActionResult> GetWarehouses(
+        [FromQuery] WarehousesQueryParameters query,
+        SortMappingProvider sortMappingProvider,
+        DataShapingService dataShapingService,
+        CancellationToken cancellationToken)
     {
-        List<WarehouseResponse> warehousesResponse = await dbContext
+        if (!sortMappingProvider.ValidateMappings<WarehouseResponse, Warehouse>(query.Sort))
+        {
+            return Problem(
+                statusCode: StatusCodes.Status400BadRequest,
+                detail: $"Invalid sort parameter. {query.Sort}");
+        }
+
+        if (!dataShapingService.Validate<WarehouseResponse>(query.Fields))
+        {
+            return Problem(
+                statusCode: StatusCodes.Status400BadRequest,
+                detail: $"Invalid fields parameter. {query.Fields}");
+        }
+
+        query.Search = query.Search?.Trim().ToLower();
+
+        SortMapping[] sortMappings = sortMappingProvider.GetMappings<WarehouseResponse, Warehouse>();
+
+
+        IQueryable<WarehouseResponse> warehousesQuery = dbContext
             .Warehouses
-            .Include(warehouse => warehouse.Ikunks)
-            .ThenInclude(ikunk => ikunk.MeasurementPoints)
+            .Where(mp =>
+                query.Search == null ||
+                EF.Functions.Like(mp.Name, $"%{query.Search}%") ||
+                EF.Functions.Like(mp.FullName, $"%{query.Search}%") ||
+                EF.Functions.Like(mp.ExciseNumber, $"%{query.Search}%") ||
+                mp.Description != null && EF.Functions.Like(mp.Description, $"%{query.Search}%")
+            )
+            .ApplySort(query.Sort, sortMappings)
             .AsNoTracking()
-            .OrderBy(warehouse => warehouse.OrderPosition)
-            .Select(WarehouseQueries.ProjectToResponse())
-            .ToListAsync(cancellationToken);
-        return Ok(new WarehousesCollectionResponse() { Items = warehousesResponse });
+            .Select(WarehouseQueries.ProjectToResponse());
+
+        PaginationResponse<ExpandoObject> response = new PaginationResponse<ExpandoObject>()
+        {
+            Page = query.Page,
+            PageSize = query.PageSize,
+            TotalCount = await warehousesQuery.CountAsync(cancellationToken),
+            Items = dataShapingService.ShapeCollectionData(
+                await warehousesQuery
+                    .Skip((query.Page - 1) * query.PageSize)
+                    .Take(query.PageSize)
+                    .ToListAsync(cancellationToken),
+                query.Fields)
+        };
+
+        return Ok(response);
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<WarehouseResponse>> GetWarehouseById(string id, CancellationToken cancellationToken)
+    public async Task<IActionResult> GetWarehouseById(
+        string id, 
+        string? fields,
+        DataShapingService dataShapingService,
+        CancellationToken cancellationToken)
     {
+        if (!dataShapingService.Validate<MeasurementPointResponse>(fields))
+        {
+            return Problem(
+                statusCode: StatusCodes.Status400BadRequest,
+                detail: $"Invalid fields parameter. {fields}");
+        }
+
         WarehouseResponse? warehouseResponse = await dbContext
             .Warehouses
             .AsNoTracking()
-            .Include(warehouse => warehouse.Ikunks.Where(ikunk => !ikunk.IsDeleted))
-            .ThenInclude(ikunk => ikunk.MeasurementPoints.Where(mp => !mp.IsDeleted))
             .Select(WarehouseQueries.ProjectToResponse())
             .FirstOrDefaultAsync(warehouse => warehouse.Id == id, cancellationToken);
         if (warehouseResponse is null)
@@ -44,7 +101,8 @@ public sealed class WarehousesController(ApplicationDbContext dbContext) : Contr
             return NotFound();
         }
 
-        return Ok(warehouseResponse);
+        ExpandoObject shapedData = dataShapingService.ShapeData(warehouseResponse, fields);
+        return Ok(shapedData);
     }
 
     [HttpPost]

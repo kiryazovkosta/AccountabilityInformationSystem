@@ -1,16 +1,20 @@
-﻿using System.Linq.Dynamic.Core;
+﻿using System.Dynamic;
+using System.Linq.Dynamic.Core;
 using AccountabilityInformationSystem.Api.Database;
 using AccountabilityInformationSystem.Api.Entities.Flow;
 using AccountabilityInformationSystem.Api.Extensions;
 using AccountabilityInformationSystem.Api.Models;
+using AccountabilityInformationSystem.Api.Models.Common;
 using AccountabilityInformationSystem.Api.Models.Flow.Ikunks;
 using AccountabilityInformationSystem.Api.Models.Flow.MeasurementPoints;
+using AccountabilityInformationSystem.Api.Services.DataShaping;
 using AccountabilityInformationSystem.Api.Services.Sorting;
 using FluentValidation;
 using FluentValidation.Results;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.EntityFrameworkCore;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace AccountabilityInformationSystem.Api.Controllers.Flow;
 
@@ -19,25 +23,32 @@ namespace AccountabilityInformationSystem.Api.Controllers.Flow;
 public sealed class MeasuringPointsController(ApplicationDbContext dbContext) : ControllerBase
 {
     [HttpGet]
-    public async Task<ActionResult<MeasurementPointsCollectionResponse>> GetMeasuringPoints(
+    public async Task<IActionResult> GetMeasuringPoints(
         [FromQuery] MeasuringPointsQueryParameters query,
         SortMappingProvider sortMappingProvider,
+        DataShapingService dataShapingService,
         CancellationToken cancellationToken)
     {
         if (!sortMappingProvider.ValidateMappings<MeasurementPointResponse, MeasurementPoint>(query.Sort))
         {
             return Problem(
                 statusCode: StatusCodes.Status400BadRequest,
-                detail: $"Invalid sort parameter. {query.Sort}"
-            );
+                detail: $"Invalid sort parameter. {query.Sort}");
+        }
+
+        if (!dataShapingService.Validate<MeasurementPointResponse>(query.Fields))
+        {
+            return Problem(
+                statusCode: StatusCodes.Status400BadRequest,
+                detail: $"Invalid fields parameter. {query.Fields}");
         }
 
         query.Search = query.Search?.Trim().ToLower();
 
         SortMapping[] sortMappings = sortMappingProvider.GetMappings<MeasurementPointResponse, MeasurementPoint>();
 
-        List<MeasurementPointResponse> measuringPointsResponse = await dbContext.MeasurementPoints
-            .Include(mp => mp.Ikunk)
+        IQueryable<MeasurementPointResponse> measurementPointQuery = dbContext
+            .MeasurementPoints
             .Where(mp =>
                 query.Search == null ||
                 EF.Functions.Like(mp.Name, $"%{query.Search}%") ||
@@ -47,27 +58,52 @@ public sealed class MeasuringPointsController(ApplicationDbContext dbContext) : 
             .Where(mp => query.Transport == null || mp.Transport == query.Transport)
             .ApplySort(query.Sort, sortMappings)
             .AsNoTracking()
-            .Select(MeasurementPointQueries.ProjectToResponse())
-            .ToListAsync(cancellationToken);
-        return Ok(new MeasurementPointsCollectionResponse() { Items = measuringPointsResponse });
+            .Select(MeasurementPointQueries.ProjectToResponse());
+
+        PaginationResponse<ExpandoObject> response = new()
+        {
+            Page = query.Page,
+            PageSize = query.PageSize,
+            TotalCount = await measurementPointQuery.CountAsync(cancellationToken),
+            Items = dataShapingService.ShapeCollectionData(
+                await measurementPointQuery
+                    .Skip((query.Page - 1) * query.PageSize)
+                    .Take(query.PageSize)
+                    .ToListAsync(cancellationToken),
+                query.Fields)
+        };
+
+        return Ok(response);
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<MeasurementPointResponse>> GetMeasuringPointById(
+    public async Task<IActionResult> GetMeasuringPointById(
         string id,
+        string? fields,
+        DataShapingService dataShapingService,
         CancellationToken cancellationToken)
     {
+        if (!dataShapingService.Validate<MeasurementPointResponse>(fields))
+        {
+            return Problem(
+                statusCode: StatusCodes.Status400BadRequest,
+                detail: $"Invalid fields parameter. {fields}");
+        }
+
         MeasurementPointResponse? measuringPointResponse = await dbContext
             .MeasurementPoints
             .AsNoTracking()
-            .Include(mp => mp.Ikunk)
+            //.Include(mp => mp.Ikunk)
             .Select(MeasurementPointQueries.ProjectToResponse())
             .FirstOrDefaultAsync(mp => mp.Id == id, cancellationToken);
         if (measuringPointResponse is null)
         {
             return NotFound();
         }
-        return Ok(measuringPointResponse);
+
+        ExpandoObject shapedData = dataShapingService.ShapeData(measuringPointResponse, fields);
+
+        return Ok(shapedData);
     }
 
     [HttpPost]

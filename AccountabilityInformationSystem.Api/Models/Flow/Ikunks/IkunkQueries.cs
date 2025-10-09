@@ -10,26 +10,27 @@ public static class IkunkQueries
 {
     public static Expression<Func<Ikunk, IkunkResponse>> ProjectToResponse()
     {
-        return Ikunk => new IkunkResponse
+        return ikunk => new IkunkResponse
         {
-            Id = Ikunk.Id,
-            Name = Ikunk.Name,
-            FullName = Ikunk.FullName,
-            Description = Ikunk.Description,
-            OrderPosition = Ikunk.OrderPosition,
-            ActiveFrom = Ikunk.ActiveFrom,
-            ActiveTo = Ikunk.ActiveTo,
+            Id = ikunk.Id,
+            Name = ikunk.Name,
+            FullName = ikunk.FullName,
+            Description = ikunk.Description,
+            OrderPosition = ikunk.OrderPosition,
+            ActiveFrom = ikunk.ActiveFrom,
+            ActiveTo = ikunk.ActiveTo,
             Warehouse = new WarehouseListResponse
             {
-                Id = Ikunk.Warehouse.Id,
-                FullName = Ikunk.Warehouse.FullName
+                Id = ikunk.Warehouse.Id,
+                FullName = ikunk.Warehouse.FullName
             },
-            MeasurementPoints = Ikunk.MeasurementPoints
+            MeasurementPoints = ikunk.MeasurementPoints
                 .OrderBy(mp => mp.OrderPosition)
                 .Select(mp => new MeasurementPointListResponse
                 {
                     Id = mp.Id,
                     FullName = mp.FullName,
+                    ControlPoint = mp.ControlPoint
                 })
                 .ToList()
         };

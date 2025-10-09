@@ -1,6 +1,8 @@
-﻿namespace AccountabilityInformationSystem.Api.Models.Warehouses;
+﻿using AccountabilityInformationSystem.Api.Models.Common;
 
-public sealed record WarehousesCollectionResponse
+namespace AccountabilityInformationSystem.Api.Models.Warehouses;
+
+public sealed record WarehousesCollectionResponse : ICollectionResponse<WarehouseResponse>
 {
     public List<WarehouseResponse> Items { get; init; }
 }

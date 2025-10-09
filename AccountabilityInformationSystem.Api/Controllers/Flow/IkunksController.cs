@@ -1,8 +1,15 @@
-﻿using AccountabilityInformationSystem.Api.Database;
+﻿using System.Dynamic;
+using System.Linq.Dynamic.Core;
+using AccountabilityInformationSystem.Api.Database;
 using AccountabilityInformationSystem.Api.Entities;
 using AccountabilityInformationSystem.Api.Entities.Flow;
+using AccountabilityInformationSystem.Api.Extensions;
+using AccountabilityInformationSystem.Api.Models.Common;
 using AccountabilityInformationSystem.Api.Models.Flow.Ikunks;
+using AccountabilityInformationSystem.Api.Models.Flow.MeasurementPoints;
 using AccountabilityInformationSystem.Api.Models.Warehouses;
+using AccountabilityInformationSystem.Api.Services.DataShaping;
+using AccountabilityInformationSystem.Api.Services.Sorting;
 using FluentValidation;
 using FluentValidation.Results;
 using Microsoft.AspNetCore.Http;
@@ -16,36 +23,85 @@ namespace AccountabilityInformationSystem.Api.Controllers.Flow;
 public sealed class IkunksController(ApplicationDbContext dbContext) : ControllerBase
 {
     [HttpGet]
-    public async Task<ActionResult<IkunksCollectionResponse>> GetIkunks(CancellationToken cancellationToken)
+    public async Task<ActionResult<IkunksCollectionResponse>> GetIkunks(
+        [FromQuery] IkunkQueryParameters query,
+        SortMappingProvider sortMappingProvider,
+        DataShapingService dataShapingService,  
+        CancellationToken cancellationToken)
     {
-        List<IkunkResponse> ikunksResponse = await dbContext
+        if (!sortMappingProvider.ValidateMappings<IkunkResponse, Ikunk>(query.Sort))
+        {
+            return Problem(
+                statusCode: StatusCodes.Status400BadRequest,
+                detail: $"Invalid sort parameter. {query.Sort}");
+        }
+
+        if (!dataShapingService.Validate<IkunkResponse>(query.Fields))
+        {
+            return Problem(
+                statusCode: StatusCodes.Status400BadRequest,
+                detail: $"Invalid fields parameter. {query.Fields}");
+        }
+
+        query.Search = query.Search?.Trim().ToLower();
+
+        SortMapping[] sortMappings = sortMappingProvider.GetMappings<IkunkResponse, Ikunk>();
+
+
+        IQueryable<IkunkResponse> ikunksQuery = dbContext
             .Ikunks
-            .Include(ikunk => ikunk.Warehouse)
-            .Include(ikunk => ikunk.MeasurementPoints)
+            .Where(mp =>
+                query.Search == null ||
+                EF.Functions.Like(mp.Name, $"%{query.Search}%") ||
+                EF.Functions.Like(mp.FullName, $"%{query.Search}%") ||
+                mp.Description != null && EF.Functions.Like(mp.Description, $"%{query.Search}%")
+            )
+            .ApplySort(query.Sort, sortMappings, "OrderPosition")
             .AsNoTracking()
-            .OrderBy(ikunk => ikunk.OrderPosition)
-            .Select(IkunkQueries.ProjectToResponse())
-            .ToListAsync(cancellationToken);
-        return Ok(new IkunksCollectionResponse() { Items = ikunksResponse });
+            .Select(IkunkQueries.ProjectToResponse());
+
+        PaginationResponse<ExpandoObject> response = new()
+        {
+            Page = query.Page,
+            PageSize = query.PageSize,
+            TotalCount = await ikunksQuery.CountAsync(cancellationToken),
+            Items = dataShapingService.ShapeCollectionData(
+                await ikunksQuery
+                    .Skip((query.Page - 1) * query.PageSize)
+                    .Take(query.PageSize)
+                    .ToListAsync(cancellationToken),
+                query.Fields)
+        };
+
+        return Ok(response);
     }
 
     [HttpGet("{id}")]
     public async Task<ActionResult<IkunkResponse>> GetIkunkById(
-        string id, 
+        string id,
+        string? fields,
+        DataShapingService dataShapingService,
         CancellationToken cancellationToken)
     {
+        if (!dataShapingService.Validate<MeasurementPointResponse>(fields))
+        {
+            return Problem(
+                statusCode: StatusCodes.Status400BadRequest,
+                detail: $"Invalid fields parameter. {fields}");
+        }
+
         IkunkResponse? ikunkResponse = await dbContext
             .Ikunks
             .AsNoTracking()
-            .Include(ikunk => ikunk.Warehouse)
-            .Include(ikunk => ikunk.MeasurementPoints.Where(mp => !mp.IsDeleted))
             .Select(IkunkQueries.ProjectToResponse())
             .FirstOrDefaultAsync(ikunk => ikunk.Id == id, cancellationToken);
         if (ikunkResponse is null)
         {
             return NotFound();
         }
-        return Ok(ikunkResponse);
+
+        ExpandoObject shapedData = dataShapingService.ShapeData(ikunkResponse, fields);
+        return Ok(shapedData);
     }
 
     [HttpPost]

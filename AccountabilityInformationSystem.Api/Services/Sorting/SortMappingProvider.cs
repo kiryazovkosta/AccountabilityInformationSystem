@@ -1,4 +1,5 @@
-﻿namespace AccountabilityInformationSystem.Api.Services.Sorting;
+﻿
+namespace AccountabilityInformationSystem.Api.Services.Sorting;
 
 public sealed class SortMappingProvider(IEnumerable<ISortMappingDefinition> sortMappingDefinitions)
 {
@@ -26,7 +27,7 @@ public sealed class SortMappingProvider(IEnumerable<ISortMappingDefinition> sort
             return true;
         }
 
-        var sortFields = sort
+        List<string> sortFields = sort
             .Split(',')
             .Select(s => s.Trim().Split(' ')[0])
             .Where(s => !string.IsNullOrWhiteSpace(s))
@@ -38,5 +39,3 @@ public sealed class SortMappingProvider(IEnumerable<ISortMappingDefinition> sort
             m.SortField.Equals(field, StringComparison.OrdinalIgnoreCase)));
     }
 }
-
-

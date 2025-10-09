@@ -2,11 +2,28 @@
 using AccountabilityInformationSystem.Api.Entities.Flow;
 using AccountabilityInformationSystem.Api.Models.Flow.MeasurementPoints;
 using AccountabilityInformationSystem.Api.Models.Warehouses;
+using AccountabilityInformationSystem.Api.Services.Sorting;
 
 namespace AccountabilityInformationSystem.Api.Models.Flow.Ikunks;
 
 public static class IkunkMappings
 {
+    public static readonly SortMappingDefinition<IkunkResponse, Ikunk> SortMapping = new()
+    {
+        Mappings =
+        [
+            new SortMapping(nameof(IkunkResponse.Name), nameof(MeasurementPoint.Name)),
+            new SortMapping(nameof(IkunkResponse.FullName), nameof(MeasurementPoint.FullName)),
+            new SortMapping(nameof(IkunkResponse.Description), nameof(MeasurementPoint.Description)),
+            new SortMapping(nameof(IkunkResponse.OrderPosition), nameof(MeasurementPoint.OrderPosition)),
+            new SortMapping(nameof(IkunkResponse.ActiveFrom), nameof(MeasurementPoint.ActiveFrom)),
+            new SortMapping(nameof(IkunkResponse.ActiveTo), nameof(MeasurementPoint.ActiveTo)),
+            new SortMapping(
+                $"{nameof(IkunkResponse.Warehouse)}.{nameof(IkunkResponse.Warehouse.Id)}",
+                $"{nameof(Ikunk.Warehouse)}.{nameof(Ikunk.Warehouse.Id)}")
+        ]
+    };
+
     public static Ikunk ToEntity(this CreateIkunkRequest request)
         => new()
     {
