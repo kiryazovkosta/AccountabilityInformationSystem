@@ -11,7 +11,7 @@ namespace AccountabilityInformationSystem.Api.Models.Common;
 /// current page and information needed for navigation, such as page index and total counts. All pagination metadata is
 /// included to facilitate client-side paging and navigation.</remarks>
 /// <typeparam name="T">The type of items contained in the paginated collection. Must be a reference type.</typeparam>
-public sealed class PaginationResponse<T> : ICollectionResponse<T>
+public sealed class PaginationResponse<T> : ICollectionResponse<T>, ILinksResponse
 where T: class
 {
     /// <summary>
@@ -48,6 +48,11 @@ where T: class
     /// Gets the collection of items contained in the current instance.
     /// </summary>
     public List<T> Items { get; init; }
+
+    /// <summary>
+    /// Gets the collection of link responses associated with the current object.
+    /// </summary>
+    public List<LinkResponse> Links { get; set; }
 
     public static async Task<PaginationResponse<T>> CreateAsync(
         IQueryable<T> source, 

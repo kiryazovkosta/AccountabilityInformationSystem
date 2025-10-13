@@ -8,19 +8,23 @@ using AccountabilityInformationSystem.Api.Models.Common;
 using AccountabilityInformationSystem.Api.Models.Flow.Ikunks;
 using AccountabilityInformationSystem.Api.Models.Flow.MeasurementPoints;
 using AccountabilityInformationSystem.Api.Services.DataShaping;
+using AccountabilityInformationSystem.Api.Services.Linking;
 using AccountabilityInformationSystem.Api.Services.Sorting;
 using FluentValidation;
 using FluentValidation.Results;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.EntityFrameworkCore;
+using OpenTelemetry.Trace;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace AccountabilityInformationSystem.Api.Controllers.Flow;
 
 [ApiController]
 [Route("api/flow/measuring-points")]
-public sealed class MeasuringPointsController(ApplicationDbContext dbContext) : ControllerBase
+public sealed class MeasuringPointsController(
+    ApplicationDbContext dbContext,
+    LinkService linkService) : ControllerBase
 {
     [HttpGet]
     public async Task<IActionResult> GetMeasuringPoints(
@@ -54,7 +58,8 @@ public sealed class MeasuringPointsController(ApplicationDbContext dbContext) : 
                 EF.Functions.Like(mp.Name, $"%{query.Search}%") ||
                 mp.Description != null && EF.Functions.Like(mp.Description, $"%{query.Search}%")
             )
-            .Where(mp => query.Direction == null || mp.FlowDirection == query.Direction)
+            .Where(mp => query.IkunkId == null || mp.Ikunk.Id == query.IkunkId)
+            .Where(mp => query.FlowDirection == null || mp.FlowDirection == query.FlowDirection)
             .Where(mp => query.Transport == null || mp.Transport == query.Transport)
             .ApplySort(query.Sort, sortMappings)
             .AsNoTracking()
@@ -70,14 +75,16 @@ public sealed class MeasuringPointsController(ApplicationDbContext dbContext) : 
                     .Skip((query.Page - 1) * query.PageSize)
                     .Take(query.PageSize)
                     .ToListAsync(cancellationToken),
-                query.Fields)
+                query.Fields,
+                mp => CreateLinksForMeasuringPoint(mp.Id, query.Fields))
         };
+        response.Links = CreateLinksForMeasuringPoints(query, response.HasNextPage, response.HasPreviousPage);
 
         return Ok(response);
     }
 
     [HttpGet("{id}")]
-    public async Task<IActionResult> GetMeasuringPointById(
+    public async Task<IActionResult> GetMeasuringPoint(
         string id,
         string? fields,
         DataShapingService dataShapingService,
@@ -93,7 +100,6 @@ public sealed class MeasuringPointsController(ApplicationDbContext dbContext) : 
         MeasurementPointResponse? measuringPointResponse = await dbContext
             .MeasurementPoints
             .AsNoTracking()
-            //.Include(mp => mp.Ikunk)
             .Select(MeasurementPointQueries.ProjectToResponse())
             .FirstOrDefaultAsync(mp => mp.Id == id, cancellationToken);
         if (measuringPointResponse is null)
@@ -101,13 +107,14 @@ public sealed class MeasuringPointsController(ApplicationDbContext dbContext) : 
             return NotFound();
         }
 
-        ExpandoObject shapedData = dataShapingService.ShapeData(measuringPointResponse, fields);
+        ExpandoObject shapedResponse = dataShapingService.ShapeData(measuringPointResponse, fields);
+        shapedResponse.TryAdd("links", CreateLinksForMeasuringPoint(id, fields));
 
-        return Ok(shapedData);
+        return Ok(shapedResponse);
     }
 
     [HttpPost]
-    public async Task<ActionResult> CreateMeasuringPoint(
+    public async Task<ActionResult<MeasurementPointResponse>> CreateMeasuringPoint(
         [FromBody] CreateMeasuringPointRequest request,
         IValidator<CreateMeasuringPointRequest> validator,
         CancellationToken cancellationToken
@@ -132,9 +139,14 @@ public sealed class MeasuringPointsController(ApplicationDbContext dbContext) : 
         MeasurementPoint measuringPoint = request.ToEntity();
         await dbContext.MeasurementPoints.AddAsync(measuringPoint, cancellationToken);
         await dbContext.SaveChangesAsync(cancellationToken);
-        MeasurementPointResponse measurementPointResponse = measuringPoint.ToResponse();
+
+        MeasurementPointResponse measurementPointResponse = measuringPoint.ToResponse() with
+        {
+            Links = CreateLinksForMeasuringPoint(measuringPoint.Id)
+        };
+
         return CreatedAtAction(
-            actionName: nameof(GetMeasuringPointById),
+            actionName: nameof(GetMeasuringPoint),
             routeValues: new { id = measurementPointResponse.Id },
             value: measurementPointResponse);
     }
@@ -176,7 +188,27 @@ public sealed class MeasuringPointsController(ApplicationDbContext dbContext) : 
         return NoContent();
     }
 
-        [HttpGet("transports")]
+    [HttpPut("{id}/deactivate")]
+    public async Task<ActionResult> DeactivateMeasurementPoint(
+        string id,
+        [FromBody] DateOnly activeTo,
+        CancellationToken cancellationToken)
+    {
+        MeasurementPoint? measuringPoint = await dbContext.MeasurementPoints.FirstOrDefaultAsync(mp => mp.Id == id, cancellationToken);
+        if (measuringPoint is null)
+        {
+            return Problem(
+                detail: "Measurement point with specific id does not exists!",
+                statusCode: StatusCodes.Status404NotFound);
+        }
+
+        measuringPoint.ActiveTo = activeTo;
+        await dbContext.SaveChangesAsync(cancellationToken);
+
+        return NoContent();
+    }
+
+    [HttpGet("transports")]
     public ActionResult<List<EnumTypeResponse>> GetTransports()
     {
         List<EnumTypeResponse> transports = [.. Enum
@@ -201,4 +233,72 @@ public sealed class MeasuringPointsController(ApplicationDbContext dbContext) : 
             })];
         return Ok(transports);
     }
+
+    private List<LinkResponse> CreateLinksForMeasuringPoints(
+        MeasuringPointsQueryParameters parameters,
+        bool hasNextPage,
+        bool hasPreviousPage)
+    {
+        List<LinkResponse> links = 
+        [
+            linkService.Create(nameof(GetMeasuringPoints), "self", HttpMethods.Get, new
+            {
+                page = parameters.Page,
+                pageSize = parameters.PageSize,
+                fields = parameters.Fields,
+                q = parameters.Search,
+                sort = parameters.Sort,
+                ikunkid = parameters.IkunkId,
+                direction = parameters.FlowDirection,
+                transport = parameters.Transport
+            }),
+            linkService.Create(nameof(CreateMeasuringPoint), "create", HttpMethods.Post),
+        ];
+
+        if (hasNextPage)
+        {
+            linkService.Create(nameof(GetMeasuringPoints), "next-page", HttpMethods.Get, new
+            {
+                page = parameters.Page + 1,
+                pageSize = parameters.PageSize,
+                fields = parameters.Fields,
+                q = parameters.Search,
+                sort = parameters.Sort,
+                ikunkid = parameters.IkunkId,
+                direction = parameters.FlowDirection,
+                transport = parameters.Transport
+            });
+        }
+
+        if (hasPreviousPage)
+        {
+            linkService.Create(nameof(GetMeasuringPoints), "previous-page", HttpMethods.Get, new
+            {
+                page = parameters.Page - 1,
+                pageSize = parameters.PageSize,
+                fields = parameters.Fields,
+                q = parameters.Search,
+                sort = parameters.Sort,
+                ikunkid = parameters.IkunkId,
+                direction = parameters.FlowDirection,
+                transport = parameters.Transport
+            });
+        }
+
+        return links;
+    }
+
+    private List<LinkResponse> CreateLinksForMeasuringPoint(string id, string? fields = null)
+    {
+        List<LinkResponse> links =
+        [
+            linkService.Create(nameof(GetMeasuringPoint), "self", HttpMethods.Get, new { id, fields }),
+            linkService.Create(nameof(UpdateMeasurementPoint), "update", HttpMethods.Put, new { id }),
+            linkService.Create(nameof(DeactivateMeasurementPoint), "deactivate", HttpMethods.Put, new { id })
+        ];
+
+        return links;
+    }
+
+
 }

@@ -1,6 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using System.Dynamic;
 using System.Reflection;
+using AccountabilityInformationSystem.Api.Models.Common;
 
 namespace AccountabilityInformationSystem.Api.Services.DataShaping;
 
@@ -36,7 +37,10 @@ public sealed class DataShapingService
         return (ExpandoObject)shapedObject;
     }
 
-    public List<ExpandoObject> ShapeCollectionData<T>(IEnumerable<T> entities, string? fields)
+    public List<ExpandoObject> ShapeCollectionData<T>(
+        IEnumerable<T> entities, 
+        string? fields,
+        Func<T, List<LinkResponse>>? linksFactory = null)
     {
         fields = AppendId(fields);
 
@@ -64,6 +68,11 @@ public sealed class DataShapingService
             foreach (PropertyInfo propertyInfo in propertyInfos)
             {
                 shapedObject[propertyInfo.Name] = propertyInfo.GetValue(entity);
+            }
+
+            if (linksFactory is not null)
+            {
+                shapedObject["links"] = linksFactory(entity);
             }
 
             shapedData.Add((ExpandoObject)shapedObject);

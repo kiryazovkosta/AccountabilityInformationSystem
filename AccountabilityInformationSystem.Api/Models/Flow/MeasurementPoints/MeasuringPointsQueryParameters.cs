@@ -15,7 +15,8 @@ public abstract record QueryParameters
 
 public sealed record MeasuringPointsQueryParameters : QueryParameters
 {
-    public FlowDirectionType? Direction { get; init; }
+    public string? IkunkId { get; init; }
+    public FlowDirectionType? FlowDirection { get; init; }
     public TransportType? Transport { get; init; }
 }
 

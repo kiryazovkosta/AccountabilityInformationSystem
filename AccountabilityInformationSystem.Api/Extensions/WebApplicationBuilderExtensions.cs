@@ -7,6 +7,7 @@ using AccountabilityInformationSystem.Api.Models.Flow.Ikunks;
 using AccountabilityInformationSystem.Api.Models.Flow.MeasurementPoints;
 using AccountabilityInformationSystem.Api.Models.Warehouses;
 using AccountabilityInformationSystem.Api.Services.DataShaping;
+using AccountabilityInformationSystem.Api.Services.Linking;
 using AccountabilityInformationSystem.Api.Services.Sorting;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
@@ -111,6 +112,9 @@ public static class WebApplicationBuilderExtensions
                 IkunkMappings.SortMapping);
 
         builder.Services.AddTransient<DataShapingService>();
+
+        builder.Services.AddHttpContextAccessor();
+        builder.Services.AddTransient<LinkService>();
 
         return builder;
     }
