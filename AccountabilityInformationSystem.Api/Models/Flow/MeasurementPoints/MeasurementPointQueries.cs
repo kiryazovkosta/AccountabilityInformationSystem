@@ -36,4 +36,19 @@ public static class MeasurementPointQueries
             }
         };
     }
+
+    public static Expression<Func<MeasurementPoint, MeasurementPointResponseV2>> ProjectToResponseV2()
+    {
+        return mp => new MeasurementPointResponseV2
+        {
+            Id = mp.Id,
+            FullName = mp.FullName,
+            OrderPosition = mp.OrderPosition,
+            Ikunk = new IkunkSimpleResponse
+            {
+                Id = mp.Ikunk.Id,
+                Name = mp.Ikunk.Name
+            }
+        };
+    }
 }

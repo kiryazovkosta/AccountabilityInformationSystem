@@ -9,7 +9,11 @@ using AccountabilityInformationSystem.Api.Models.Warehouses;
 using AccountabilityInformationSystem.Api.Services.DataShaping;
 using AccountabilityInformationSystem.Api.Services.Linking;
 using AccountabilityInformationSystem.Api.Services.Sorting;
+using Asp.Versioning;
+using Asp.Versioning.ApiExplorer;
 using FluentValidation;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Newtonsoft.Json.Serialization;
@@ -22,8 +26,9 @@ namespace AccountabilityInformationSystem.Api.Extensions;
 
 public static class WebApplicationBuilderExtensions
 {
-    public static WebApplicationBuilder AddControllers(this WebApplicationBuilder builder)
+    public static WebApplicationBuilder AddApiServices(this WebApplicationBuilder builder)
     {
+
         builder.Services
             .AddControllers(options =>
             {
@@ -32,8 +37,41 @@ public static class WebApplicationBuilderExtensions
             .AddNewtonsoftJson(options =>
             {
                 options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+            });
+
+        builder.Services.Configure<MvcOptions>(options =>
+        {
+            NewtonsoftJsonOutputFormatter formatter = options.OutputFormatters
+                .OfType<NewtonsoftJsonOutputFormatter>()
+                .First();
+            formatter.SupportedMediaTypes.Add(CustomMediaTypeNames.Application.HateoasJson);
+            formatter.SupportedMediaTypes.Add(CustomMediaTypeNames.Application.JsonV1);
+            formatter.SupportedMediaTypes.Add(CustomMediaTypeNames.Application.JsonV2);
+            formatter.SupportedMediaTypes.Add(CustomMediaTypeNames.Application.HateoasJsonV1);
+            formatter.SupportedMediaTypes.Add(CustomMediaTypeNames.Application.HateoasJsonV2);
+
+        });
+
+        builder.Services
+            .AddApiVersioning(options =>
+            {
+                options.DefaultApiVersion = new ApiVersion(1);
+                options.ReportApiVersions = true;
+                options.AssumeDefaultVersionWhenUnspecified = true;
+                options.ApiVersionSelector = new DefaultApiVersionSelector(options);
+                options.ApiVersionReader = ApiVersionReader.Combine(
+                    new UrlSegmentApiVersionReader(),
+                    new MediaTypeApiVersionReader(),
+                    new MediaTypeApiVersionReaderBuilder()
+                        .Template("application/vnd.ais.hateoas.{version}+json")
+                        .Build());
             })
-            .AddXmlSerializerFormatters();
+            .AddMvc()
+            .AddApiExplorer(options =>
+            {
+                options.GroupNameFormat = "'v'V";
+                options.SubstituteApiVersionInUrl = true;
+            });
 
         builder.Services.AddOpenApi();
 

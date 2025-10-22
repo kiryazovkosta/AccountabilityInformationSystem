@@ -1,5 +1,6 @@
 ﻿using System.Dynamic;
 using System.Linq.Dynamic.Core;
+using AccountabilityInformationSystem.Api.Common.Constants;
 using AccountabilityInformationSystem.Api.Database;
 using AccountabilityInformationSystem.Api.Entities.Flow;
 using AccountabilityInformationSystem.Api.Extensions;
@@ -10,6 +11,7 @@ using AccountabilityInformationSystem.Api.Models.Flow.MeasurementPoints;
 using AccountabilityInformationSystem.Api.Services.DataShaping;
 using AccountabilityInformationSystem.Api.Services.Linking;
 using AccountabilityInformationSystem.Api.Services.Sorting;
+using Asp.Versioning;
 using FluentValidation;
 using FluentValidation.Results;
 using Microsoft.AspNetCore.Mvc;
@@ -22,11 +24,13 @@ namespace AccountabilityInformationSystem.Api.Controllers.Flow;
 
 [ApiController]
 [Route("api/flow/measuring-points")]
+[ApiVersion(1.0)]
 public sealed class MeasuringPointsController(
     ApplicationDbContext dbContext,
     LinkService linkService) : ControllerBase
 {
     [HttpGet]
+    [MapToApiVersion(1.0)]
     public async Task<IActionResult> GetMeasuringPoints(
         [FromQuery] MeasuringPointsQueryParameters query,
         SortMappingProvider sortMappingProvider,
@@ -65,6 +69,8 @@ public sealed class MeasuringPointsController(
             .AsNoTracking()
             .Select(MeasurementPointQueries.ProjectToResponse());
 
+        bool includeLinks = query.Accept == CustomMediaTypeNames.Application.HateoasJson;
+
         PaginationResponse<ExpandoObject> response = new()
         {
             Page = query.Page,
@@ -76,9 +82,75 @@ public sealed class MeasuringPointsController(
                     .Take(query.PageSize)
                     .ToListAsync(cancellationToken),
                 query.Fields,
-                mp => CreateLinksForMeasuringPoint(mp.Id, query.Fields))
+                includeLinks ? mp => CreateLinksForMeasuringPoint(mp.Id, query.Fields) : null)
         };
-        response.Links = CreateLinksForMeasuringPoints(query, response.HasNextPage, response.HasPreviousPage);
+        if (includeLinks)
+        {
+            response.Links = CreateLinksForMeasuringPoints(query, response.HasNextPage, response.HasPreviousPage);
+        }
+
+        return Ok(response);
+    }
+
+    [HttpGet]
+    [ApiVersion(2.0)]
+    public async Task<IActionResult> GetMeasuringPointsV2(
+        [FromQuery] MeasuringPointsQueryParameters query,
+        SortMappingProvider sortMappingProvider,
+        DataShapingService dataShapingService,
+        CancellationToken cancellationToken)
+    {
+        if (!sortMappingProvider.ValidateMappings<MeasurementPointResponse, MeasurementPoint>(query.Sort))
+        {
+            return Problem(
+                statusCode: StatusCodes.Status400BadRequest,
+                detail: $"Invalid sort parameter. {query.Sort}");
+        }
+
+        if (!dataShapingService.Validate<MeasurementPointResponse>(query.Fields))
+        {
+            return Problem(
+                statusCode: StatusCodes.Status400BadRequest,
+                detail: $"Invalid fields parameter. {query.Fields}");
+        }
+
+        query.Search = query.Search?.Trim().ToLower();
+
+        SortMapping[] sortMappings = sortMappingProvider.GetMappings<MeasurementPointResponse, MeasurementPoint>();
+
+        IQueryable<MeasurementPointResponseV2> measurementPointQuery = dbContext
+            .MeasurementPoints
+            .Where(mp =>
+                query.Search == null ||
+                EF.Functions.Like(mp.Name, $"%{query.Search}%") ||
+                mp.Description != null && EF.Functions.Like(mp.Description, $"%{query.Search}%")
+            )
+            .Where(mp => query.IkunkId == null || mp.Ikunk.Id == query.IkunkId)
+            .Where(mp => query.FlowDirection == null || mp.FlowDirection == query.FlowDirection)
+            .Where(mp => query.Transport == null || mp.Transport == query.Transport)
+            .ApplySort(query.Sort, sortMappings)
+            .AsNoTracking()
+            .Select(MeasurementPointQueries.ProjectToResponseV2());
+
+        bool includeLinks = query.Accept == CustomMediaTypeNames.Application.HateoasJson;
+
+        PaginationResponse<ExpandoObject> response = new()
+        {
+            Page = query.Page,
+            PageSize = query.PageSize,
+            TotalCount = await measurementPointQuery.CountAsync(cancellationToken),
+            Items = dataShapingService.ShapeCollectionData(
+                await measurementPointQuery
+                    .Skip((query.Page - 1) * query.PageSize)
+                    .Take(query.PageSize)
+                    .ToListAsync(cancellationToken),
+                query.Fields,
+                includeLinks ? mp => CreateLinksForMeasuringPoint(mp.Id, query.Fields) : null)
+        };
+        if (includeLinks)
+        {
+            response.Links = CreateLinksForMeasuringPoints(query, response.HasNextPage, response.HasPreviousPage);
+        }
 
         return Ok(response);
     }
@@ -87,6 +159,7 @@ public sealed class MeasuringPointsController(
     public async Task<IActionResult> GetMeasuringPoint(
         string id,
         string? fields,
+        [FromHeader(Name = "Accept")] string? accept,
         DataShapingService dataShapingService,
         CancellationToken cancellationToken)
     {
@@ -108,7 +181,10 @@ public sealed class MeasuringPointsController(
         }
 
         ExpandoObject shapedResponse = dataShapingService.ShapeData(measuringPointResponse, fields);
-        shapedResponse.TryAdd("links", CreateLinksForMeasuringPoint(id, fields));
+        if (accept == CustomMediaTypeNames.Application.HateoasJson)
+        {
+            shapedResponse.TryAdd("links", CreateLinksForMeasuringPoint(id, fields));
+        }
 
         return Ok(shapedResponse);
     }
@@ -257,7 +333,7 @@ public sealed class MeasuringPointsController(
 
         if (hasNextPage)
         {
-            linkService.Create(nameof(GetMeasuringPoints), "next-page", HttpMethods.Get, new
+            links.Add(linkService.Create(nameof(GetMeasuringPoints), "next-page", HttpMethods.Get, new
             {
                 page = parameters.Page + 1,
                 pageSize = parameters.PageSize,
@@ -267,22 +343,24 @@ public sealed class MeasuringPointsController(
                 ikunkid = parameters.IkunkId,
                 direction = parameters.FlowDirection,
                 transport = parameters.Transport
-            });
+            }));
         }
 
         if (hasPreviousPage)
         {
-            linkService.Create(nameof(GetMeasuringPoints), "previous-page", HttpMethods.Get, new
-            {
-                page = parameters.Page - 1,
-                pageSize = parameters.PageSize,
-                fields = parameters.Fields,
-                q = parameters.Search,
-                sort = parameters.Sort,
-                ikunkid = parameters.IkunkId,
-                direction = parameters.FlowDirection,
-                transport = parameters.Transport
-            });
+            links.Add(
+                linkService.Create(nameof(GetMeasuringPoints), "previous-page", HttpMethods.Get, new
+                {
+                    page = parameters.Page - 1,
+                    pageSize = parameters.PageSize,
+                    fields = parameters.Fields,
+                    q = parameters.Search,
+                    sort = parameters.Sort,
+                    ikunkid = parameters.IkunkId,
+                    direction = parameters.FlowDirection,
+                    transport = parameters.Transport
+                })
+            );
         }
 
         return links;

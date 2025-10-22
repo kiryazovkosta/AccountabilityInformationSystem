@@ -11,6 +11,8 @@ public abstract record QueryParameters
     public string? Fields { get; init; }
     public int Page { get; init; } = 1;
     public int PageSize { get; init; } = 10;
+    [FromHeader(Name = "Accept")]
+    public string? Accept { get; init; }
 }
 
 public sealed record MeasuringPointsQueryParameters : QueryParameters

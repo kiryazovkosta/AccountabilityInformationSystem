@@ -23,8 +23,30 @@
 **/values.dev.yaml
 LICENSE
 README.md
-!**/.gitignore
-!.git/HEAD
-!.git/config
-!.git/packed-refs
-!.git/refs/heads/**
+
+# NuGet packages
+**/.nuget/
+**/packages/
+**/*.nupkg
+**/*.snupkg
+
+# Build outputs
+**/out/
+**/publish/
+**/wwwroot/lib/
+
+# Test results
+**/TestResults/
+**/*.trx
+
+# Logs and databases
+**/*.log
+**/*.db
+**/*.sqlite
+**/*.bak
+
+# Temporary files
+**/*.tmp
+**/*.cache
+**/*.swp
+*~

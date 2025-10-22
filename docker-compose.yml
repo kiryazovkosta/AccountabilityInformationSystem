@@ -1,10 +1,11 @@
-name: ais
-
 services:
   ais.api:
     image: ${DOCKER_REGISTRY-}accountabilityinformationsystemapi
     depends_on:
-      - ais.mssql
+      ais.mssql:
+        condition: service_healthy
+      ais.aspire-dashboard:
+        condition: service_started
     build:
       context: .
       dockerfile: AccountabilityInformationSystem.Api/Dockerfile
@@ -26,23 +27,25 @@ services:
     environment:
       - ACCEPT_EULA=Y
       - MSSQL_SA_PASSWORD=Test@123
+      - MSSQL_PID=Developer
     volumes:
       - mssqldata:/var/opt/mssql
-    networks:
-      - ais-network
     healthcheck:
-      test: ["CMD-SHELL", " /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P Test@123 -Q 'SELECT 1' || exit 1"]
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P $$MSSQL_SA_PASSWORD -C -Q 'SELECT 1' || exit 1"]
       interval: 10s
       timeout: 5s
-      retries: 10
+      retries: 20
       start_period: 30s
-    
+    networks:
+      - ais-network
+ 
   ais.aspire-dashboard:
     image: mcr.microsoft.com/dotnet/aspire-dashboard:latest
     environment:
       DOTNET_DASHBOARD_UNSECURED_ALLOW_ANONYMOUS: true
     ports:
       - 18888:18888
+      - 18889:18889
     networks:
       - ais-network
 

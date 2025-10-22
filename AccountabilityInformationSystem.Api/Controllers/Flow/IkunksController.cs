@@ -10,6 +10,7 @@ using AccountabilityInformationSystem.Api.Models.Flow.MeasurementPoints;
 using AccountabilityInformationSystem.Api.Models.Warehouses;
 using AccountabilityInformationSystem.Api.Services.DataShaping;
 using AccountabilityInformationSystem.Api.Services.Sorting;
+using Asp.Versioning;
 using FluentValidation;
 using FluentValidation.Results;
 using Microsoft.AspNetCore.Http;
@@ -20,6 +21,7 @@ namespace AccountabilityInformationSystem.Api.Controllers.Flow;
 
 [ApiController]
 [Route("api/flow/ikunks")]
+[ApiVersion(1.0)]
 public sealed class IkunksController(ApplicationDbContext dbContext) : ControllerBase
 {
     [HttpGet]
@@ -77,7 +79,8 @@ public sealed class IkunksController(ApplicationDbContext dbContext) : Controlle
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<IkunkResponse>> GetIkunkById(
+    [MapToApiVersion(1.0)]
+    public async Task<ActionResult<IkunkResponse>> GetIkunk(
         string id,
         string? fields,
         DataShapingService dataShapingService,
@@ -94,6 +97,35 @@ public sealed class IkunksController(ApplicationDbContext dbContext) : Controlle
             .Ikunks
             .AsNoTracking()
             .Select(IkunkQueries.ProjectToResponse())
+            .FirstOrDefaultAsync(ikunk => ikunk.Id == id, cancellationToken);
+        if (ikunkResponse is null)
+        {
+            return NotFound();
+        }
+
+        ExpandoObject shapedData = dataShapingService.ShapeData(ikunkResponse, fields);
+        return Ok(shapedData);
+    }
+
+    [HttpGet("{id}")]
+    [ApiVersion(2.0)]
+    public async Task<ActionResult<IkunkResponse>> GetIkunkV2(
+        string id,
+        string? fields,
+        DataShapingService dataShapingService,
+        CancellationToken cancellationToken)
+    {
+        if (!dataShapingService.Validate<IkunkResponseV2>(fields))
+        {
+            return Problem(
+                statusCode: StatusCodes.Status400BadRequest,
+                detail: $"Invalid fields parameter. {fields}");
+        }
+
+        IkunkResponseV2? ikunkResponse = await dbContext
+            .Ikunks
+            .AsNoTracking()
+            .Select(IkunkQueries.ProjectToResponseV2())
             .FirstOrDefaultAsync(ikunk => ikunk.Id == id, cancellationToken);
         if (ikunkResponse is null)
         {
@@ -131,7 +163,7 @@ public sealed class IkunksController(ApplicationDbContext dbContext) : Controlle
         await dbContext.SaveChangesAsync(cancellationToken);
         IkunkResponse ikunkResponse = ikunk.ToResponse();
         return CreatedAtAction(
-            nameof(GetIkunkById), 
+            nameof(GetIkunk), 
             new { id = ikunk.Id }, 
             ikunkResponse);
     }

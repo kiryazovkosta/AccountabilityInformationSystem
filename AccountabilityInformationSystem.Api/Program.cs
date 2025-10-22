@@ -5,7 +5,7 @@ using Scalar.AspNetCore;
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 builder
-    .AddControllers()
+    .AddApiServices()
     .AddValidators()
     .AddErrorHandling()
     .AddDatabase()
@@ -17,7 +17,6 @@ WebApplication app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
-
     app.MapScalarApiReference();
 
     await app.ApplyMigrationAsync();
