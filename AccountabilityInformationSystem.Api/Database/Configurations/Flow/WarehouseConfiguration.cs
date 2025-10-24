@@ -34,10 +34,6 @@ public sealed class WarehouseConfiguration : IEntityTypeConfiguration<Warehouse>
             .HasMaxLength(EntitiesConstants.ModifiedByMaxLength)
             .IsRequired(false);
 
-        builder.Property(e => e.DeletedBy)
-            .HasMaxLength(EntitiesConstants.DeletedByMaxLength)
-            .IsRequired(false);
-
         builder.HasIndex(e => e.ExciseNumber)
             .IsUnique();
 

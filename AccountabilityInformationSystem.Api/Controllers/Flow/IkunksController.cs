@@ -13,6 +13,7 @@ using AccountabilityInformationSystem.Api.Services.Sorting;
 using Asp.Versioning;
 using FluentValidation;
 using FluentValidation.Results;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -22,6 +23,7 @@ namespace AccountabilityInformationSystem.Api.Controllers.Flow;
 [ApiController]
 [Route("api/flow/ikunks")]
 [ApiVersion(1.0)]
+[Authorize]
 public sealed class IkunksController(ApplicationDbContext dbContext) : ControllerBase
 {
     [HttpGet]

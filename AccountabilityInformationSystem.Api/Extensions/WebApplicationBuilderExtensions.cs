@@ -1,4 +1,6 @@
-﻿using AccountabilityInformationSystem.Api.Common.Constants;
+﻿using System.Security.Claims;
+using System.Text;
+using AccountabilityInformationSystem.Api.Common.Constants;
 using AccountabilityInformationSystem.Api.Database;
 using AccountabilityInformationSystem.Api.Entities;
 using AccountabilityInformationSystem.Api.Entities.Flow;
@@ -9,13 +11,19 @@ using AccountabilityInformationSystem.Api.Models.Warehouses;
 using AccountabilityInformationSystem.Api.Services.DataShaping;
 using AccountabilityInformationSystem.Api.Services.Linking;
 using AccountabilityInformationSystem.Api.Services.Sorting;
+using AccountabilityInformationSystem.Api.Services.Tokenizing;
+using AccountabilityInformationSystem.Api.Settings;
 using Asp.Versioning;
 using Asp.Versioning.ApiExplorer;
 using FluentValidation;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.IdentityModel.JsonWebTokens;
+using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json.Serialization;
 using OpenTelemetry;
 using OpenTelemetry.Metrics;
@@ -73,7 +81,11 @@ public static class WebApplicationBuilderExtensions
                 options.SubstituteApiVersionInUrl = true;
             });
 
-        builder.Services.AddOpenApi();
+        builder.Services.AddOpenApi(options =>
+        {
+            options.AddDocumentTransformer<BearerSecuritySchemeTransformer>();
+        });
+        //builder.Services.AddOpenApi();
 
         return builder;
     }
@@ -106,7 +118,15 @@ public static class WebApplicationBuilderExtensions
             options
                 .UseSqlServer(
                     builder.Configuration.GetConnectionString(DatabasesConstants.ApplicationDatabase),
-                    sqlOptions => sqlOptions.MigrationsHistoryTable(HistoryRepository.DefaultTableName, ShemasConstants.Application));
+                    sqlOptions => sqlOptions.MigrationsHistoryTable(HistoryRepository.DefaultTableName, SchemasConstants.Application));
+        });
+
+        builder.Services.AddDbContext<ApplicationIdentityDbContext>(options =>
+        {
+            options
+                .UseSqlServer(
+                    builder.Configuration.GetConnectionString(DatabasesConstants.ApplicationDatabase),
+                    sqlOptions => sqlOptions.MigrationsHistoryTable(HistoryRepository.DefaultTableName, SchemasConstants.Identity));
         });
 
         return builder;
@@ -153,6 +173,39 @@ public static class WebApplicationBuilderExtensions
 
         builder.Services.AddHttpContextAccessor();
         builder.Services.AddTransient<LinkService>();
+
+        builder.Services.AddTransient<TokenProvider>();
+
+        return builder;
+    }
+
+    public static WebApplicationBuilder AddAuthenticationServices(this WebApplicationBuilder builder)
+    {
+        builder.Services.AddIdentity<IdentityUser, IdentityRole>()
+            .AddEntityFrameworkStores<ApplicationIdentityDbContext>()
+            .AddDefaultTokenProviders();
+
+        builder.Services.Configure<JwtAuthOptions>(builder.Configuration.GetSection("Jwt"));
+
+        JwtAuthOptions? jwtAuthOptions = builder.Configuration.GetSection("Jwt").Get<JwtAuthOptions>() ?? throw new Exception("Invalid or non exists jwt section!");
+
+        builder.Services
+            .AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidIssuer = jwtAuthOptions.Issuer,
+                    ValidAudience = jwtAuthOptions.Audience,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtAuthOptions.Key))
+                };
+            });
+
+        builder.Services.AddAuthorization();
 
         return builder;
     }

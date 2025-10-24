@@ -10,8 +10,8 @@ public sealed class TestsController : ControllerBase
     [HttpGet("ping")]
     public ActionResult<string> Ping()
     {
-        throw new IndexOutOfRangeException("Test exception for demonstration purposes.");
+        //throw new IndexOutOfRangeException("Test exception for demonstration purposes.");
 
-        //return Ok("pong");
+        return Ok("pong");
     }
 }

@@ -12,6 +12,7 @@ using AccountabilityInformationSystem.Api.Services.DataShaping;
 using AccountabilityInformationSystem.Api.Services.Sorting;
 using FluentValidation;
 using FluentValidation.Results;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -20,6 +21,7 @@ namespace AccountabilityInformationSystem.Api.Controllers;
 
 [ApiController]
 [Route("api/warehouses")]
+[Authorize]
 public sealed class WarehousesController(ApplicationDbContext dbContext) : ControllerBase
 {
     [HttpGet]
@@ -61,7 +63,7 @@ public sealed class WarehousesController(ApplicationDbContext dbContext) : Contr
             .AsNoTracking()
             .Select(WarehouseQueries.ProjectToResponse());
 
-        PaginationResponse<ExpandoObject> response = new PaginationResponse<ExpandoObject>()
+        PaginationResponse<ExpandoObject> response = new()
         {
             Page = query.Page,
             PageSize = query.PageSize,
@@ -183,9 +185,6 @@ public sealed class WarehousesController(ApplicationDbContext dbContext) : Contr
                 statusCode: StatusCodes.Status400BadRequest);
         }
 
-        warehouse.IsDeleted = true;
-        warehouse.DeletedAt = DateTime.UtcNow;
-        warehouse.DeletedBy = "System user"; // TODO: Replace with actual user
         await dbContext.SaveChangesAsync(cancellationToken);
         return NoContent();
     }

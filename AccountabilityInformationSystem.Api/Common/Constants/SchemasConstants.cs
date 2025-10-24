@@ -1,6 +1,8 @@
 ﻿namespace AccountabilityInformationSystem.Api.Common.Constants;
 
-public static class ShemasConstants
+public static class SchemasConstants
 {
     public const string Application = "ais";
+
+    public const string Identity = "identity";
 }

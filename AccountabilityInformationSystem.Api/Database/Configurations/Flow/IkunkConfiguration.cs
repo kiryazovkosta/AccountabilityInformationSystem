@@ -33,9 +33,9 @@ public sealed class IkunkConfiguration : IEntityTypeConfiguration<Ikunk>
             .HasMaxLength(EntitiesConstants.ModifiedByMaxLength)
             .IsRequired(false);
 
-        builder.Property(e => e.DeletedBy)
-            .HasMaxLength(EntitiesConstants.DeletedByMaxLength)
-            .IsRequired(false);
+        builder.Property(e => e.WarehouseId)
+            .IsRequired()
+            .HasMaxLength(EntitiesConstants.IdMaxLength);
 
         builder.HasIndex(e => e.Name)
             .IsUnique();

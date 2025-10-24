@@ -36,7 +36,6 @@ internal static class WarehouseMappings
             // TODO: Replace with actual user
             CreatedBy = "System user",
             CreatedAt = DateTime.UtcNow,
-            IsDeleted = false
         };
 
     public static WarehouseResponse ToResponse(this Warehouse warehouse)

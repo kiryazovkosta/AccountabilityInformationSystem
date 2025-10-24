@@ -37,8 +37,7 @@ public static class IkunkMappings
         WarehouseId = request.WarehouseId,
         // TODO: Replace with actual user
         CreatedBy = "System user",
-        CreatedAt = DateTime.UtcNow,
-        IsDeleted = false
+        CreatedAt = DateTime.UtcNow
     };
 
     public static IkunkResponse ToResponse(this Ikunk ikunk)

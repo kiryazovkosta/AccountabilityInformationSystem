@@ -1,5 +1,6 @@
 ﻿using System.Dynamic;
 using System.Linq.Dynamic.Core;
+using System.Net.Mime;
 using AccountabilityInformationSystem.Api.Common.Constants;
 using AccountabilityInformationSystem.Api.Database;
 using AccountabilityInformationSystem.Api.Entities.Flow;
@@ -14,6 +15,7 @@ using AccountabilityInformationSystem.Api.Services.Sorting;
 using Asp.Versioning;
 using FluentValidation;
 using FluentValidation.Results;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.EntityFrameworkCore;
@@ -25,12 +27,21 @@ namespace AccountabilityInformationSystem.Api.Controllers.Flow;
 [ApiController]
 [Route("api/flow/measuring-points")]
 [ApiVersion(1.0)]
+[Authorize]
+[Produces(
+    MediaTypeNames.Application.Json,
+    CustomMediaTypeNames.Application.JsonV1,
+    CustomMediaTypeNames.Application.JsonV2,
+    CustomMediaTypeNames.Application.HateoasJson,
+    CustomMediaTypeNames.Application.HateoasJsonV1,
+    CustomMediaTypeNames.Application.HateoasJsonV2)]
 public sealed class MeasuringPointsController(
     ApplicationDbContext dbContext,
     LinkService linkService) : ControllerBase
 {
     [HttpGet]
     [MapToApiVersion(1.0)]
+    [Produces(typeof(PaginationResponse<MeasurementPointResponse>))]
     public async Task<IActionResult> GetMeasuringPoints(
         [FromQuery] MeasuringPointsQueryParameters query,
         SortMappingProvider sortMappingProvider,
@@ -69,8 +80,6 @@ public sealed class MeasuringPointsController(
             .AsNoTracking()
             .Select(MeasurementPointQueries.ProjectToResponse());
 
-        bool includeLinks = query.Accept == CustomMediaTypeNames.Application.HateoasJson;
-
         PaginationResponse<ExpandoObject> response = new()
         {
             Page = query.Page,
@@ -82,9 +91,9 @@ public sealed class MeasuringPointsController(
                     .Take(query.PageSize)
                     .ToListAsync(cancellationToken),
                 query.Fields,
-                includeLinks ? mp => CreateLinksForMeasuringPoint(mp.Id, query.Fields) : null)
+                query.IncludeLinks ? mp => CreateLinksForMeasuringPoint(mp.Id, query.Fields) : null)
         };
-        if (includeLinks)
+        if (query.IncludeLinks)
         {
             response.Links = CreateLinksForMeasuringPoints(query, response.HasNextPage, response.HasPreviousPage);
         }
@@ -132,8 +141,6 @@ public sealed class MeasuringPointsController(
             .AsNoTracking()
             .Select(MeasurementPointQueries.ProjectToResponseV2());
 
-        bool includeLinks = query.Accept == CustomMediaTypeNames.Application.HateoasJson;
-
         PaginationResponse<ExpandoObject> response = new()
         {
             Page = query.Page,
@@ -145,9 +152,9 @@ public sealed class MeasuringPointsController(
                     .Take(query.PageSize)
                     .ToListAsync(cancellationToken),
                 query.Fields,
-                includeLinks ? mp => CreateLinksForMeasuringPoint(mp.Id, query.Fields) : null)
+                query.IncludeLinks ? mp => CreateLinksForMeasuringPoint(mp.Id, query.Fields) : null)
         };
-        if (includeLinks)
+        if (query.IncludeLinks)
         {
             response.Links = CreateLinksForMeasuringPoints(query, response.HasNextPage, response.HasPreviousPage);
         }
@@ -158,16 +165,15 @@ public sealed class MeasuringPointsController(
     [HttpGet("{id}")]
     public async Task<IActionResult> GetMeasuringPoint(
         string id,
-        string? fields,
-        [FromHeader(Name = "Accept")] string? accept,
+        [FromQuery] MeasuringPointQueryParameters query,
         DataShapingService dataShapingService,
         CancellationToken cancellationToken)
     {
-        if (!dataShapingService.Validate<MeasurementPointResponse>(fields))
+        if (!dataShapingService.Validate<MeasurementPointResponse>(query.Fields))
         {
             return Problem(
                 statusCode: StatusCodes.Status400BadRequest,
-                detail: $"Invalid fields parameter. {fields}");
+                detail: $"Invalid fields parameter. {query.Fields}");
         }
 
         MeasurementPointResponse? measuringPointResponse = await dbContext
@@ -180,10 +186,10 @@ public sealed class MeasuringPointsController(
             return NotFound();
         }
 
-        ExpandoObject shapedResponse = dataShapingService.ShapeData(measuringPointResponse, fields);
-        if (accept == CustomMediaTypeNames.Application.HateoasJson)
+        ExpandoObject shapedResponse = dataShapingService.ShapeData(measuringPointResponse, query.Fields);
+        if (query.IncludeLinks)
         {
-            shapedResponse.TryAdd("links", CreateLinksForMeasuringPoint(id, fields));
+            shapedResponse.TryAdd("links", CreateLinksForMeasuringPoint(id, query.Fields));
         }
 
         return Ok(shapedResponse);

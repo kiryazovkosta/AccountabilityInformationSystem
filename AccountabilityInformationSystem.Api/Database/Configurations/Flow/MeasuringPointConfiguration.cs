@@ -36,9 +36,9 @@ public sealed class MeasuringPointConfiguration : IEntityTypeConfiguration<Measu
             .HasMaxLength(EntitiesConstants.ModifiedByMaxLength)
             .IsRequired(false);
 
-        builder.Property(e => e.DeletedBy)
-            .HasMaxLength(EntitiesConstants.DeletedByMaxLength)
-            .IsRequired(false);
+        builder.Property(e => e.IkunkId)
+            .IsRequired()
+            .HasMaxLength(EntitiesConstants.IdMaxLength);
 
         builder.Property(e => e.FlowDirection)
             .HasMaxLength(EntitiesConstants.EnumMaxLength)

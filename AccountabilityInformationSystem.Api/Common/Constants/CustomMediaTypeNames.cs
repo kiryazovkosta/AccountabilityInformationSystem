@@ -9,5 +9,7 @@ public static class CustomMediaTypeNames
         public const string HateoasJson = "application/vnd.ais.hateoas+json";
         public const string HateoasJsonV1 = "application/vnd.ais.hateoas.1+json";
         public const string HateoasJsonV2 = "application/vnd.ais.hateoas.2+json";
+
+        public const string HateoasSubType = "hateoas";
     }
 }
