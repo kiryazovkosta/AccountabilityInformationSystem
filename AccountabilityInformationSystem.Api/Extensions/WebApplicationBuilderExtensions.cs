@@ -12,6 +12,7 @@ using AccountabilityInformationSystem.Api.Services.DataShaping;
 using AccountabilityInformationSystem.Api.Services.Linking;
 using AccountabilityInformationSystem.Api.Services.Sorting;
 using AccountabilityInformationSystem.Api.Services.Tokenizing;
+using AccountabilityInformationSystem.Api.Services.UserContexting;
 using AccountabilityInformationSystem.Api.Settings;
 using Asp.Versioning;
 using Asp.Versioning.ApiExplorer;
@@ -175,6 +176,9 @@ public static class WebApplicationBuilderExtensions
         builder.Services.AddTransient<LinkService>();
 
         builder.Services.AddTransient<TokenProvider>();
+
+        builder.Services.AddMemoryCache();
+        builder.Services.AddScoped<UserContext>();
 
         return builder;
     }

@@ -3,6 +3,7 @@ using System.Linq.Dynamic.Core;
 using AccountabilityInformationSystem.Api.Database;
 using AccountabilityInformationSystem.Api.Entities;
 using AccountabilityInformationSystem.Api.Entities.Flow;
+using AccountabilityInformationSystem.Api.Entities.Identity;
 using AccountabilityInformationSystem.Api.Extensions;
 using AccountabilityInformationSystem.Api.Models.Common;
 using AccountabilityInformationSystem.Api.Models.Flow.Ikunks;
@@ -10,6 +11,7 @@ using AccountabilityInformationSystem.Api.Models.Flow.MeasurementPoints;
 using AccountabilityInformationSystem.Api.Models.Warehouses;
 using AccountabilityInformationSystem.Api.Services.DataShaping;
 using AccountabilityInformationSystem.Api.Services.Sorting;
+using AccountabilityInformationSystem.Api.Services.UserContexting;
 using Asp.Versioning;
 using FluentValidation;
 using FluentValidation.Results;
@@ -24,13 +26,14 @@ namespace AccountabilityInformationSystem.Api.Controllers.Flow;
 [Route("api/flow/ikunks")]
 [ApiVersion(1.0)]
 [Authorize]
-public sealed class IkunksController(ApplicationDbContext dbContext) : ControllerBase
+public sealed class IkunksController(ApplicationDbContext dbContext, UserContext userContext) 
+    : ControllerBase
 {
     [HttpGet]
     public async Task<ActionResult<IkunksCollectionResponse>> GetIkunks(
         [FromQuery] IkunkQueryParameters query,
         SortMappingProvider sortMappingProvider,
-        DataShapingService dataShapingService,  
+        DataShapingService dataShapingService, 
         CancellationToken cancellationToken)
     {
         if (!sortMappingProvider.ValidateMappings<IkunkResponse, Ikunk>(query.Sort))
@@ -144,6 +147,12 @@ public sealed class IkunksController(ApplicationDbContext dbContext) : Controlle
         IValidator<CreateIkunkRequest> validator,
         CancellationToken cancellationToken)
     {
+        User? user = await userContext.GetUserAsync(cancellationToken);
+        if (user is null)
+        {
+            return Problem(statusCode: StatusCodes.Status401Unauthorized, detail: "Unauthorized");
+        }
+
         await validator.ValidateAndThrowAsync(request, cancellationToken);
 
         if (!await dbContext.Warehouses.AnyAsync(w => w.Id == request.WarehouseId, cancellationToken))
@@ -160,7 +169,7 @@ public sealed class IkunksController(ApplicationDbContext dbContext) : Controlle
                 statusCode: StatusCodes.Status409Conflict);
         }
 
-        Ikunk ikunk = request.ToEntity();
+        Ikunk ikunk = request.ToEntity(user.Email);
         await dbContext.Ikunks.AddAsync(ikunk, cancellationToken);
         await dbContext.SaveChangesAsync(cancellationToken);
         IkunkResponse ikunkResponse = ikunk.ToResponse();
@@ -177,6 +186,12 @@ public sealed class IkunksController(ApplicationDbContext dbContext) : Controlle
         IValidator<UpdateIkunkRequest> validator,
         CancellationToken cancellationToken)
     {
+        User? user = await userContext.GetUserAsync(cancellationToken);
+        if (user is null)
+        {
+            return Problem(statusCode: StatusCodes.Status401Unauthorized, detail: "Unauthorized");
+        }
+
         await validator.ValidateAndThrowAsync(request, cancellationToken);
 
         bool nameExists = await dbContext
@@ -206,7 +221,7 @@ public sealed class IkunksController(ApplicationDbContext dbContext) : Controlle
                 statusCode: StatusCodes.Status400BadRequest);
         }
 
-        ikunk.UpdateFromRequest(request);
+        ikunk.UpdateFromRequest(request, user.Email);
         await dbContext.SaveChangesAsync(cancellationToken);
         return NoContent();
     }

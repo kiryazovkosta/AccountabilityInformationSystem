@@ -3,6 +3,7 @@ using System.Linq.Expressions;
 using AccountabilityInformationSystem.Api.Database;
 using AccountabilityInformationSystem.Api.Entities;
 using AccountabilityInformationSystem.Api.Entities.Flow;
+using AccountabilityInformationSystem.Api.Entities.Identity;
 using AccountabilityInformationSystem.Api.Extensions;
 using AccountabilityInformationSystem.Api.Models.Common;
 using AccountabilityInformationSystem.Api.Models.Flow.Ikunks;
@@ -10,6 +11,7 @@ using AccountabilityInformationSystem.Api.Models.Flow.MeasurementPoints;
 using AccountabilityInformationSystem.Api.Models.Warehouses;
 using AccountabilityInformationSystem.Api.Services.DataShaping;
 using AccountabilityInformationSystem.Api.Services.Sorting;
+using AccountabilityInformationSystem.Api.Services.UserContexting;
 using FluentValidation;
 using FluentValidation.Results;
 using Microsoft.AspNetCore.Authorization;
@@ -22,7 +24,9 @@ namespace AccountabilityInformationSystem.Api.Controllers;
 [ApiController]
 [Route("api/warehouses")]
 [Authorize]
-public sealed class WarehousesController(ApplicationDbContext dbContext) : ControllerBase
+public sealed class WarehousesController(
+    ApplicationDbContext dbContext, 
+    UserContext userContext) : ControllerBase
 {
     [HttpGet]
     public async Task<IActionResult> GetWarehouses(
@@ -48,7 +52,6 @@ public sealed class WarehousesController(ApplicationDbContext dbContext) : Contr
         query.Search = query.Search?.Trim().ToLower();
 
         SortMapping[] sortMappings = sortMappingProvider.GetMappings<WarehouseResponse, Warehouse>();
-
 
         IQueryable<WarehouseResponse> warehousesQuery = dbContext
             .Warehouses
@@ -115,6 +118,12 @@ public sealed class WarehousesController(ApplicationDbContext dbContext) : Contr
     {
         await validator.ValidateAndThrowAsync(request, cancellationToken);
 
+        User? user = await userContext.GetUserAsync(cancellationToken);
+        if (user is null)
+        {
+            return Problem(statusCode: StatusCodes.Status401Unauthorized, detail: "Unauthorized");
+        }
+
         if (await dbContext.Warehouses.AnyAsync(w => w.ExciseNumber == request.ExciseNumber, cancellationToken))
         {
             return Problem(
@@ -122,7 +131,7 @@ public sealed class WarehousesController(ApplicationDbContext dbContext) : Contr
                 statusCode: StatusCodes.Status409Conflict);
         }
 
-        Warehouse warehouse = request.ToEntity();
+        Warehouse warehouse = request.ToEntity(user.Email);
         await dbContext.Warehouses.AddAsync(warehouse, cancellationToken);
         await dbContext.SaveChangesAsync(cancellationToken);
         WarehouseResponse warehouseResponse = warehouse.ToResponse();
@@ -136,6 +145,12 @@ public sealed class WarehousesController(ApplicationDbContext dbContext) : Contr
         IValidator<UpdateWarehouseRequest> validator,
         CancellationToken cancellationToken)
     {
+        User? user = await userContext.GetUserAsync(cancellationToken);
+        if (user is null)
+        {
+            return Problem(statusCode: StatusCodes.Status401Unauthorized, detail: "Unauthorized");
+        }
+
         await validator.ValidateAndThrowAsync(request, cancellationToken);
 
         bool exciseNumberExists = await dbContext
@@ -158,7 +173,7 @@ public sealed class WarehousesController(ApplicationDbContext dbContext) : Contr
                 statusCode: StatusCodes.Status400BadRequest);
         }
 
-        warehouse.UpdateFromRequest(request);
+        warehouse.UpdateFromRequest(request, user.Email);
         await dbContext.SaveChangesAsync(cancellationToken);
 
         return NoContent();

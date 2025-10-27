@@ -24,7 +24,7 @@ public static class IkunkMappings
         ]
     };
 
-    public static Ikunk ToEntity(this CreateIkunkRequest request)
+    public static Ikunk ToEntity(this CreateIkunkRequest request, string userName)
         => new()
     {
         Id = $"ik_{Guid.CreateVersion7()}",
@@ -35,8 +35,7 @@ public static class IkunkMappings
         ActiveFrom = request.ActiveFrom,
         ActiveTo = request.ActiveTo,
         WarehouseId = request.WarehouseId,
-        // TODO: Replace with actual user
-        CreatedBy = "System user",
+        CreatedBy = userName,
         CreatedAt = DateTime.UtcNow
     };
 
@@ -65,7 +64,7 @@ public static class IkunkMappings
                 })]
         };
 
-    public static void UpdateFromRequest(this Ikunk ikunk, UpdateIkunkRequest request)
+    public static void UpdateFromRequest(this Ikunk ikunk, UpdateIkunkRequest request, string userName)
     {
         ikunk.Name = request.Name ?? ikunk.Name;
         ikunk.FullName = request.FullName ?? ikunk.FullName;
@@ -74,8 +73,7 @@ public static class IkunkMappings
         ikunk.ActiveFrom = request.ActiveFrom ?? ikunk.ActiveFrom;
         ikunk.ActiveTo = request.ActiveTo ?? ikunk.ActiveTo;
         ikunk.WarehouseId = request.WarehouseId ?? ikunk.WarehouseId;
-        // TODO: Replace with actual user
-        ikunk.ModifiedBy = "System User";
+        ikunk.ModifiedBy = userName;
         ikunk.ModifiedAt = DateTime.UtcNow;
     }
 }

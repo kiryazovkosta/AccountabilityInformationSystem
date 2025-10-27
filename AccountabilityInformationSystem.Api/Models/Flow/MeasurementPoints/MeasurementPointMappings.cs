@@ -27,7 +27,7 @@ public static class MeasurementPointMappings
     };
 
 
-    public static MeasurementPoint ToEntity(this CreateMeasuringPointRequest request)
+    public static MeasurementPoint ToEntity(this CreateMeasuringPointRequest request, string userName)
         => new()
         {
             Id = $"mp_{Guid.CreateVersion7()}",
@@ -41,7 +41,7 @@ public static class MeasurementPointMappings
             ActiveFrom = request.ActiveFrom,
             ActiveTo = request.ActiveTo,
             IkunkId = request.IkunkId,
-            CreatedBy = "System user", // TODO: Replace with actual user
+            CreatedBy = userName,
             CreatedAt = DateTime.UtcNow,
         };
 
@@ -66,7 +66,7 @@ public static class MeasurementPointMappings
             },
             ActiveFrom = measurementPoint.ActiveFrom,
             ActiveTo = measurementPoint.ActiveTo,
-            Ikunk = measurementPoint.Ikunk is not null ?
+            Ikunk = measurementPoint?.Ikunk is not null ?
                 new Ikunks.IkunkSimpleResponse
                 {
                     Id = measurementPoint.Ikunk.Id,
@@ -76,7 +76,8 @@ public static class MeasurementPointMappings
 
     public static void UpdateFromRequest(
         this MeasurementPoint measuringPoint, 
-        UpdateMeasurementPointRequest request)
+        UpdateMeasurementPointRequest request,
+        string userName)
     {
         measuringPoint.Name = request.Name ?? measuringPoint.Name;
         measuringPoint.FullName = request.FullName ?? measuringPoint.FullName;
@@ -88,8 +89,7 @@ public static class MeasurementPointMappings
         measuringPoint.ActiveFrom = request.ActiveFrom ?? measuringPoint.ActiveFrom;
         measuringPoint.ActiveTo = request.ActiveTo ?? measuringPoint.ActiveTo;
         measuringPoint.IkunkId = request.IkunkId ?? measuringPoint.IkunkId;
-        // TODO: Replace with actual user
-        measuringPoint.ModifiedBy = "System User";
+        measuringPoint.ModifiedBy = userName;
         measuringPoint.ModifiedAt = DateTime.UtcNow;
     }
 }

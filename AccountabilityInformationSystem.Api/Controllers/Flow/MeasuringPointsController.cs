@@ -4,6 +4,7 @@ using System.Net.Mime;
 using AccountabilityInformationSystem.Api.Common.Constants;
 using AccountabilityInformationSystem.Api.Database;
 using AccountabilityInformationSystem.Api.Entities.Flow;
+using AccountabilityInformationSystem.Api.Entities.Identity;
 using AccountabilityInformationSystem.Api.Extensions;
 using AccountabilityInformationSystem.Api.Models;
 using AccountabilityInformationSystem.Api.Models.Common;
@@ -12,6 +13,7 @@ using AccountabilityInformationSystem.Api.Models.Flow.MeasurementPoints;
 using AccountabilityInformationSystem.Api.Services.DataShaping;
 using AccountabilityInformationSystem.Api.Services.Linking;
 using AccountabilityInformationSystem.Api.Services.Sorting;
+using AccountabilityInformationSystem.Api.Services.UserContexting;
 using Asp.Versioning;
 using FluentValidation;
 using FluentValidation.Results;
@@ -37,7 +39,8 @@ namespace AccountabilityInformationSystem.Api.Controllers.Flow;
     CustomMediaTypeNames.Application.HateoasJsonV2)]
 public sealed class MeasuringPointsController(
     ApplicationDbContext dbContext,
-    LinkService linkService) : ControllerBase
+    LinkService linkService,
+    UserContext userContext) : ControllerBase
 {
     [HttpGet]
     [MapToApiVersion(1.0)]
@@ -202,6 +205,12 @@ public sealed class MeasuringPointsController(
         CancellationToken cancellationToken
         )
     {
+        User? user = await userContext.GetUserAsync(cancellationToken);
+        if (user is null)
+        {
+            return Problem(statusCode: StatusCodes.Status401Unauthorized, detail: "Unauthorized");
+        }
+
         await validator.ValidateAndThrowAsync(request, cancellationToken);
 
         if (!await dbContext.Ikunks.AnyAsync(i => i.Id == request.IkunkId, cancellationToken))
@@ -218,7 +227,7 @@ public sealed class MeasuringPointsController(
                 statusCode: StatusCodes.Status409Conflict);
         }
 
-        MeasurementPoint measuringPoint = request.ToEntity();
+        MeasurementPoint measuringPoint = request.ToEntity(user.Email);
         await dbContext.MeasurementPoints.AddAsync(measuringPoint, cancellationToken);
         await dbContext.SaveChangesAsync(cancellationToken);
 
@@ -240,6 +249,12 @@ public sealed class MeasuringPointsController(
         IValidator<UpdateMeasurementPointRequest> validator,
         CancellationToken cancellationToken)
     {
+        User? user = await userContext.GetUserAsync(cancellationToken);
+        if (user is null)
+        {
+            return Problem(statusCode: StatusCodes.Status401Unauthorized, detail: "Unauthorized");
+        }
+
         await validator.ValidateAndThrowAsync(request, cancellationToken);
 
         if (request.IkunkId is not null && !await dbContext.Ikunks.AnyAsync(i => i.Id == request.IkunkId, cancellationToken))
@@ -264,7 +279,7 @@ public sealed class MeasuringPointsController(
                 statusCode: StatusCodes.Status409Conflict);
         }
 
-        measuringPoint.UpdateFromRequest(request);
+        measuringPoint.UpdateFromRequest(request, user.Email);
         await dbContext.SaveChangesAsync(cancellationToken);
 
         return NoContent();

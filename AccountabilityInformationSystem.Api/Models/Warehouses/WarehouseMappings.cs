@@ -22,7 +22,7 @@ internal static class WarehouseMappings
     };
 
 
-    public static Warehouse ToEntity(this CreateWarehouseRequest request)
+    public static Warehouse ToEntity(this CreateWarehouseRequest request, string userName)
         => new()
         {
             Id = $"wh_{Guid.CreateVersion7()}",
@@ -33,8 +33,7 @@ internal static class WarehouseMappings
             ExciseNumber = request.ExciseNumber,
             ActiveFrom = request.ActiveFrom,
             ActiveTo = request.ActiveTo,
-            // TODO: Replace with actual user
-            CreatedBy = "System user",
+            CreatedBy = userName,
             CreatedAt = DateTime.UtcNow,
         };
 
@@ -67,7 +66,7 @@ internal static class WarehouseMappings
         };
     }
 
-    public static void UpdateFromRequest(this Warehouse warehouse, UpdateWarehouseRequest request)
+    public static void UpdateFromRequest(this Warehouse warehouse, UpdateWarehouseRequest request, string userName)
     {
         warehouse.Name = request.Name ?? warehouse.Name;
         warehouse.FullName = request.FullName ?? warehouse.FullName;
@@ -76,8 +75,7 @@ internal static class WarehouseMappings
         warehouse.ExciseNumber = request.ExciseNumber ?? warehouse.ExciseNumber;
         warehouse.ActiveFrom = request.ActiveFrom ?? warehouse.ActiveFrom;
         warehouse.ActiveTo = request.ActiveTo ?? warehouse.ActiveTo;
-        // TODO: Replace with actual user
-        warehouse.ModifiedBy = "System User";
+        warehouse.ModifiedBy = userName;
         warehouse.ModifiedAt = DateTime.UtcNow;
     }
 }

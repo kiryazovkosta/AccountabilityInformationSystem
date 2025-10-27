@@ -20,4 +20,20 @@ public static class UserMappings
             CreatedBy = EntitiesConstants.DefaultSystemUser
         };
     }
+
+    public static UserResponse ToResponse(this User user)
+    {
+        return new UserResponse
+        {
+            Id = user.Id,
+            Email = user.Email,
+            FullName = 
+                user.MiddleName != null ? 
+                    $"{user.FirstName} {user.MiddleName} {user.LastName}" 
+                    : $"{user.FirstName} {user.LastName}",
+            Image = user.Image,
+            CreatedAt = user.CreatedAt,
+            ModifiedAt = user.ModifiedAt
+        };
+    }
 }

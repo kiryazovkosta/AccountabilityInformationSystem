@@ -1,15 +1,18 @@
 ﻿using System.Net;
+using System.Threading;
 using AccountabilityInformationSystem.Api.Database;
 using AccountabilityInformationSystem.Api.Entities.Identity;
 using AccountabilityInformationSystem.Api.Models.Identity.Auth;
 using AccountabilityInformationSystem.Api.Models.Identity.Users;
 using AccountabilityInformationSystem.Api.Services.Tokenizing;
+using AccountabilityInformationSystem.Api.Settings;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.Extensions.Options;
 
 namespace AccountabilityInformationSystem.Api.Controllers.Identity;
 
@@ -20,8 +23,11 @@ public sealed class AuthController(
     UserManager<IdentityUser> userManager,
     ApplicationIdentityDbContext identityDbContext,
     ApplicationDbContext applicationDbContext,
-    TokenProvider tokenProvider) : ControllerBase
+    TokenProvider tokenProvider,
+    IOptions<JwtAuthOptions> options) : ControllerBase
 {
+    private readonly JwtAuthOptions _jwtAuthOptions = options.Value;
+
     [HttpPost("register")]
     public async Task<ActionResult<AccessTokenResponse>> Register(
         RegisterUserRequest register, 
@@ -60,28 +66,77 @@ public sealed class AuthController(
 
         await applicationDbContext.SaveChangesAsync(cancellationToken);
 
+        AccessTokenResponse response = tokenProvider.Create(new AccessTokenRequest(identityUser.Id, identityUser.Email));
+
+        RefreshToken refreshToken = new()
+        {
+            Id = $"rt_{Guid.CreateVersion7()}",
+            UserId = identityUser.Id,
+            Token = response.RefreshToken,
+            ExpiresAt = DateTime.UtcNow.AddDays(_jwtAuthOptions.RefreshTokenExpirationDays)
+        };
+
+        await identityDbContext.RefreshTokens.AddAsync(refreshToken, cancellationToken);
+
+        await identityDbContext.SaveChangesAsync(cancellationToken);
+
         await transaction.CommitAsync(cancellationToken);
 
-        AccessTokenResponse response =
-            tokenProvider.Create(new AccessTokenRequest(identityUser.Id, identityUser.Email));
+
 
         return Ok(response);
     }
 
     [HttpPost("login")]
-    public async Task<IActionResult> Login(LoginUserRequest request)
+    public async Task<IActionResult> Login(LoginUserRequest request, CancellationToken cancellationToken)
     {
-        IdentityUser user = await userManager.FindByEmailAsync(request.Email);
-        if (user is null || 
-            !await userManager.CheckPasswordAsync(user, request.Password))
+        IdentityUser identityUser = await userManager.FindByEmailAsync(request.Email);
+        if (identityUser is null || 
+            !await userManager.CheckPasswordAsync(identityUser, request.Password))
         {
             return Problem(
                 detail: "Invalid username or password!", 
                 statusCode: StatusCodes.Status401Unauthorized);
         }
 
-        AccessTokenRequest accessTokenRequest = new(user.Id, user.Email ?? string.Empty);
+        AccessTokenRequest accessTokenRequest = new(identityUser.Id, identityUser.Email ?? string.Empty);
         AccessTokenResponse response = tokenProvider.Create(accessTokenRequest);
+
+        RefreshToken refreshToken = new()
+        {
+            Id = $"rt_{Guid.CreateVersion7()}",
+            UserId = identityUser.Id,
+            Token = response.RefreshToken,
+            ExpiresAt = DateTime.UtcNow.AddDays(_jwtAuthOptions.RefreshTokenExpirationDays)
+        };
+
+        await identityDbContext.RefreshTokens.AddAsync(refreshToken, cancellationToken);
+
+        await identityDbContext.SaveChangesAsync(cancellationToken);
+
+        return Ok(response);
+    }
+
+    [HttpPost("refresh")]
+    public async Task<ActionResult<AccessTokenResponse>> Refresh(RefreshTokenRequest request, CancellationToken cancellationToken)
+    {
+        RefreshToken? refreshToken =
+            await identityDbContext.RefreshTokens
+                .Include(rt => rt.User)
+                .FirstOrDefaultAsync(rt => rt.Token == request.RefreshToken, cancellationToken);
+        if (refreshToken is null || refreshToken.ExpiresAt < DateTime.UtcNow)
+        {
+            return Problem(statusCode: StatusCodes.Status401Unauthorized, detail: "Unauthorized");
+        }
+
+        AccessTokenRequest accessTokenRequest = new(refreshToken.User.Id, refreshToken.User.Email ?? string.Empty);
+        AccessTokenResponse response = tokenProvider.Create(accessTokenRequest);
+
+        refreshToken.Token = response.RefreshToken;
+        refreshToken.ExpiresAt = DateTime.UtcNow.AddDays(_jwtAuthOptions.RefreshTokenExpirationDays);
+
+        identityDbContext.RefreshTokens.Update(refreshToken);
+        await identityDbContext.SaveChangesAsync(cancellationToken);
 
         return Ok(response);
     }

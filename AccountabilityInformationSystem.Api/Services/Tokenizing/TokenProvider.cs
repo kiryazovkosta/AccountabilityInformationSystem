@@ -1,4 +1,5 @@
 ﻿using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 using AccountabilityInformationSystem.Api.Models.Identity.Auth;
 using AccountabilityInformationSystem.Api.Settings;
@@ -22,8 +23,8 @@ public sealed class TokenProvider(IOptionsSnapshot<JwtAuthOptions> options)
 
     private string GenerateAccessToken(AccessTokenRequest tokenRequest)
     {
-        SymmetricSecurityKey securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtAuthOptions.Key));
-        SigningCredentials credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha512);
+        SymmetricSecurityKey securityKey = new(Encoding.UTF8.GetBytes(_jwtAuthOptions.Key));
+        SigningCredentials credentials = new(securityKey, SecurityAlgorithms.HmacSha512);
 
         List<Claim> claims =
         [
@@ -31,7 +32,7 @@ public sealed class TokenProvider(IOptionsSnapshot<JwtAuthOptions> options)
             new(JwtRegisteredClaimNames.Email, tokenRequest.Email)
         ];
 
-        SecurityTokenDescriptor tokenDescriptor = new SecurityTokenDescriptor
+        SecurityTokenDescriptor tokenDescriptor = new()
         {
             Subject = new ClaimsIdentity(claims),
             Expires = DateTime.UtcNow.AddMinutes(_jwtAuthOptions.ExpirationInMinutes),
@@ -40,13 +41,14 @@ public sealed class TokenProvider(IOptionsSnapshot<JwtAuthOptions> options)
             Audience = _jwtAuthOptions.Audience
         };
 
-        JsonWebTokenHandler handler = new JsonWebTokenHandler();
+        JsonWebTokenHandler handler = new();
         string accessToken = handler.CreateToken(tokenDescriptor);
         return accessToken;
     }
 
     private static string GenerateRefreshToken()
     {
-        return string.Empty;
+        byte[] randomBytes = RandomNumberGenerator.GetBytes(64);
+        return Convert.ToBase64String(randomBytes);
     }
 }

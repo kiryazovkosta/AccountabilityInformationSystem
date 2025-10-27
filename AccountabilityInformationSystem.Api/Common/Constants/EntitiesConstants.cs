@@ -23,4 +23,6 @@ public static class EntitiesConstants
     public const int DeletedByMaxLength = 128;
 
     public const string DefaultSystemUser = "SystemUser";
+
+    public const int TokenMaxlength = 1000;
 }
