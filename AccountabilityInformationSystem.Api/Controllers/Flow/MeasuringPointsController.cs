@@ -29,7 +29,7 @@ namespace AccountabilityInformationSystem.Api.Controllers.Flow;
 [ApiController]
 [Route("api/flow/measuring-points")]
 [ApiVersion(1.0)]
-[Authorize]
+[Authorize(Roles = $"{Role.Admin},{Role.FlowUser}")]
 [Produces(
     MediaTypeNames.Application.Json,
     CustomMediaTypeNames.Application.JsonV1,

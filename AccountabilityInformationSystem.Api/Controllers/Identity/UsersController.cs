@@ -17,6 +17,7 @@ namespace AccountabilityInformationSystem.Api.Controllers.Identity;
 public sealed class UsersController(UserContext userContext) : ControllerBase
 {
     [HttpGet("{id}")]
+    [Authorize(Roles = $"{Role.Admin}")]
     public async Task<ActionResult<UserResponse>> GetUserById(
         string id, CancellationToken cancellationToken)
     {

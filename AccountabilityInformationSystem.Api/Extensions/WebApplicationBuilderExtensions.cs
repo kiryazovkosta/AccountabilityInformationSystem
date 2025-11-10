@@ -86,7 +86,6 @@ public static class WebApplicationBuilderExtensions
         {
             options.AddDocumentTransformer<BearerSecuritySchemeTransformer>();
         });
-        //builder.Services.AddOpenApi();
 
         return builder;
     }
@@ -211,6 +210,11 @@ public static class WebApplicationBuilderExtensions
 
         builder.Services.AddAuthorization();
 
+        return builder;
+    }
+
+    public static WebApplicationBuilder AddCors(this WebApplicationBuilder builder)
+    {
         return builder;
     }
 }

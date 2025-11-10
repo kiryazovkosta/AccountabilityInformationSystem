@@ -24,4 +24,20 @@ public static class DatabaseExtensions
             throw;
         }
     }
+
+    //public static async Task SeedInitialDataAsync(this WebApplication app, CancellationToken cancellationToken = default)
+    //{
+    //    using IServiceScope scope = app.Services.CreateScope();
+    //    await using ApplicationIdentityDbContext identityDbContext = scope.ServiceProvider.GetRequiredService<ApplicationIdentityDbContext>();
+    //    try
+    //    {
+    //        await IdentityDataSeeder.SeedRolesAsync(identityDbContext, cancellationToken);
+    //        Console.WriteLine("Successfully seeded initial roles to ApplicationIdentityDbContext!");
+    //    }
+    //    catch (Exception exception)
+    //    {
+    //        Console.WriteLine(exception);
+    //        throw;
+    //    }
+    //}
 }

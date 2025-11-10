@@ -15,5 +15,5 @@ public sealed class Warehouse
     public string ExciseNumber { get; set; }
     public DateOnly ActiveFrom { get; set; }
     public DateOnly ActiveTo { get; set; }
-    public ICollection<Ikunk> Ikunks { get; set; } = new List<Ikunk>();
+    public ICollection<Ikunk> Ikunks { get; set; } = [];
 }

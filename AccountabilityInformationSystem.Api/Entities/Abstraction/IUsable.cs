@@ -1,5 +1,6 @@
 ﻿namespace AccountabilityInformationSystem.Api.Entities.Abstraction;
 
-public class AuditableActivableEntity
+public interface IUsable
 {
+    bool IsUsed { get; }
 }

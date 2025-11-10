@@ -19,13 +19,14 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi;
 
 namespace AccountabilityInformationSystem.Api.Controllers.Flow;
 
 [ApiController]
 [Route("api/flow/ikunks")]
 [ApiVersion(1.0)]
-[Authorize]
+[Authorize(Roles = $"{Role.Admin},{Role.FlowUser}")]
 public sealed class IkunksController(ApplicationDbContext dbContext, UserContext userContext) 
     : ControllerBase
 {

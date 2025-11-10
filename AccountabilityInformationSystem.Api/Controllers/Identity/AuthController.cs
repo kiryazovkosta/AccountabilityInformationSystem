@@ -59,6 +59,20 @@ public sealed class AuthController(
 
         //await userManager.SetTwoFactorEnabledAsync(identityUser, true);
 
+        IdentityResult addToRoleResult =  await userManager.AddToRoleAsync(identityUser, Role.Member);
+        if (!addToRoleResult.Succeeded)
+        {
+            Dictionary<string, object?> extensions = new()
+            {
+                { "errors", identityResult.Errors.ToDictionary(e => e.Code, e => e.Description) }
+            };
+            return Problem(
+                detail: "Unable to register user, please try again!",
+                statusCode: StatusCodes.Status400BadRequest,
+                extensions: extensions
+            );
+        }
+
         User user = register.ToEntity();
         user.IdentityId = identityUser.Id;
 
@@ -66,7 +80,7 @@ public sealed class AuthController(
 
         await applicationDbContext.SaveChangesAsync(cancellationToken);
 
-        AccessTokenResponse response = tokenProvider.Create(new AccessTokenRequest(identityUser.Id, identityUser.Email));
+        AccessTokenResponse response = tokenProvider.Create(new AccessTokenRequest(identityUser.Id, identityUser.Email, [Role.Member]));
 
         RefreshToken refreshToken = new()
         {
@@ -99,7 +113,9 @@ public sealed class AuthController(
                 statusCode: StatusCodes.Status401Unauthorized);
         }
 
-        AccessTokenRequest accessTokenRequest = new(identityUser.Id, identityUser.Email ?? string.Empty);
+        IEnumerable<string> roles = await userManager.GetRolesAsync(identityUser);
+
+        AccessTokenRequest accessTokenRequest = new(identityUser.Id, identityUser.Email ?? string.Empty, roles);
         AccessTokenResponse response = tokenProvider.Create(accessTokenRequest);
 
         RefreshToken refreshToken = new()
@@ -129,7 +145,8 @@ public sealed class AuthController(
             return Problem(statusCode: StatusCodes.Status401Unauthorized, detail: "Unauthorized");
         }
 
-        AccessTokenRequest accessTokenRequest = new(refreshToken.User.Id, refreshToken.User.Email ?? string.Empty);
+        IEnumerable<string> roles = await userManager.GetRolesAsync(refreshToken.User);
+        AccessTokenRequest accessTokenRequest = new(refreshToken.User.Id, refreshToken.User.Email ?? string.Empty, roles);
         AccessTokenResponse response = tokenProvider.Create(accessTokenRequest);
 
         refreshToken.Token = response.RefreshToken;
