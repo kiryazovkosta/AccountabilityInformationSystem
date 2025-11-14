@@ -21,7 +21,7 @@ public sealed record MeasuringPointsQueryParameters : QueryParameters
     public TransportType? Transport { get; init; }
 }
 
-public sealed record MeasuringPointQueryParameters : AcceptHeaderQueryParameter
+public sealed record SingleQueryParameters : AcceptHeaderQueryParameter
 {
     public string? Fields { get; init; }
 }
@@ -32,4 +32,15 @@ public sealed record WarehousesQueryParameters : QueryParameters
 
 public sealed record IkunkQueryParameters : QueryParameters
 {
+}
+
+public sealed record MeasurementPointsDataQueryParameters : QueryParameters
+{
+    public List<string>? Warehouses { get; init; }
+    public List<string>? Ikunks { get; init; }
+    public List<string>? MeasurementPoints { get; init; }
+    public DateTime? Begin { get; init; }
+    public DateTime? End { get; init; }
+    public FlowDirectionType? FlowDirection { get; init; }
+    public List<string>? Products { get; init; }
 }

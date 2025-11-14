@@ -2,6 +2,7 @@
 using System.Dynamic;
 using System.Reflection;
 using AccountabilityInformationSystem.Api.Models.Common;
+using AccountabilityInformationSystem.Api.Models.Flow.MeasurementPointsData;
 
 namespace AccountabilityInformationSystem.Api.Services.DataShaping;
 
@@ -110,5 +111,10 @@ public sealed class DataShapingService
         }
 
         return fields;
+    }
+
+    internal List<ExpandoObject> ShapeCollectionData(List<MeasurementPointDataListResponse> measurementPointDataListResponses, string? fields, object value)
+    {
+        throw new NotImplementedException();
     }
 }
