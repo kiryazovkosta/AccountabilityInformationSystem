@@ -9,6 +9,7 @@ using AccountabilityInformationSystem.Api.Models.Flow.Ikunks;
 using AccountabilityInformationSystem.Api.Models.Flow.MeasurementPoints;
 using AccountabilityInformationSystem.Api.Models.Warehouses;
 using AccountabilityInformationSystem.Api.Services.DataShaping;
+using AccountabilityInformationSystem.Api.Services.Encrypting;
 using AccountabilityInformationSystem.Api.Services.Linking;
 using AccountabilityInformationSystem.Api.Services.Sorting;
 using AccountabilityInformationSystem.Api.Services.Tokenizing;
@@ -178,6 +179,9 @@ public static class WebApplicationBuilderExtensions
 
         builder.Services.AddMemoryCache();
         builder.Services.AddScoped<UserContext>();
+
+        builder.Services.Configure<EncryptionOptions>(builder.Configuration.GetSection("Encryption"));
+        builder.Services.AddTransient<EncryptionService>();
 
         return builder;
     }

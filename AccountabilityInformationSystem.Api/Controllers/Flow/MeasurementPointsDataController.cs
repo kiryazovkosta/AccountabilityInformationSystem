@@ -7,6 +7,7 @@ using AccountabilityInformationSystem.Api.Models.Common;
 using AccountabilityInformationSystem.Api.Models.Flow.MeasurementPoints;
 using AccountabilityInformationSystem.Api.Models.Flow.MeasurementPointsData;
 using AccountabilityInformationSystem.Api.Services.DataShaping;
+using AccountabilityInformationSystem.Api.Services.Encrypting;
 using AccountabilityInformationSystem.Api.Services.Linking;
 using AccountabilityInformationSystem.Api.Services.Sorting;
 using AccountabilityInformationSystem.Api.Services.UserContexting;
@@ -26,6 +27,7 @@ namespace AccountabilityInformationSystem.Api.Controllers.Flow;
 public class MeasurementPointsDataController(
     ApplicationDbContext dbContext,
     LinkService linkService,
+    EncryptionService encryptionService,
     UserContext userContext) : ControllerBase
 {
     [HttpGet]
@@ -131,7 +133,7 @@ public class MeasurementPointsDataController(
     [HttpPost]
     [MapToApiVersion(1.0)]
     public async Task<IActionResult> CreateMeasuringPointData(
-         [FromBody] CreateMeasuringPointDataRequest request,
+        [FromBody] CreateMeasuringPointDataRequest request,
         IValidator<CreateMeasuringPointDataRequest> validator,
         CancellationToken cancellationToken)
     {
@@ -169,6 +171,7 @@ public class MeasurementPointsDataController(
         }
 
         MeasurementPointData measuringPointData = request.ToEntity(user.Email);
+        measuringPointData.CreatedBy = encryptionService.Encrypt(user.Email);
         await dbContext.MeasurementPointsData.AddAsync(measuringPointData, cancellationToken);
         await dbContext.SaveChangesAsync(cancellationToken);
 
