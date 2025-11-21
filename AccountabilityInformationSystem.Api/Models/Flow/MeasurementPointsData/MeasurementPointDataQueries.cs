@@ -14,16 +14,16 @@ public static class MeasurementPointDataQueries
         return mp => new MeasurementPointDataListResponse
         {
             Id = mp.Id,
-            MeasurementPoint = new MeasurementPointListResponse()
+            MeasurementPoint = new()
             {
                 Id = mp.MeasurementPoint.Id,
                 ControlPoint = mp.MeasurementPoint.ControlPoint,
                 FullName = mp.MeasurementPoint.FullName,
-                Ikunk = new MeasurementPointSimpleResponse()
+                Ikunk = new()
                 {
                     Id = mp.MeasurementPoint.Ikunk.Id,
                     FullName = mp.MeasurementPoint.Ikunk.FullName,
-                    Warehouse = new WarehouseSimpleResponse()
+                    Warehouse = new()
                     {
                         Id = mp.MeasurementPoint.Ikunk.Warehouse.Id,
                         FullName = mp.MeasurementPoint.Ikunk.Warehouse.FullName
@@ -38,7 +38,7 @@ public static class MeasurementPointDataQueries
                 Value = mp.FlowDirectionType,
                 Description = mp.FlowDirectionType.GetDescription()
             },
-            Product = new ProductListResponse()
+            Product = new()
             {
                 Id = mp.Product.Id,
                 Code = mp.Product.Code,
@@ -55,16 +55,16 @@ public static class MeasurementPointDataQueries
         return mp => new MeasurementPointDataResponse
         {
             Id = mp.Id,
-            MeasurementPoint = new MeasurementPointListResponse()
+            MeasurementPoint = new()
             {
                 Id = mp.MeasurementPoint.Id,
                 ControlPoint = mp.MeasurementPoint.ControlPoint,
                 FullName = mp.MeasurementPoint.FullName,
-                Ikunk = new MeasurementPointSimpleResponse()
+                Ikunk = new()
                 {
                     Id = mp.MeasurementPoint.Ikunk.Id,
                     FullName = mp.MeasurementPoint.Ikunk.FullName,
-                    Warehouse = new WarehouseSimpleResponse()
+                    Warehouse = new()
                     {
                         Id = mp.MeasurementPoint.Ikunk.Warehouse.Id,
                         FullName = mp.MeasurementPoint.Ikunk.Warehouse.FullName
@@ -79,7 +79,7 @@ public static class MeasurementPointDataQueries
                 Value = mp.FlowDirectionType,
                 Description = mp.FlowDirectionType.GetDescription()
             },
-            Product = new ProductListResponse()
+            Product = new()
             {
                 Id = mp.Product.Id,
                 Code = mp.Product.Code,

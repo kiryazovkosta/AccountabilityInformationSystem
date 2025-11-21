@@ -21,13 +21,13 @@ internal static class WarehouseQueries
             ActiveTo = warehouse.ActiveTo,
             Ikunks = warehouse.Ikunks
                 .OrderBy(ikunk => ikunk.OrderPosition)
-                .Select(ikunk => new IkunkListResponse()
+                .Select(ikunk => new WarehouseIkunkResponse()
                 {
                     Id = ikunk.Id,
                     FullName = ikunk.FullName,
                     MeasurementPoints = ikunk.MeasurementPoints
                         .OrderBy(mp => mp.OrderPosition)
-                        .Select(mp => new MeasurementPointListResponse()
+                        .Select(mp => new WarehouseIkunkMeasurementPointResponse()
                         {
                             Id = mp.Id,
                             FullName = mp.FullName,

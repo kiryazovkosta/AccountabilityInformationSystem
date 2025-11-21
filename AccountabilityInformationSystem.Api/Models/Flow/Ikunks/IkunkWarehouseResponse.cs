@@ -1,7 +1,7 @@
 ﻿namespace AccountabilityInformationSystem.Api.Models.Flow.Ikunks;
 
-public class IkunkSimpleResponse
+public sealed record IkunkWarehouseResponse
 {
     public string Id { get; init; }
-    public string Name { get; init; }
+    public string FullName { get; set; }
 }

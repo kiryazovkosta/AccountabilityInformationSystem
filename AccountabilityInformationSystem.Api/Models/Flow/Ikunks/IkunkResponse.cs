@@ -14,6 +14,6 @@ public sealed record IkunkResponse
     public int OrderPosition { get; init; }
     public DateOnly ActiveFrom { get; init; }
     public DateOnly ActiveTo { get; init; }
-    public WarehouseListResponse? Warehouse { get; init; }
-    public List<MeasurementPointListResponse> MeasurementPoints { get; init; }
+    public IkunkWarehouseResponse? Warehouse { get; init; }
+    public List<IkunkMeasurementPointResponse> MeasurementPoints { get; init; }
 }

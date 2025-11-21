@@ -19,14 +19,14 @@ public static class IkunkQueries
             OrderPosition = ikunk.OrderPosition,
             ActiveFrom = ikunk.ActiveFrom,
             ActiveTo = ikunk.ActiveTo,
-            Warehouse = new WarehouseListResponse
+            Warehouse = new IkunkWarehouseResponse
             {
                 Id = ikunk.Warehouse.Id,
                 FullName = ikunk.Warehouse.FullName
             },
             MeasurementPoints = ikunk.MeasurementPoints
                 .OrderBy(mp => mp.OrderPosition)
-                .Select(mp => new MeasurementPointListResponse
+                .Select(mp => new IkunkMeasurementPointResponse
                 {
                     Id = mp.Id,
                     FullName = mp.FullName,
@@ -49,14 +49,14 @@ public static class IkunkQueries
             ActiveTo = ikunk.ActiveTo,
             Created = ikunk.CreatedAt,
             Modified = ikunk.ModifiedAt,
-            Warehouse = new WarehouseListResponse
+            Warehouse = new IkunkWarehouseResponse
             {
                 Id = ikunk.Warehouse.Id,
                 FullName = ikunk.Warehouse.FullName
             },
             MeasurementPoints = ikunk.MeasurementPoints
                 .OrderBy(mp => mp.OrderPosition)
-                .Select(mp => new MeasurementPointListResponse
+                .Select(mp => new IkunkMeasurementPointResponse
                 {
                     Id = mp.Id,
                     FullName = mp.FullName,
@@ -66,3 +66,5 @@ public static class IkunkQueries
         };
     }
 }
+
+

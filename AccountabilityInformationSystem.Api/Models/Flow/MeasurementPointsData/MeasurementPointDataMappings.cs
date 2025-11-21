@@ -64,16 +64,16 @@ public static class MeasurementPointDataMappings
      => new()
      {
          Id = mp.Id,
-         MeasurementPoint = mp.MeasurementPoint is null ? null : new MeasurementPointListResponse()
+         MeasurementPoint = mp.MeasurementPoint is null ? null : new()
          {
              Id = mp.MeasurementPoint.Id,
              ControlPoint = mp.MeasurementPoint.ControlPoint,
              FullName = mp.MeasurementPoint.FullName,
-             Ikunk = new MeasurementPointSimpleResponse()
+             Ikunk = new()
              {
                  Id = mp.MeasurementPoint.Ikunk.Id,
                  FullName = mp.MeasurementPoint.Ikunk.FullName,
-                 Warehouse = new WarehouseSimpleResponse()
+                 Warehouse = new()
                  {
                      Id = mp.MeasurementPoint.Ikunk.Warehouse.Id,
                      FullName = mp.MeasurementPoint.Ikunk.Warehouse.FullName
@@ -88,7 +88,7 @@ public static class MeasurementPointDataMappings
              Value = mp.FlowDirectionType,
              Description = mp.FlowDirectionType.GetDescription()
          },
-         Product = mp.Product is null ? null : new ProductListResponse()
+         Product = mp.Product is null ? null : new()
          {
              Id = mp.Product.Id,
              Code = mp.Product.Code,

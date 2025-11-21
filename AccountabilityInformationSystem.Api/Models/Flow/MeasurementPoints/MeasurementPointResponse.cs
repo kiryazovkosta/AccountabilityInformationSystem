@@ -15,6 +15,6 @@ public sealed record MeasurementPointResponse : ILinksResponse
     public EnumTypeResponse Transport { get; init; }
     public DateOnly ActiveFrom { get; init; }
     public DateOnly ActiveTo { get; init; }
-    public IkunkSimpleResponse? Ikunk { get; init; }
+    public MeasurementPointIkunkResponse? Ikunk { get; init; }
     public List<LinkResponse> Links { get; set; }
 }

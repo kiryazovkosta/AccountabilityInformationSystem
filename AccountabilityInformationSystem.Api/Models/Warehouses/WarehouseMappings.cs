@@ -51,16 +51,17 @@ internal static class WarehouseMappings
             ActiveTo = warehouse.ActiveTo,
             Ikunks = [.. warehouse.Ikunks
                 .OrderBy(ikunk => ikunk.OrderPosition)
-                .Select(ikunk => new IkunkListResponse()
+                .Select(ikunk => new WarehouseIkunkResponse()
                 {
                     Id = ikunk.Id,
                     FullName = ikunk.FullName,
                     MeasurementPoints = [.. ikunk.MeasurementPoints
                         .OrderBy(mp => mp.OrderPosition)
-                        .Select(mp => new Models.Flow.MeasurementPoints.MeasurementPointListResponse()
+                        .Select(mp => new WarehouseIkunkMeasurementPointResponse()
                         {
                             Id = mp.Id,
-                            FullName = mp.FullName
+                            FullName = mp.FullName,
+                            ControlPoint = mp.ControlPoint
                         })]
                 })]
         };

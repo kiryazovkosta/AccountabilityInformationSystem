@@ -17,22 +17,27 @@ public static class MeasurementPointQueries
             Description = mp.Description,
             ControlPoint = mp.ControlPoint,
             OrderPosition = mp.OrderPosition,
-            FlowDirection = new EnumTypeResponse()
+            FlowDirection = new()
             {
                 Value = mp.FlowDirection,
                 Description = mp.FlowDirection.GetDescription()
             },
-            Transport = new EnumTypeResponse()
+            Transport = new()
             {
                 Value = mp.Transport,
                 Description = mp.Transport.GetDescription()
             },
             ActiveFrom = mp.ActiveFrom,
             ActiveTo = mp.ActiveTo,
-            Ikunk = new IkunkSimpleResponse
+            Ikunk = new()
             {
                 Id = mp.Ikunk.Id,
-                Name = mp.Ikunk.Name
+                Name = mp.Ikunk.Name,
+                Warehouse = new() 
+                { 
+                    Id = mp.Ikunk.WarehouseId, 
+                    Name = mp.Ikunk.Warehouse.Name 
+                }
             }
         };
     }
@@ -44,7 +49,7 @@ public static class MeasurementPointQueries
             Id = mp.Id,
             FullName = mp.FullName,
             OrderPosition = mp.OrderPosition,
-            Ikunk = new IkunkSimpleResponse
+            Ikunk = new()
             {
                 Id = mp.Ikunk.Id,
                 Name = mp.Ikunk.Name

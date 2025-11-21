@@ -30,7 +30,7 @@ public sealed class WarehousesController(
 {
     [HttpGet]
     public async Task<IActionResult> GetWarehouses(
-        [FromQuery] WarehousesQueryParameters query,
+        [FromQuery] QueryParameters query,
         SortMappingProvider sortMappingProvider,
         DataShapingService dataShapingService,
         CancellationToken cancellationToken)
@@ -89,7 +89,7 @@ public sealed class WarehousesController(
         DataShapingService dataShapingService,
         CancellationToken cancellationToken)
     {
-        if (!dataShapingService.Validate<MeasurementPointResponse>(fields))
+        if (!dataShapingService.Validate<WarehouseResponse>(fields))
         {
             return Problem(
                 statusCode: StatusCodes.Status400BadRequest,

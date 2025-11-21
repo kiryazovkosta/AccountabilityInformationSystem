@@ -98,7 +98,7 @@ public class MeasurementPointsDataController(
     [MapToApiVersion(1.0)]
     public async Task<IActionResult> GetMeasuringPointData(
         string id,
-        [FromQuery] SingleQueryParameters query,
+        [FromQuery] FieldsOnlyQueryParameters query,
         DataShapingService dataShapingService,
         CancellationToken cancellationToken)
     {

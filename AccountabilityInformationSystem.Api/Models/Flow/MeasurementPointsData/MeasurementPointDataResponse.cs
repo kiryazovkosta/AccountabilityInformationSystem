@@ -8,12 +8,12 @@ namespace AccountabilityInformationSystem.Api.Models.Flow.MeasurementPointsData;
 public sealed record MeasurementPointDataResponse : ILinksResponse
 {
     public string Id { get; init; }
-    public MeasurementPointListResponse? MeasurementPoint { get; init; }
+    public MeasurementPointDataMeasurementPointResponse? MeasurementPoint { get; init; }
     public int Number { get; init; }
     public DateTime BeginTime { get; init; }
     public DateTime EndTime { get; init; }
     public EnumTypeResponse FlowDirection { get; init; }
-    public ProductListResponse? Product { get; init; }
+    public MeasurementPointDataProducResponse? Product { get; init; }
     public decimal? TotalizerBeginGrossObservableVolume { get; init; }
     public decimal? TotalizerEndGrossObservableVolume { get; init; }
     public decimal? TotalizerBeginGrossStandardVolume { get; init; }

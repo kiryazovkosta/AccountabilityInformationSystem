@@ -50,14 +50,14 @@ public static class IkunkMappings
             ActiveFrom = ikunk.ActiveFrom,
             ActiveTo = ikunk.ActiveTo,
             Warehouse = ikunk.Warehouse is not null ? 
-                new WarehouseListResponse() 
+                new IkunkWarehouseResponse() 
                 { 
                     Id = ikunk.Warehouse.Id, 
                     FullName = ikunk.Warehouse.FullName 
                 } : null ,
             MeasurementPoints = [.. ikunk.MeasurementPoints
                 .OrderBy(mp => mp.OrderPosition)
-                .Select(mp => new MeasurementPointListResponse()
+                .Select(mp => new IkunkMeasurementPointResponse()
                 {
                     Id = mp.Id,
                     FullName = mp.FullName

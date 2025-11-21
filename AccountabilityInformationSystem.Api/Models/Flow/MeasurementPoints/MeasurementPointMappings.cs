@@ -54,12 +54,12 @@ public static class MeasurementPointMappings
             Description = measurementPoint.Description,
             ControlPoint = measurementPoint.ControlPoint,
             OrderPosition = measurementPoint.OrderPosition,
-            FlowDirection = new EnumTypeResponse() 
+            FlowDirection = new() 
             { 
                 Value = measurementPoint.FlowDirection, 
                 Description = measurementPoint.FlowDirection.GetDescription() 
             },
-            Transport = new EnumTypeResponse()
+            Transport = new()
             {
                 Value = measurementPoint.Transport,
                 Description = measurementPoint.Transport.GetDescription()
@@ -67,10 +67,15 @@ public static class MeasurementPointMappings
             ActiveFrom = measurementPoint.ActiveFrom,
             ActiveTo = measurementPoint.ActiveTo,
             Ikunk = measurementPoint?.Ikunk is not null ?
-                new Ikunks.IkunkSimpleResponse
+                new()
                 {
                     Id = measurementPoint.Ikunk.Id,
-                    Name = measurementPoint.Ikunk.Name
+                    Name = measurementPoint.Ikunk.Name,
+                    Warehouse = new()
+                    {
+                        Id = measurementPoint.Ikunk.Warehouse.Id,
+                        Name = measurementPoint.Ikunk.Warehouse.Name
+                    }
                 } : null
         };
 

@@ -3,10 +3,14 @@ using System.Text;
 using AccountabilityInformationSystem.Api.Common.Constants;
 using AccountabilityInformationSystem.Api.Database;
 using AccountabilityInformationSystem.Api.Entities;
+using AccountabilityInformationSystem.Api.Entities.Excise;
 using AccountabilityInformationSystem.Api.Entities.Flow;
 using AccountabilityInformationSystem.Api.Middleware;
+using AccountabilityInformationSystem.Api.Models.ExciseNomenclatures;
 using AccountabilityInformationSystem.Api.Models.Flow.Ikunks;
 using AccountabilityInformationSystem.Api.Models.Flow.MeasurementPoints;
+using AccountabilityInformationSystem.Api.Models.Flow.MeasurementPointsData;
+using AccountabilityInformationSystem.Api.Models.ProductTypes;
 using AccountabilityInformationSystem.Api.Models.Warehouses;
 using AccountabilityInformationSystem.Api.Services.DataShaping;
 using AccountabilityInformationSystem.Api.Services.Encrypting;
@@ -169,6 +173,24 @@ public static class WebApplicationBuilderExtensions
         builder.Services
             .AddSingleton<ISortMappingDefinition, SortMappingDefinition<IkunkResponse, Ikunk>>(_ =>
                 IkunkMappings.SortMapping);
+        builder.Services
+            .AddSingleton<ISortMappingDefinition, SortMappingDefinition<MeasurementPointDataListResponse, MeasurementPointData>>(_ =>
+                MeasurementPointDataMappings.SortMapping);
+        builder.Services
+            .AddSingleton<ISortMappingDefinition, SortMappingDefinition<ProductTypeResponse, ProductType>>(_ =>
+                ProductTypeMappings.SortMapping);
+
+        builder.Services
+            .AddSingleton<ISortMappingDefinition, SortMappingDefinition<ExciseNomenclatureResponse, ApCode>>(_ =>
+                ExciseNomenclatureMappings.SortMappingApCode);
+
+        builder.Services
+            .AddSingleton<ISortMappingDefinition, SortMappingDefinition<ExciseNomenclatureResponse, BrandName>>(_ =>
+                ExciseNomenclatureMappings.SortMappingBrandName);
+
+        builder.Services
+            .AddSingleton<ISortMappingDefinition, SortMappingDefinition<ExciseNomenclatureResponse, CnCode>>(_ =>
+                ExciseNomenclatureMappings.SortMappingCnCode);
 
         builder.Services.AddTransient<DataShapingService>();
 

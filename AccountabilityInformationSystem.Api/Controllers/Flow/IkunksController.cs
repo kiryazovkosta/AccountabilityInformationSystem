@@ -32,7 +32,7 @@ public sealed class IkunksController(ApplicationDbContext dbContext, UserContext
 {
     [HttpGet]
     public async Task<ActionResult<IkunksCollectionResponse>> GetIkunks(
-        [FromQuery] IkunkQueryParameters query,
+        [FromQuery] QueryParameters query,
         SortMappingProvider sortMappingProvider,
         DataShapingService dataShapingService, 
         CancellationToken cancellationToken)

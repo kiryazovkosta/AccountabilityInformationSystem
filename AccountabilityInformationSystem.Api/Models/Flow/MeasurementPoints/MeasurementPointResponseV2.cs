@@ -8,6 +8,6 @@ public sealed record MeasurementPointResponseV2 : ILinksResponse
     public string Id { get; init; }
     public string FullName { get; init; }
     public int OrderPosition { get; init; }
-    public IkunkSimpleResponse? Ikunk { get; init; }
+    public MeasurementPointIkunkResponse? Ikunk { get; init; }
     public List<LinkResponse> Links { get; set; }
 }

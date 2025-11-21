@@ -168,7 +168,7 @@ public sealed class MeasuringPointsController(
     [HttpGet("{id}")]
     public async Task<IActionResult> GetMeasuringPoint(
         string id,
-        [FromQuery] SingleQueryParameters query,
+        [FromQuery] FieldsOnlyQueryParameters query,
         DataShapingService dataShapingService,
         CancellationToken cancellationToken)
     {
