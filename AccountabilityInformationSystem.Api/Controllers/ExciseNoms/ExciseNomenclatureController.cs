@@ -1,12 +1,14 @@
 ﻿using System.Dynamic;
 using AccountabilityInformationSystem.Api.Database;
 using AccountabilityInformationSystem.Api.Entities.Abstraction;
+using AccountabilityInformationSystem.Api.Entities.Excise;
+using AccountabilityInformationSystem.Api.Entities.Identity;
 using AccountabilityInformationSystem.Api.Extensions;
 using AccountabilityInformationSystem.Api.Models.Common;
 using AccountabilityInformationSystem.Api.Models.ExciseNomenclatures;
-using AccountabilityInformationSystem.Api.Models.ExciseNomenclatures.ApCodes;
 using AccountabilityInformationSystem.Api.Services.DataShaping;
 using AccountabilityInformationSystem.Api.Services.Sorting;
+using AccountabilityInformationSystem.Api.Services.UserContexting;
 using Asp.Versioning;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
@@ -17,10 +19,18 @@ namespace AccountabilityInformationSystem.Api.Controllers.ExciseNoms;
 
 [Authorize]
 [ApiController]
-public abstract class ExciseNomenclatureController<TEntity>(
-    ApplicationDbContext dbContext) : ControllerBase
+public abstract class ExciseNomenclatureController<TEntity, TCreateRequest> : ControllerBase
     where TEntity : class, IEntity, IExciseEntity
+    where TCreateRequest: CreateExciseNomenclatureRequest
 {
+    protected readonly ApplicationDbContext DbContext;
+
+    protected ExciseNomenclatureController(ApplicationDbContext dbContext)
+    {
+        ArgumentNullException.ThrowIfNull(dbContext);
+        DbContext = dbContext;
+    }
+
     [HttpGet]
     [MapToApiVersion(1.0)]
     public async Task<IActionResult> GetCodes(
@@ -36,7 +46,7 @@ public abstract class ExciseNomenclatureController<TEntity>(
                 detail: $"Invalid sort parameter. {query.Sort}");
         }
 
-        if (!dataShapingService.Validate<ApCodeResponse>(query.Fields))
+        if (!dataShapingService.Validate<ExciseNomenclatureResponse>(query.Fields))
         {
             return Problem(
                 statusCode: StatusCodes.Status400BadRequest,
@@ -47,7 +57,7 @@ public abstract class ExciseNomenclatureController<TEntity>(
 
         SortMapping[] sortMappings = sortMappingProvider.GetMappings<ExciseNomenclatureResponse, TEntity>();
 
-        IQueryable<ExciseNomenclatureResponse> queryable = dbContext
+        IQueryable<ExciseNomenclatureResponse> queryable = DbContext
             .Set<TEntity>()
             .Where(pt =>
                 query.Search == null ||
@@ -76,63 +86,64 @@ public abstract class ExciseNomenclatureController<TEntity>(
     }
 
 
-    //[HttpGet("{id}")]
-    //public async Task<IActionResult> GetCode(
-    //    string id,
-    //    [FromQuery] FieldsOnlyQueryParameters query,
-    //    DataShapingService dataShapingService,
-    //    CancellationToken cancellationToken)
-    //{
-    //    if (!dataShapingService.Validate<ProductTypeResponse>(query.Fields))
-    //    {
-    //        return Problem(
-    //            statusCode: StatusCodes.Status400BadRequest,
-    //            detail: $"Invalid fields parameter. {query.Fields}");
-    //    }
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetCode(
+        string id,
+        [FromQuery] FieldsOnlyQueryParameters query,
+        DataShapingService dataShapingService,
+        CancellationToken cancellationToken)
+    {
+        if (!dataShapingService.Validate<ExciseNomenclatureResponse>(query.Fields))
+        {
+            return Problem(
+                statusCode: StatusCodes.Status400BadRequest,
+                detail: $"Invalid fields parameter. {query.Fields}");
+        }
 
-    //    ProductTypeResponse? productTypeResponse = await dbContext
-    //        .ProductTypes
-    //        .AsNoTracking()
-    //        .Select(ProductTypeQueries.ProjectToResponse())
-    //        .FirstOrDefaultAsync(mp => mp.Id == id, cancellationToken);
-    //    if (productTypeResponse is null)
-    //    {
-    //        return NotFound();
-    //    }
+        ExciseNomenclatureResponse? exciseNomenclatureResponse = await DbContext
+            .Set<TEntity>()
+            .AsNoTracking()
+            .Select(ExciseNomenclatureQueries.ProjectToResponse<TEntity>())
+            .FirstOrDefaultAsync(mp => mp.Id == id, cancellationToken);
+        if (exciseNomenclatureResponse is null)
+        {
+            return NotFound();
+        }
 
-    //    ExpandoObject shapedResponse = dataShapingService.ShapeData(productTypeResponse, query.Fields);
-    //    return Ok(shapedResponse);
-    //}
+        ExpandoObject shapedResponse = dataShapingService.ShapeData(exciseNomenclatureResponse, query.Fields);
+        return Ok(shapedResponse);
+    }
 
-    //[HttpPost]
-    //public async Task<ActionResult<ProductTypeResponse>> Create(
-    //    [FromBody] CreateProductTypeRequest request,
-    //    IValidator<CreateProductTypeRequest> validator,
-    //    CancellationToken cancellationToken)
-    //{
-    //    User? user = await userContext.GetUserAsync(cancellationToken);
-    //    if (user is null)
-    //    {
-    //        return Problem(statusCode: StatusCodes.Status401Unauthorized, detail: "Unauthorized");
-    //    }
+    [HttpPost]
+    public async Task<ActionResult<ExciseNomenclatureResponse>> Create(
+        [FromBody] TCreateRequest request,
+        IValidator<TCreateRequest> validator,
+        UserContext userContext,
+        CancellationToken cancellationToken)
+    {
+        User? user = await userContext.GetUserAsync(cancellationToken);
+        if (user is null)
+        {
+            return Problem(statusCode: StatusCodes.Status401Unauthorized, detail: "Unauthorized");
+        }
 
-    //    await validator.ValidateAndThrowAsync(request, cancellationToken);
+        await validator.ValidateAndThrowAsync(request, cancellationToken);
 
-    //    if (await dbContext.ProductTypes.AnyAsync(mp => mp.Name == request.Name, cancellationToken))
-    //    {
-    //        return Problem(
-    //            detail: "Product type with specific name already exists!",
-    //            statusCode: StatusCodes.Status409Conflict);
-    //    }
+        if (await DbContext.Set<ApCode>().AnyAsync(en => en.Code == request.Code, cancellationToken))
+        {
+            return Problem(
+                detail: $"{typeof(ApCode)} with specific code already exists!",
+                statusCode: StatusCodes.Status409Conflict);
+        }
 
-    //    ProductType productType = request.ToEntity(user.Email);
-    //    await dbContext.ProductTypes.AddAsync(productType, cancellationToken);
-    //    await dbContext.SaveChangesAsync(cancellationToken);
-    //    ProductTypeResponse productTypeResponse = productType.ToResponse();
+        ApCode entity = request.ToEntity<ApCode>(user.Email, "ac");
+        await DbContext.Set<ApCode>().AddAsync(entity, cancellationToken);
+        await DbContext.SaveChangesAsync(cancellationToken);
+        ExciseNomenclatureResponse response = entity.ToResponse();
 
-    //    return CreatedAtAction(
-    //        actionName: nameof(GetProductType),
-    //        routeValues: new { id = productType.Id },
-    //        value: productTypeResponse);
-    //}
+        return CreatedAtAction(
+            actionName: nameof(GetCode),
+            routeValues: new { id = response.Id },
+            value: response);
+    }
 }

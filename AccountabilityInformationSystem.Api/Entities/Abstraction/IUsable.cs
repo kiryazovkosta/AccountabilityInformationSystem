@@ -2,5 +2,5 @@
 
 public interface IUsable
 {
-    bool IsUsed { get; }
+    bool IsUsed { get; set; }
 }

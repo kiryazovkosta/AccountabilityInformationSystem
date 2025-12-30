@@ -2,7 +2,7 @@
 
 public interface IExciseEntity : IUsable
 {
-    string Code { get; }
-    string BgDescription { get; }
-    string? DescriptionEn { get; }
+    string Code { get; set; }
+    string BgDescription { get; set; }
+    string? DescriptionEn { get; set; }
 }
