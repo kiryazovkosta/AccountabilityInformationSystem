@@ -1,4 +1,5 @@
 using AccountabilityInformationSystem.Api.Extensions;
+using AccountabilityInformationSystem.Api.Settings;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 
@@ -10,7 +11,8 @@ builder
     .AddDatabase()
     .AddObservability()
     .AddApplicationServices()
-    .AddAuthenticationServices();
+    .AddAuthenticationServices()
+    .AddCorsPolicy();
 
 WebApplication app = builder.Build();
 if (app.Environment.IsDevelopment())
@@ -23,6 +25,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseExceptionHandler();
+app.UseCors(CorsOptions.PolicyName);
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
