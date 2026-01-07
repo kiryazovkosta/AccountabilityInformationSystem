@@ -1,0 +1,42 @@
+<header>
+    <img src="logo.png" alt="Logo">
+    <nav class="nav-menu">
+        <ul class="main-nav">
+            <li><a routerLink="/home" routerLinkActive="active" >Home</a></li>
+            <li><a routerLink="/features" routerLinkActive="active">Features</a></li>
+            <li><a routerLink="/pricing" routerLinkActive="active">Pricing</a></li>
+            <li><a routerLink="/contact" routerLinkActive="active">Contact</a></li>
+            <li><a routerLink="/kendo-demos" routerLinkActive="active">Kendo UI Demos</a></li>
+        </ul>
+        <ul class="user-nav">
+            <li>
+                @if (!isLoggedIn) {
+                    <a routerLink="/auth/login" routerLinkActive="active" class="login-btn">Login</a>
+                } @else {
+                    <div class="has-submenu">
+                        <a href="#" class="profile-btn">{{ userName || 'User' }}</a>
+                        <div class="submenu-panel">
+                            <div class="panel-header">
+                                <span class="panel-title"></span>
+                                <button type="button" class="close-btn" (click)="closeSubmenu($event)" aria-label="Close menu">
+                                    <span>&times;</span>
+                                </button>
+                            </div>
+                            <div class="panel-body">
+                                <ul class="submenu">
+                                    <li><a routerLink="/auth/user-profile" routerLinkActive="active">Profile</a></li>
+                                    <li><a routerLink="/auth/logout" >Logout</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </li>
+        </ul>
+    </nav>
+    <button type="button" class="hamburger" aria-label="Toggle navigation">
+        <span></span>
+        <span></span>
+        <span></span>
+    </button>
+</header>
