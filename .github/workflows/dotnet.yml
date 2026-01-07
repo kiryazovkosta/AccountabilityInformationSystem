@@ -1,4 +1,4 @@
-name: Build
+name: CI - Backend
 
 on:
   workflow_dispatch:
@@ -8,29 +8,38 @@ on:
     branches: [ "main" ]
 
 env:
-  DOTNET_VERSION: '10.x'
+  DOTNET_VERSION: '10.0.x'
+  DOTNET_CLI_TELEMETRY_OPTOUT: 'true'
+  DOTNET_NOLOGO: 'true'
 
 jobs:
-  build:
-
+  backend-build:
+    name: Build .NET API
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v4
-  
+
     - name: Setup .NET
-      uses: actions/setup-dotnet@v4
+      uses: actions/setup-dotnet@v5
       with:
         dotnet-version: ${{ env.DOTNET_VERSION }}
+        cache: true
+        cache-dependency-path: ais-server/AccountabilityInformationSystem/Directory.Packages.props
 
     - name: Restore dependencies
-      run: dotnet restore AccountabilityInformationSystem.sln
+      run: dotnet restore
+      working-directory: ais-server/AccountabilityInformationSystem
 
     - name: Build
-      run: dotnet build AccountabilityInformationSystem.sln --configuration Release --no-restore
+      run: dotnet build --configuration Release --no-restore
+      working-directory: ais-server/AccountabilityInformationSystem
 
-    - name: Test
-      run: dotnet test AccountabilityInformationSystem.sln --configuration Release --no-restore --no-build
+    # No test projects exist yet - uncomment when tests are added
+    # - name: Test
+    #   run: dotnet test --configuration Release --no-restore --no-build
+    #   working-directory: ais-server/AccountabilityInformationSystem
 
     - name: Publish
-      run: dotnet publish AccountabilityInformationSystem.sln --configuration Release --no-restore --no-build
+      run: dotnet publish --configuration Release --no-restore --no-build
+      working-directory: ais-server/AccountabilityInformationSystem
