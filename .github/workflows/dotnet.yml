@@ -28,18 +28,18 @@ jobs:
         cache-dependency-path: ais-server/AccountabilityInformationSystem/Directory.Packages.props
 
     - name: Restore dependencies
-      run: dotnet restore
+      run: dotnet restore AccountabilityInformationSystem.sln
       working-directory: ais-server/AccountabilityInformationSystem
 
     - name: Build
-      run: dotnet build --configuration Release --no-restore
+      run: dotnet build AccountabilityInformationSystem.sln --configuration Release --no-restore
       working-directory: ais-server/AccountabilityInformationSystem
 
     # No test projects exist yet - uncomment when tests are added
     # - name: Test
-    #   run: dotnet test --configuration Release --no-restore --no-build
+    #   run: dotnet test AccountabilityInformationSystem.sln --configuration Release --no-restore --no-build
     #   working-directory: ais-server/AccountabilityInformationSystem
 
     - name: Publish
-      run: dotnet publish --configuration Release --no-restore --no-build
+      run: dotnet publish AccountabilityInformationSystem.sln --configuration Release --no-restore --no-build
       working-directory: ais-server/AccountabilityInformationSystem
