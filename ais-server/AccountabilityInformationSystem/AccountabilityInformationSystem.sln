@@ -17,8 +17,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{81DDED9D-158B-E303-5F62-77A2896D2A5A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AccountabilityInformationSystem.ConsoleSeeder", "..\AccountabilityInformationSystem.ConsoleSeeder\AccountabilityInformationSystem.ConsoleSeeder.csproj", "{C1B6007C-BABB-4F20-A06A-698181B83110}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,17 +31,12 @@ Global
 		{81DDED9D-158B-E303-5F62-77A2896D2A5A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{81DDED9D-158B-E303-5F62-77A2896D2A5A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{81DDED9D-158B-E303-5F62-77A2896D2A5A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C1B6007C-BABB-4F20-A06A-698181B83110}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C1B6007C-BABB-4F20-A06A-698181B83110}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C1B6007C-BABB-4F20-A06A-698181B83110}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C1B6007C-BABB-4F20-A06A-698181B83110}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{7E7BF14A-F723-4585-89F7-BC9857D5446E} = {63D5DF24-0991-45EB-8F82-FF1EF5886C22}
-		{C1B6007C-BABB-4F20-A06A-698181B83110} = {63D5DF24-0991-45EB-8F82-FF1EF5886C22}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {414D1324-5C7E-4FFF-A3A7-9EA138699EE1}
