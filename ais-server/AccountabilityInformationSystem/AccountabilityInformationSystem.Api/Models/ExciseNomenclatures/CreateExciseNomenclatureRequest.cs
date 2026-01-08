@@ -13,3 +13,9 @@ public sealed record CreateApCodeNomenclatureRequest : CreateExciseNomenclatureR
 public sealed record CreateBrandNameNomenclatureRequest : CreateExciseNomenclatureRequest;
 
 public sealed record CreateCnCodeNomenclatureRequest : CreateExciseNomenclatureRequest;
+
+public sealed record CreateExciseNomenclatureBatchRequest<TCreateRequest>
+    where TCreateRequest : CreateExciseNomenclatureRequest
+{
+    public required List<TCreateRequest> Entries { get; init; }
+}

@@ -98,6 +98,17 @@ public static class WebApplicationBuilderExtensions
     public static WebApplicationBuilder AddValidators(this WebApplicationBuilder builder)
     {
         builder.Services.AddValidatorsFromAssemblyContaining<Program>(includeInternalTypes: true);
+
+        // Register generic batch validators for excise nomenclatures
+        builder.Services.AddScoped<IValidator<CreateExciseNomenclatureBatchRequest<CreateApCodeNomenclatureRequest>>,
+            CreateExciseNomenclatureBatchRequestValidator<CreateApCodeNomenclatureRequest>>();
+
+        builder.Services.AddScoped<IValidator<CreateExciseNomenclatureBatchRequest<CreateCnCodeNomenclatureRequest>>,
+            CreateExciseNomenclatureBatchRequestValidator<CreateCnCodeNomenclatureRequest>>();
+
+        builder.Services.AddScoped<IValidator<CreateExciseNomenclatureBatchRequest<CreateBrandNameNomenclatureRequest>>,
+            CreateExciseNomenclatureBatchRequestValidator<CreateBrandNameNomenclatureRequest>>();
+
         return builder;
     }
 

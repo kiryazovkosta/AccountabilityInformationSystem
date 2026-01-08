@@ -18,4 +18,6 @@ public sealed class CnCodesController : ExciseNomenclatureController<CnCode, Cre
         : base(dbContext)
     {
     }
+
+    protected override string EntityIdPrefix => "cn";
 }

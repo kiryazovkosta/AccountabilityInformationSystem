@@ -16,4 +16,6 @@ public sealed class BrandNamesController : ExciseNomenclatureController<BrandNam
         : base(dbContext)
     {
     }
+
+    protected override string EntityIdPrefix => "bn";
 }

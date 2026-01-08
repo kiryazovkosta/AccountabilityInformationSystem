@@ -17,8 +17,10 @@ namespace AccountabilityInformationSystem.Api.Controllers.ExciseNoms;
 [Route("api/excise/ap-codes")]
 public sealed class ApCodesController : ExciseNomenclatureController<ApCode, CreateApCodeNomenclatureRequest>
 {
-    public ApCodesController(ApplicationDbContext dbContext) 
+    public ApCodesController(ApplicationDbContext dbContext)
         : base(dbContext)
     {
     }
+
+    protected override string EntityIdPrefix => "ap";
 }
