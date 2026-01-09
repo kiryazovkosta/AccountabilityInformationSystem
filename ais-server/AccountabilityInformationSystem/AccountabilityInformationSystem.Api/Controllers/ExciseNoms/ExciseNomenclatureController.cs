@@ -3,10 +3,12 @@ using System.Dynamic;
 using AccountabilityInformationSystem.Api.Database;
 using AccountabilityInformationSystem.Api.Entities.Abstraction;
 using AccountabilityInformationSystem.Api.Entities.Excise;
+using AccountabilityInformationSystem.Api.Entities.Flow;
 using AccountabilityInformationSystem.Api.Entities.Identity;
 using AccountabilityInformationSystem.Api.Extensions;
 using AccountabilityInformationSystem.Api.Models.Common;
 using AccountabilityInformationSystem.Api.Models.ExciseNomenclatures;
+using AccountabilityInformationSystem.Api.Models.Flow.Ikunks;
 using AccountabilityInformationSystem.Api.Services.DataShaping;
 using AccountabilityInformationSystem.Api.Services.Sorting;
 using AccountabilityInformationSystem.Api.Services.UserContexting;
@@ -18,11 +20,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AccountabilityInformationSystem.Api.Controllers.ExciseNoms;
 
+[ResponseCache(Duration = 120)]
 [Authorize]
 [ApiController]
-public abstract class ExciseNomenclatureController<TEntity, TCreateRequest> : ControllerBase
+public abstract class ExciseNomenclatureController<TEntity, TCreateRequest, TUpdateRequest> : ControllerBase
     where TEntity : AuditableEntity, IEntity, IExciseEntity, new()
     where TCreateRequest: CreateExciseNomenclatureRequest
+    where TUpdateRequest : UpdateExciseNomenclatureRequest
 {
     protected readonly ApplicationDbContext DbContext;
     protected abstract string EntityIdPrefix { get; }
@@ -35,7 +39,7 @@ public abstract class ExciseNomenclatureController<TEntity, TCreateRequest> : Co
 
     [HttpGet]
     [MapToApiVersion(1.0)]
-    public async Task<IActionResult> GetCodes(
+    public async Task<IActionResult> GetAll(
         [FromQuery] ExciseNomenclatureQueryParameters query,
         [FromServices] SortMappingProvider sortMappingProvider,
         [FromServices] DataShapingService dataShapingService,
@@ -89,7 +93,7 @@ public abstract class ExciseNomenclatureController<TEntity, TCreateRequest> : Co
 
 
     [HttpGet("{id}")]
-    public async Task<IActionResult> GetCode(
+    public async Task<IActionResult> GetById(
         string id,
         [FromQuery] FieldsOnlyQueryParameters query,
         [FromServices] DataShapingService dataShapingService,
@@ -144,7 +148,7 @@ public abstract class ExciseNomenclatureController<TEntity, TCreateRequest> : Co
         ExciseNomenclatureResponse response = entity.ToResponse();
 
         return CreatedAtAction(
-            actionName: nameof(GetCode),
+            actionName: nameof(GetById),
             routeValues: new { id = response.Id },
             value: response);
     }
@@ -170,16 +174,59 @@ public abstract class ExciseNomenclatureController<TEntity, TCreateRequest> : Co
             return Problem(statusCode: StatusCodes.Status400BadRequest, detail: "Invalid number of unique codes");
         }
 
-        bool alreadyExists = await DbContext.Set<TEntity>().AnyAsync(e => createdCodes.Contains(e.Code));
+        bool alreadyExists = await DbContext.Set<TEntity>().AnyAsync(e => createdCodes.Contains(e.Code), cancellationToken);
         if (alreadyExists)
         {
             return Problem(statusCode: StatusCodes.Status409Conflict, detail: "One or more entities with provided codes already exists");
         }
 
-        List<TEntity> entities = request.Entries.Select(en => en.ToEntity<TEntity>(user.Email, EntityIdPrefix)).ToList();
+        List<TEntity> entities = [.. request.Entries.Select(en => en.ToEntity<TEntity>(user.Email, EntityIdPrefix))];
         await DbContext.Set<TEntity>().AddRangeAsync(entities, cancellationToken);
         await DbContext.SaveChangesAsync(cancellationToken);
 
-        return CreatedAtAction(nameof(GetCodes), null);
+        return CreatedAtAction(nameof(GetAll), null);
+    }
+
+    [HttpPut]
+    public async Task<ActionResult> Update(
+        string id,
+        [FromBody] TUpdateRequest request,
+        [FromServices] IValidator<TUpdateRequest> validator,
+        [FromServices] UserContext userContext,
+        CancellationToken cancellationToken)
+    {
+        User? user = await userContext.GetUserAsync(cancellationToken);
+        if (user is null)
+        {
+            return Problem(
+                statusCode: StatusCodes.Status401Unauthorized, 
+                detail: "Unauthorized");
+        }
+
+        await validator.ValidateAndThrowAsync(request, cancellationToken);
+
+        TEntity? entity = await DbContext
+            .Set<TEntity>()
+            .FirstOrDefaultAsync(en => en.Id == id, cancellationToken);
+        if (entity is null)
+        {
+            return Problem(
+                detail: $"{nameof(TEntity)} with specific id does not exists!",
+                statusCode: StatusCodes.Status404NotFound);
+        }
+
+        bool codeExists = await DbContext
+            .Set<TEntity>()
+            .AnyAsync(en => en.Code == request.Code && en.Id != entity.Id, cancellationToken);
+        if (codeExists)
+        {
+            return Problem(
+                detail: $"{nameof(TEntity)} with specific name already exists!",
+                statusCode: StatusCodes.Status409Conflict);
+        }
+
+        entity.UpdateFromRequest(request, user.Email);
+        await DbContext.SaveChangesAsync(cancellationToken);
+        return NoContent();
     }
 }

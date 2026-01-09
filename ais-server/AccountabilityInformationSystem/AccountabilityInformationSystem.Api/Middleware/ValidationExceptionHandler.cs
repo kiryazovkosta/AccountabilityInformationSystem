@@ -28,7 +28,7 @@ public sealed class ValidationExceptionHandler(IProblemDetailsService problemDet
             }
         };
 
-        var errors = validationException.Errors
+        Dictionary<string, string[]> errors = validationException.Errors
             .GroupBy(e => e.PropertyName)
             .ToDictionary(
                 g => g.Key.ToLowerInvariant(), 

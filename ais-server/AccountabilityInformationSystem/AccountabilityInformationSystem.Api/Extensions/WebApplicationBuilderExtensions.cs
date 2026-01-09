@@ -92,6 +92,8 @@ public static class WebApplicationBuilderExtensions
             options.AddDocumentTransformer<BearerSecuritySchemeTransformer>();
         });
 
+        builder.Services.AddResponseCaching();
+
         return builder;
     }
 

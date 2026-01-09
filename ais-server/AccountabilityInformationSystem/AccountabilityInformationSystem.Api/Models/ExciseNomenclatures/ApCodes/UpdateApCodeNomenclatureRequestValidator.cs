@@ -1,14 +1,13 @@
 ﻿using AccountabilityInformationSystem.Api.Common.Constants;
 using FluentValidation;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace AccountabilityInformationSystem.Api.Models.ExciseNomenclatures.ApCodes;
 
-public sealed class CreateApCodeNomenclatureRequestValidator : AbstractValidator<CreateApCodeNomenclatureRequest>
+public sealed class UpdateApCodeNomenclatureRequestValidator : AbstractValidator<UpdateApCodeNomenclatureRequest>
 {
-    public CreateApCodeNomenclatureRequestValidator()
+    public UpdateApCodeNomenclatureRequestValidator()
     {
-        Include(new CreateExciseNomenclatureValidator<CreateApCodeNomenclatureRequest>(
+        Include(new UpdateExciseNomenclatureValidator<UpdateApCodeNomenclatureRequest>(
             EntitiesConstants.ApCodeConstants.CodeLength,
             EntitiesConstants.ApCodeConstants.CodePattern,
             EntitiesConstants.ApCodeConstants.DescriptionMaxlength));

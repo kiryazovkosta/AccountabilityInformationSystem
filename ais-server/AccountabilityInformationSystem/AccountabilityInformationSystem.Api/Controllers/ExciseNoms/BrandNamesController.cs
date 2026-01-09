@@ -10,7 +10,8 @@ namespace AccountabilityInformationSystem.Api.Controllers.ExciseNoms;
 [Authorize]
 [ApiController]
 [Route("api/excise/brand-names")]
-public sealed class BrandNamesController : ExciseNomenclatureController<BrandName, CreateBrandNameNomenclatureRequest>
+public sealed class BrandNamesController 
+    : ExciseNomenclatureController<BrandName, CreateBrandNameNomenclatureRequest, UpdateBrandNameNomenclatureRequest>
 {
     public BrandNamesController(ApplicationDbContext dbContext)
         : base(dbContext)

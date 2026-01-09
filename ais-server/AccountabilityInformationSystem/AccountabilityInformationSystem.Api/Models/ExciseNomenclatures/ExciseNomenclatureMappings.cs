@@ -68,4 +68,16 @@ public static class ExciseNomenclatureMappings
             DescriptionEn = exciseEntity.DescriptionEn,
             IsUsed = exciseEntity.IsUsed
         };
+
+    public static void UpdateFromRequest<TEntity, TUpdateRequest>(this TEntity entity, TUpdateRequest request, string userName)
+        where TEntity : AuditableEntity, IEntity, IExciseEntity
+        where TUpdateRequest : UpdateExciseNomenclatureRequest
+    {
+        entity.Code = request.Code ?? entity.Code;
+        entity.BgDescription = request.BgDescription ?? entity.BgDescription;
+        entity.DescriptionEn = request.DescriptionEn ?? entity.BgDescription;
+        entity.IsUsed = request.IsUsed ?? entity.IsUsed;
+        entity.ModifiedBy = userName;
+        entity.ModifiedAt = DateTime.UtcNow;
+    }
 }

@@ -15,7 +15,8 @@ namespace AccountabilityInformationSystem.Api.Controllers.ExciseNoms;
 [Authorize]
 [ApiController]
 [Route("api/excise/ap-codes")]
-public sealed class ApCodesController : ExciseNomenclatureController<ApCode, CreateApCodeNomenclatureRequest>
+public sealed class ApCodesController 
+    : ExciseNomenclatureController<ApCode, CreateApCodeNomenclatureRequest, UpdateApCodeNomenclatureRequest>
 {
     public ApCodesController(ApplicationDbContext dbContext)
         : base(dbContext)

@@ -1,4 +1,6 @@
-﻿namespace AccountabilityInformationSystem.Api.Models.ExciseNomenclatures;
+﻿using AccountabilityInformationSystem.Api.Entities.Abstraction;
+
+namespace AccountabilityInformationSystem.Api.Models.ExciseNomenclatures;
 
 public record CreateExciseNomenclatureRequest
 {
