@@ -9,7 +9,6 @@ public sealed class CreateApCodeNomenclatureRequestValidator : AbstractValidator
     public CreateApCodeNomenclatureRequestValidator()
     {
         Include(new CreateExciseNomenclatureValidator<CreateApCodeNomenclatureRequest>(
-            EntitiesConstants.ApCodeConstants.CodeLength,
             EntitiesConstants.ApCodeConstants.CodePattern,
             EntitiesConstants.ApCodeConstants.DescriptionMaxlength));
     }

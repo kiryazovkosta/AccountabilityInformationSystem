@@ -9,7 +9,6 @@ public sealed class CreateBrandNameNomenclatureRequestValidator : AbstractValida
     public CreateBrandNameNomenclatureRequestValidator()
     {
         Include(new CreateExciseNomenclatureValidator<CreateBrandNameNomenclatureRequest>(
-            EntitiesConstants.BrandNameConstants.CodeLength,
             EntitiesConstants.BrandNameConstants.CodePattern,
             EntitiesConstants.BrandNameConstants.DescriptionMaxlength));
     }

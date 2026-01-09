@@ -5,15 +5,9 @@ namespace AccountabilityInformationSystem.Api.Models.ExciseNomenclatures;
 public sealed class CreateExciseNomenclatureValidator<TCreateRequest> : AbstractValidator<TCreateRequest>
     where TCreateRequest : CreateExciseNomenclatureRequest
 {
-    public CreateExciseNomenclatureValidator(int codeLength, string codePattern, int descriptionMaxLength)
+    public CreateExciseNomenclatureValidator(string codePattern, int descriptionMaxLength)
     {
         RuleFor(x => x.Code)
-            .NotEmpty()
-            .Length(codeLength)
-            .WithMessage($"Code must be exactlly {codeLength} characters.");
-
-        RuleFor(x => x.Code)
-            .NotEmpty()
             .Matches(codePattern)
             .WithMessage($"Code must to be into {codePattern} format.");
 
