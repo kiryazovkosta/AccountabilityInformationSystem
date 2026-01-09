@@ -36,4 +36,8 @@
     <Folder Include="Services\UserContexting\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="AccountabilityInformationSystem.UnitTests" />
+  </ItemGroup>
+
 </Project>
