@@ -9,7 +9,7 @@ public sealed class CreateCnCodeNomenclatureRequestValidator : AbstractValidator
     public CreateCnCodeNomenclatureRequestValidator()
     {
         Include(new CreateExciseNomenclatureValidator<CreateCnCodeNomenclatureRequest>(
-            EntitiesConstants.CnCodeConstant.CodePattern,
-            EntitiesConstants.CnCodeConstant.DescriptionMaxlength));
+            EntitiesConstants.CnCodeConstants.CodePattern,
+            EntitiesConstants.CnCodeConstants.DescriptionMaxlength));
     }
 }

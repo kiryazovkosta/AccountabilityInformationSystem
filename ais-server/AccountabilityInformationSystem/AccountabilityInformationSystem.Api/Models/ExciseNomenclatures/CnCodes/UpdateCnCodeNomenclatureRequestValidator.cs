@@ -8,8 +8,8 @@ public sealed class UpdateCnCodeNomenclatureRequestValidator : AbstractValidator
     public UpdateCnCodeNomenclatureRequestValidator()
     {
         Include(new UpdateExciseNomenclatureValidator<UpdateCnCodeNomenclatureRequest>(
-            EntitiesConstants.CnCodeConstant.CodeLength,
-            EntitiesConstants.CnCodeConstant.CodePattern,
-            EntitiesConstants.CnCodeConstant.DescriptionMaxlength));
+            EntitiesConstants.CnCodeConstants.CodeLength,
+            EntitiesConstants.CnCodeConstants.CodePattern,
+            EntitiesConstants.CnCodeConstants.DescriptionMaxlength));
     }
 }

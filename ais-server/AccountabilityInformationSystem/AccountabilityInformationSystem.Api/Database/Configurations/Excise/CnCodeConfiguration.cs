@@ -19,7 +19,7 @@ public sealed class CnCodeConfiguration : IEntityTypeConfiguration<CnCode>
 
         builder.Property(e => e.Code)
             .IsRequired()
-            .HasMaxLength(EntitiesConstants.CnCodeConstant.CodeLength);
+            .HasMaxLength(EntitiesConstants.CnCodeConstants.CodeLength);
 
         builder.Property(e => e.BgDescription)
             .IsRequired()

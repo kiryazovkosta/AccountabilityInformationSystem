@@ -51,7 +51,7 @@ public static class EntitiesConstants
         public const string DefaultSorting = "Code ascending";
     }
 
-    public static class CnCodeConstant
+    public static class CnCodeConstants
     {
         public const int CodeLength = 8;
         public const string CodePattern = @"^(?!00000000)\d{8}$";
