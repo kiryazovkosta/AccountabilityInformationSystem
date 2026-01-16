@@ -2,10 +2,7 @@
 using AccountabilityInformationSystem.Api.Models.ExciseNomenclatures;
 using AccountabilityInformationSystem.Api.Models.ExciseNomenclatures.ApCodes;
 using FluentValidation.Results;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace AccountabilityInformationSystem.UnitTests.Validators;
@@ -69,7 +66,7 @@ public class CreateApCodeNomenclatureRequestValidatorTests
     public async Task Validate_ShouldFailed_WhenInputRequestIncreaseMaximumLengthBgDescription()
     {
         //Arrange
-        string description = new string('a', EntitiesConstants.ApCodeConstants.DescriptionMaxlength + 1);
+        string description = new('a', EntitiesConstants.ApCodeConstants.DescriptionMaxlength + 1);
         CreateApCodeNomenclatureRequest request = new() { Code = "A100", BgDescription = description, DescriptionEn = null, IsUsed = false };
 
         // Act
@@ -84,7 +81,7 @@ public class CreateApCodeNomenclatureRequestValidatorTests
     public async Task Validate_ShouldFailed_WhenInputRequestIncreasemaximumLengthEnDescription()
     {
         //Arrange
-        string description = new string('a', EntitiesConstants.ApCodeConstants.DescriptionMaxlength + 1);
+        string description = new('a', EntitiesConstants.ApCodeConstants.DescriptionMaxlength + 1);
         CreateApCodeNomenclatureRequest request = new() { Code = "A100", BgDescription = "Some description", DescriptionEn = description, IsUsed = false };
 
         // Act
