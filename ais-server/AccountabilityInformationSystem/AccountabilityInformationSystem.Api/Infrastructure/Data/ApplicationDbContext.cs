@@ -1,4 +1,4 @@
-using AccountabilityInformationSystem.Api.Common.Constants;
+using AccountabilityInformationSystem.Api.Shared.Constants;
 using AccountabilityInformationSystem.Api.Domain.Entities;
 using AccountabilityInformationSystem.Api.Domain.Entities.Excise;
 using AccountabilityInformationSystem.Api.Domain.Entities.Flow;

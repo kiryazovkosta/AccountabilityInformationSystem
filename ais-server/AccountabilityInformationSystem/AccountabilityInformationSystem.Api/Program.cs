@@ -1,4 +1,4 @@
-using AccountabilityInformationSystem.Api.Extensions;
+using AccountabilityInformationSystem.Api.Shared.Extensions;
 using AccountabilityInformationSystem.Api.Settings;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;

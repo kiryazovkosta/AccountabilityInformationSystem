@@ -1,4 +1,4 @@
-using AccountabilityInformationSystem.Api.Common.Constants;
+using AccountabilityInformationSystem.Api.Shared.Constants;
 using AccountabilityInformationSystem.Api.Domain.Entities.Excise;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;

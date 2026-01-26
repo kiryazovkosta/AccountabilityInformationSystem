@@ -1,4 +1,4 @@
-using AccountabilityInformationSystem.Api.Common.Constants;
+using AccountabilityInformationSystem.Api.Shared.Constants;
 using AccountabilityInformationSystem.Api.Domain.Entities.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;

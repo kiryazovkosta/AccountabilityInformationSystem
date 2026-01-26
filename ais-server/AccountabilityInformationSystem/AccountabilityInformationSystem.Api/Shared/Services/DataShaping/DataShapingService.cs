@@ -1,8 +1,8 @@
 using System.Collections.Concurrent;
 using System.Dynamic;
 using System.Reflection;
+using AccountabilityInformationSystem.Api.Features.Flow.MeasurementPointsData.Shared;
 using AccountabilityInformationSystem.Api.Shared.Models;
-using AccountabilityInformationSystem.Api.Models.Flow.MeasurementPointsData;
 
 namespace AccountabilityInformationSystem.Api.Shared.Services.DataShaping;
 
