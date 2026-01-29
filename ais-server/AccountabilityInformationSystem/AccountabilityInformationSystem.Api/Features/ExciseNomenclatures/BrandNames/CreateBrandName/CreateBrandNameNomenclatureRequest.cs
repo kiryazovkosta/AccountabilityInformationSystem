@@ -1,0 +1,5 @@
+using AccountabilityInformationSystem.Api.Features.ExciseNomenclatures.Shared.CreateExciseNomenclature;
+
+namespace AccountabilityInformationSystem.Api.Features.ExciseNomenclatures.BrandNames.CreateBrandName;
+
+public sealed record CreateBrandNameNomenclatureRequest : CreateExciseNomenclatureRequest;

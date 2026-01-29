@@ -1,6 +1,5 @@
-﻿using AccountabilityInformationSystem.Api.Common.Constants;
-using AccountabilityInformationSystem.Api.Models.ExciseNomenclatures;
-using AccountabilityInformationSystem.Api.Models.ExciseNomenclatures.BrandNames;
+﻿using AccountabilityInformationSystem.Api.Features.ExciseNomenclatures.BrandNames.CreateBrandName;
+using AccountabilityInformationSystem.Api.Shared.Constants;
 using FluentValidation.Results;
 using System.Linq;
 using System.Threading.Tasks;

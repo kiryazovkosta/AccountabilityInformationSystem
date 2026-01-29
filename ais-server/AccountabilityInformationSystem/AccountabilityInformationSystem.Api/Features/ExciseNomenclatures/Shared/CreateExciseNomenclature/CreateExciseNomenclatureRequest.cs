@@ -8,12 +8,6 @@ public record CreateExciseNomenclatureRequest
     public bool IsUsed { get; set; }
 }
 
-public sealed record CreateApCodeNomenclatureRequest : CreateExciseNomenclatureRequest;
-
-public sealed record CreateBrandNameNomenclatureRequest : CreateExciseNomenclatureRequest;
-
-public sealed record CreateCnCodeNomenclatureRequest : CreateExciseNomenclatureRequest;
-
 public sealed record CreateExciseNomenclatureBatchRequest<TCreateRequest>
     where TCreateRequest : CreateExciseNomenclatureRequest
 {

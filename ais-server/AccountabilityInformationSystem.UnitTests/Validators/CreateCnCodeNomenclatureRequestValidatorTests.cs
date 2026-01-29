@@ -1,6 +1,5 @@
-﻿using AccountabilityInformationSystem.Api.Common.Constants;
-using AccountabilityInformationSystem.Api.Models.ExciseNomenclatures;
-using AccountabilityInformationSystem.Api.Models.ExciseNomenclatures.CnCodes;
+﻿using AccountabilityInformationSystem.Api.Features.ExciseNomenclatures.CnCodes.CreateCnCode;
+using AccountabilityInformationSystem.Api.Shared.Constants;
 using FluentValidation.Results;
 using System.Linq;
 using System.Threading.Tasks;

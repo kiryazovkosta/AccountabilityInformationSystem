@@ -1,10 +1,10 @@
 using AccountabilityInformationSystem.Api.Infrastructure.Data;
 using AccountabilityInformationSystem.Api.Domain.Entities.Excise;
 using AccountabilityInformationSystem.Api.Features.ExciseNomenclatures.Shared;
-using AccountabilityInformationSystem.Api.Features.ExciseNomenclatures.Shared.CreateExciseNomenclature;
 using AccountabilityInformationSystem.Api.Features.ExciseNomenclatures.Shared.UpdateExciseNomenclature;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using AccountabilityInformationSystem.Api.Features.ExciseNomenclatures.CnCodes.CreateCnCode;
 
 namespace AccountabilityInformationSystem.Api.Features.ExciseNomenclatures.CnCodes;
 
