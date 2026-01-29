@@ -3,6 +3,7 @@ using AccountabilityInformationSystem.Api.Features.ExciseNomenclatures.Shared.Up
 using AccountabilityInformationSystem.Api.Shared.Constants;
 using FluentValidation.Results;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace AccountabilityInformationSystem.UnitTests.Validators;
@@ -18,7 +19,7 @@ public class UpdateBrandNameNomenclatureRequestValidatorTests
         UpdateBrandNameNomenclatureRequest request = new() { Code = "A12345", BgDescription = "Описание на български език", DescriptionEn = null, IsUsed = false };
 
         // Act
-        ValidationResult validationResult = await _validator.ValidateAsync(request);
+        ValidationResult validationResult = await _validator.ValidateAsync(request, CancellationToken.None);
 
         // Assert
         Assert.True(validationResult.IsValid);
@@ -32,7 +33,7 @@ public class UpdateBrandNameNomenclatureRequestValidatorTests
         UpdateBrandNameNomenclatureRequest request = new() { Code = null, BgDescription = "Описание на български език", DescriptionEn = null, IsUsed = false };
 
         // Act
-        ValidationResult validationResult = await _validator.ValidateAsync(request);
+        ValidationResult validationResult = await _validator.ValidateAsync(request, CancellationToken.None);
 
         // Assert
         Assert.True(validationResult.IsValid);
@@ -46,7 +47,7 @@ public class UpdateBrandNameNomenclatureRequestValidatorTests
         UpdateBrandNameNomenclatureRequest request = new() { Code = "", BgDescription = "Описание на български език", DescriptionEn = null, IsUsed = false };
 
         // Act
-        ValidationResult validationResult = await _validator.ValidateAsync(request);
+        ValidationResult validationResult = await _validator.ValidateAsync(request, CancellationToken.None);
 
         // Assert
         Assert.True(validationResult.IsValid);
@@ -60,7 +61,7 @@ public class UpdateBrandNameNomenclatureRequestValidatorTests
         UpdateBrandNameNomenclatureRequest request = new() { Code = "A12345", BgDescription = null, DescriptionEn = null, IsUsed = false };
 
         // Act
-        ValidationResult validationResult = await _validator.ValidateAsync(request);
+        ValidationResult validationResult = await _validator.ValidateAsync(request, CancellationToken.None);
 
         // Assert
         Assert.True(validationResult.IsValid);
@@ -74,7 +75,7 @@ public class UpdateBrandNameNomenclatureRequestValidatorTests
         UpdateBrandNameNomenclatureRequest request = new() { Code = "A12345", BgDescription = "", DescriptionEn = null, IsUsed = false };
 
         // Act
-        ValidationResult validationResult = await _validator.ValidateAsync(request);
+        ValidationResult validationResult = await _validator.ValidateAsync(request, CancellationToken.None);
 
         // Assert
         Assert.True(validationResult.IsValid);
@@ -97,7 +98,7 @@ public class UpdateBrandNameNomenclatureRequestValidatorTests
         UpdateBrandNameNomenclatureRequest request = new() { Code = code, BgDescription = "Описание на български език", DescriptionEn = null, IsUsed = false };
 
         // Act
-        ValidationResult validationResult = await _validator.ValidateAsync(request);
+        ValidationResult validationResult = await _validator.ValidateAsync(request, CancellationToken.None);
 
         // Assert
         Assert.False(validationResult.IsValid);
@@ -112,7 +113,7 @@ public class UpdateBrandNameNomenclatureRequestValidatorTests
         UpdateBrandNameNomenclatureRequest request = new() { Code = "A12345", BgDescription = description, DescriptionEn = null, IsUsed = false };
 
         // Act
-        ValidationResult validationResult = await _validator.ValidateAsync(request);
+        ValidationResult validationResult = await _validator.ValidateAsync(request, CancellationToken.None);
 
         // Assert
         Assert.False(validationResult.IsValid);
@@ -127,7 +128,7 @@ public class UpdateBrandNameNomenclatureRequestValidatorTests
         UpdateBrandNameNomenclatureRequest request = new() { Code = "A12345", BgDescription = "Some description", DescriptionEn = description, IsUsed = false };
 
         // Act
-        ValidationResult validationResult = await _validator.ValidateAsync(request);
+        ValidationResult validationResult = await _validator.ValidateAsync(request, CancellationToken.None);
 
         // Assert
         Assert.False(validationResult.IsValid);

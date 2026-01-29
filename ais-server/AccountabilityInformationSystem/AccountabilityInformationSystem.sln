@@ -15,11 +15,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.github\workflows\dotnet.yml = .github\workflows\dotnet.yml
 	EndProjectSection
 EndProject
-Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{81DDED9D-158B-E303-5F62-77A2896D2A5A}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{386547BE-7558-4BE6-8FD4-AC8A975C64ED}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AccountabilityInformationSystem.UnitTests", "..\AccountabilityInformationSystem.UnitTests\AccountabilityInformationSystem.UnitTests.csproj", "{C7288E73-9CD4-4FA0-AC77-021D659C396D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AccountabilityInformationSystem.Aspire.AppHost", "AccountabilityInformationSystem.Aspire.AppHost\AccountabilityInformationSystem.Aspire.AppHost.csproj", "{BB9F051C-6602-46C6-A615-093AAA9F62E4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AccountabilityInformationSystem.Aspire.ServiceDefaults", "AccountabilityInformationSystem.Aspire.ServiceDefaults\AccountabilityInformationSystem.Aspire.ServiceDefaults.csproj", "{FEC67526-61E9-5B91-EFB4-C7A0799AE24A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -31,14 +33,18 @@ Global
 		{7E7BF14A-F723-4585-89F7-BC9857D5446E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7E7BF14A-F723-4585-89F7-BC9857D5446E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7E7BF14A-F723-4585-89F7-BC9857D5446E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{81DDED9D-158B-E303-5F62-77A2896D2A5A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{81DDED9D-158B-E303-5F62-77A2896D2A5A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{81DDED9D-158B-E303-5F62-77A2896D2A5A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{81DDED9D-158B-E303-5F62-77A2896D2A5A}.Release|Any CPU.Build.0 = Release|Any CPU
 		{C7288E73-9CD4-4FA0-AC77-021D659C396D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{C7288E73-9CD4-4FA0-AC77-021D659C396D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C7288E73-9CD4-4FA0-AC77-021D659C396D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C7288E73-9CD4-4FA0-AC77-021D659C396D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BB9F051C-6602-46C6-A615-093AAA9F62E4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BB9F051C-6602-46C6-A615-093AAA9F62E4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BB9F051C-6602-46C6-A615-093AAA9F62E4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BB9F051C-6602-46C6-A615-093AAA9F62E4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FEC67526-61E9-5B91-EFB4-C7A0799AE24A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FEC67526-61E9-5B91-EFB4-C7A0799AE24A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FEC67526-61E9-5B91-EFB4-C7A0799AE24A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FEC67526-61E9-5B91-EFB4-C7A0799AE24A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -19,6 +19,7 @@ using AccountabilityInformationSystem.Api.Shared.Services.Linking;
 using AccountabilityInformationSystem.Api.Shared.Services.Sorting;
 using AccountabilityInformationSystem.Api.Shared.Services.Tokenizing;
 using AccountabilityInformationSystem.Api.Shared.Services.UserContexting;
+using AccountabilityInformationSystem.Api.Shared.Services.Seeding;
 using AccountabilityInformationSystem.Api.Settings;
 using Asp.Versioning;
 using FluentValidation;
@@ -133,45 +134,45 @@ public static class WebApplicationBuilderExtensions
 
     public static WebApplicationBuilder AddDatabase(this WebApplicationBuilder builder)
     {
-        builder.Services.AddDbContext<ApplicationDbContext>(options =>
-        {
-            options
-                .UseSqlServer(
-                    builder.Configuration.GetConnectionString(DatabasesConstants.ApplicationDatabase),
-                    sqlOptions => sqlOptions.MigrationsHistoryTable(HistoryRepository.DefaultTableName, SchemasConstants.Application));
-        });
+        builder.AddSqlServerDbContext<ApplicationDbContext>(
+            DatabasesConstants.ApplicationDatabase,
+            configureDbContextOptions: options =>
+            {
+                options.UseSqlServer(sqlOptions =>
+                    sqlOptions.MigrationsHistoryTable(HistoryRepository.DefaultTableName, SchemasConstants.Application));
+            });
 
-        builder.Services.AddDbContext<ApplicationIdentityDbContext>(options =>
-        {
-            options
-                .UseSqlServer(
-                    builder.Configuration.GetConnectionString(DatabasesConstants.ApplicationDatabase),
-                    sqlOptions => sqlOptions.MigrationsHistoryTable(HistoryRepository.DefaultTableName, SchemasConstants.Identity));
-        });
+        builder.AddSqlServerDbContext<ApplicationIdentityDbContext>(
+            DatabasesConstants.ApplicationDatabase,
+            configureDbContextOptions: options =>
+            {
+                options.UseSqlServer(sqlOptions =>
+                    sqlOptions.MigrationsHistoryTable(HistoryRepository.DefaultTableName, SchemasConstants.Identity));
+            });
 
         return builder;
     }
 
     public static WebApplicationBuilder AddObservability(this WebApplicationBuilder builder)
     {
-        builder.Services.AddOpenTelemetry()
-            .ConfigureResource(resource => resource.AddService(builder.Environment.ApplicationName))
-            .WithTracing(tracing => tracing
-                .AddHttpClientInstrumentation()
-                .AddAspNetCoreInstrumentation()
-                .AddSqlClientInstrumentation()
-            )
-            .WithMetrics(metrics => metrics
-                .AddHttpClientInstrumentation()
-                .AddAspNetCoreInstrumentation()
-                .AddRuntimeInstrumentation())
-            .UseOtlpExporter();
+        //builder.Services.AddOpenTelemetry()
+        //    .ConfigureResource(resource => resource.AddService(builder.Environment.ApplicationName))
+        //    .WithTracing(tracing => tracing
+        //        .AddHttpClientInstrumentation()
+        //        .AddAspNetCoreInstrumentation()
+        //        .AddSqlClientInstrumentation()
+        //    )
+        //    .WithMetrics(metrics => metrics
+        //        .AddHttpClientInstrumentation()
+        //        .AddAspNetCoreInstrumentation()
+        //        .AddRuntimeInstrumentation())
+        //    .UseOtlpExporter();
 
-        builder.Logging.AddOpenTelemetry(options =>
-        {
-            options.IncludeScopes = true;
-            options.IncludeFormattedMessage = true;
-        });
+        //builder.Logging.AddOpenTelemetry(options =>
+        //{
+        //    options.IncludeScopes = true;
+        //    options.IncludeFormattedMessage = true;
+        //});
 
         return builder;
     }
@@ -219,6 +220,8 @@ public static class WebApplicationBuilderExtensions
 
         builder.Services.Configure<EncryptionOptions>(builder.Configuration.GetSection("Encryption"));
         builder.Services.AddTransient<EncryptionService>();
+
+        builder.Services.AddHostedService<RoleSeedingService>();
 
         return builder;
     }

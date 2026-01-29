@@ -1,9 +1,7 @@
 using AccountabilityInformationSystem.Api.Shared.Constants;
 using AccountabilityInformationSystem.Api.Domain.Entities.Identity;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
 
 namespace AccountabilityInformationSystem.Api.Infrastructure.Data;
 
@@ -41,44 +39,5 @@ public sealed class ApplicationIdentityDbContext(DbContextOptions<ApplicationIde
                 .HasForeignKey(e => e.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
-    }
-
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        base.OnConfiguring(optionsBuilder);
-
-        optionsBuilder
-            .UseSeeding((context, _) =>
-            {
-
-            })
-            .UseAsyncSeeding(async (context, _, cancellationToken) =>
-            {
-                try
-                {
-                    RoleManager<IdentityRole> roleManager = context.GetService<RoleManager<IdentityRole>>();
-                    if (!await roleManager.RoleExistsAsync(Role.Admin))
-                    {
-                        await roleManager.CreateAsync(new IdentityRole(Role.Admin));
-                    }
-
-                    if (!await roleManager.RoleExistsAsync(Role.FlowUser))
-                    {
-                        await roleManager.CreateAsync(new IdentityRole(Role.FlowUser));
-                    }
-
-                    if (!await roleManager.RoleExistsAsync(Role.Member))
-                    {
-                        await roleManager.CreateAsync(new IdentityRole(Role.Member));
-                    }
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e);
-                    throw;
-                }
-
-
-            });
     }
 }

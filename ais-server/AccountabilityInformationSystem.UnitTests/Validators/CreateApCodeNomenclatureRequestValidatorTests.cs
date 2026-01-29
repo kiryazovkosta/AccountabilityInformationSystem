@@ -2,6 +2,7 @@
 using AccountabilityInformationSystem.Api.Shared.Constants;
 using FluentValidation.Results;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace AccountabilityInformationSystem.UnitTests.Validators;
@@ -17,7 +18,7 @@ public class CreateApCodeNomenclatureRequestValidatorTests
         CreateApCodeNomenclatureRequest request = new(){ Code = "A100", BgDescription = "Описание на български език", DescriptionEn = null, IsUsed = false };
 
         // Act
-        ValidationResult validationResult = await _validator.ValidateAsync(request);
+        ValidationResult validationResult = await _validator.ValidateAsync(request, cancellation: CancellationToken.None);
 
         // Assert
         Assert.True(validationResult.IsValid);
@@ -40,7 +41,7 @@ public class CreateApCodeNomenclatureRequestValidatorTests
         CreateApCodeNomenclatureRequest request = new() { Code = code, BgDescription = "Описание на български език", DescriptionEn = null, IsUsed = false };
 
         // Act
-        ValidationResult validationResult = await _validator.ValidateAsync(request);
+        ValidationResult validationResult = await _validator.ValidateAsync(request, CancellationToken.None);
 
         // Assert
         Assert.False(validationResult.IsValid);
@@ -54,7 +55,7 @@ public class CreateApCodeNomenclatureRequestValidatorTests
         CreateApCodeNomenclatureRequest request = new() { Code = "A100", BgDescription = "", DescriptionEn = null, IsUsed = false };
 
         // Act
-        ValidationResult validationResult = await _validator.ValidateAsync(request);
+        ValidationResult validationResult = await _validator.ValidateAsync(request, CancellationToken.None);
 
         // Assert
         Assert.False(validationResult.IsValid);
@@ -69,7 +70,7 @@ public class CreateApCodeNomenclatureRequestValidatorTests
         CreateApCodeNomenclatureRequest request = new() { Code = "A100", BgDescription = description, DescriptionEn = null, IsUsed = false };
 
         // Act
-        ValidationResult validationResult = await _validator.ValidateAsync(request);
+        ValidationResult validationResult = await _validator.ValidateAsync(request, CancellationToken.None);
 
         // Assert
         Assert.False(validationResult.IsValid);
@@ -84,7 +85,7 @@ public class CreateApCodeNomenclatureRequestValidatorTests
         CreateApCodeNomenclatureRequest request = new() { Code = "A100", BgDescription = "Some description", DescriptionEn = description, IsUsed = false };
 
         // Act
-        ValidationResult validationResult = await _validator.ValidateAsync(request);
+        ValidationResult validationResult = await _validator.ValidateAsync(request, CancellationToken.None);
 
         // Assert
         Assert.False(validationResult.IsValid);

@@ -4,12 +4,12 @@ namespace AccountabilityInformationSystem.Api.Features.Flow.MeasurementPointsDat
 
 public sealed record CreateMeasuringPointDataRequest
 {
-    public string MeasurementPointId { get; init; }
-    public int Number { get; init; }
-    public DateTime BeginTime { get; init; }
-    public DateTime EndTime { get; init; }
-    public FlowDirectionType FlowDirectionType { get; init; }
-    public string ProductId { get; init; }
+    public required string MeasurementPointId { get; init; }
+    public required int Number { get; init; }
+    public required DateTime BeginTime { get; init; }
+    public required DateTime EndTime { get; init; }
+    public required FlowDirectionType FlowDirectionType { get; init; }
+    public required string ProductId { get; init; }
     public decimal? TotalizerBeginGrossObservableVolume { get; init; }
     public decimal? TotalizerEndGrossObservableVolume { get; init; }
     public decimal? TotalizerBeginGrossStandardVolume { get; init; }

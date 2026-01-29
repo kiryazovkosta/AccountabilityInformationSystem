@@ -4,7 +4,9 @@ using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+
 builder
+    .AddServiceDefaults()
     .AddApiServices()
     .AddValidators()
     .AddErrorHandling()
@@ -15,6 +17,8 @@ builder
     .AddCorsPolicy();
 
 WebApplication app = builder.Build();
+
+app.MapDefaultEndpoints();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
