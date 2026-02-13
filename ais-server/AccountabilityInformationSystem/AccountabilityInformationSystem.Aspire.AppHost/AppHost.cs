@@ -15,13 +15,9 @@ IResourceBuilder<ProjectResource> backend = builder.AddProject<Projects.Accounta
     .WaitFor(sqlServer)
     .WithEnvironment("ASPNETCORE_ENVIRONMENT", "Development");
 
-var clientBuild = builder.AddExecutable(
-    "ais-client-build", "npm.cmd", workingDirectory: "../../../ais-client", "run", "build")
-    .WaitFor(backend);
-
 builder.AddExecutable(
     "ais-client", "npm.cmd", workingDirectory: "../../../ais-client", "run", "start")
     .WithEnvironment("BROWSER", "none")
-    .WaitFor(clientBuild);
+    .WaitFor(backend);
 
 await builder.Build().RunAsync();
