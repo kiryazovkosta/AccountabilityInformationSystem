@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using Aspire.Hosting;
 using Aspire.Hosting.JavaScript;
 
@@ -15,9 +16,19 @@ IResourceBuilder<ProjectResource> backend = builder.AddProject<Projects.Accounta
     .WaitFor(sqlServer)
     .WithEnvironment("ASPNETCORE_ENVIRONMENT", "Development");
 
-builder.AddExecutable(
+if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+{
+    builder.AddExecutable(
     "ais-client", "npm.cmd", workingDirectory: "../../../ais-client", "run", "start")
     .WithEnvironment("BROWSER", "none")
     .WaitFor(backend);
+}
+else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+{
+    builder.AddExecutable(
+    "ais-client", "npm", workingDirectory: "../../../ais-client", "run", "start")
+    .WithEnvironment("BROWSER", "none")
+    .WaitFor(backend);
+}
 
 await builder.Build().RunAsync();
