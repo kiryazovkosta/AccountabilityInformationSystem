@@ -19,14 +19,16 @@ IResourceBuilder<ProjectResource> backend = builder.AddProject<Projects.Accounta
 if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
 {
     builder.AddExecutable(
-    "ais-client", "npm.cmd", workingDirectory: "../../../ais-client", "run", "start")
+    "ais-client", "npm.cmd", workingDirectory: "../../../ais-client", "run", "start", "--", "--port", "4201")
+    .WithHttpEndpoint(port: 4200, targetPort: 4201, name: "http")
     .WithEnvironment("BROWSER", "none")
     .WaitFor(backend);
 }
 else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
 {
     builder.AddExecutable(
-    "ais-client", "npm", workingDirectory: "../../../ais-client", "run", "start")
+    "ais-client", "npm", workingDirectory: "../../../ais-client", "run", "start", "--", "--port", "4201")
+    .WithHttpEndpoint(port: 4200, targetPort: 4201, name: "http")
     .WithEnvironment("BROWSER", "none")
     .WaitFor(backend);
 }

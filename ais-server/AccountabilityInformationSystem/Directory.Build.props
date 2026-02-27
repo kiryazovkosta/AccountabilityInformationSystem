@@ -4,9 +4,8 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 		<AnalysisLevel>latest</AnalysisLevel>
-		<AnalysisMode>AllEnabledByDefau</AnalysisMode>
-		<TheatWarningAsErrors>true</TheatWarningAsErrors>
-		<CodeAnalysisThratWarningAsErrors>true</CodeAnalysisThratWarningAsErrors>
+		<AnalysisMode>AllEnabledByDefault</AnalysisMode>
+		<TreatWarningAsErrors>true</TreatWarningAsErrors>
 		<EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
 		<LangVersion>latest</LangVersion>
 	</PropertyGroup>

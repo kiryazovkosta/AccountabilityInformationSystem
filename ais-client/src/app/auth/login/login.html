@@ -1,1 +1,14 @@
-<p>login works!</p>
+<main>
+  <section id="login">
+    <h2>Login</h2>
+    <form (ngSubmit)="onSubmit()" #loginForm="ngForm">
+      <label for="username">Username</label>
+      <input id="username" name="username" type="text"
+             [(ngModel)]="username" required autocomplete="username">
+      <label for="password">Password</label>
+      <input id="password" name="password" type="password"
+             [(ngModel)]="password" required autocomplete="current-password">
+      <button type="submit" [disabled]="loginForm.invalid">Login</button>
+    </form>
+  </section>
+</main>
