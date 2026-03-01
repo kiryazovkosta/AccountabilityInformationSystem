@@ -1,14 +1,38 @@
-<main>
-  <section id="login">
-    <h2>Login</h2>
-    <form (ngSubmit)="onSubmit()" #loginForm="ngForm">
-      <label for="username">Username</label>
-      <input id="username" name="username" type="text"
-             [(ngModel)]="username" required autocomplete="username">
-      <label for="password">Password</label>
-      <input id="password" name="password" type="password"
-             [(ngModel)]="password" required autocomplete="current-password">
-      <button type="submit" [disabled]="loginForm.invalid">Login</button>
+<main class="login-page">
+  <div class="login-card">
+    <h1>Login</h1>
+    <h3>Use this form to login if you have account</h3>
+    <form>
+      <label>
+        Email:
+        <input type="email" [formField]="loginForm.email" />
+      </label>
+      @if (loginForm.email().touched() && loginForm.email().invalid()) {
+      <div class="error-list">
+        @for (error of loginForm.email().errors(); track error) {
+          <p>{{ error.message }}</p>
+        }
+      </div>
+      }
+
+      <label>
+        Password:
+        <input type="password" [formField]="loginForm.password" />
+      </label>
+      @if (loginForm.password().touched() && loginForm.password().invalid()) {
+      <div class="error-list">
+        @for (error of loginForm.password().errors(); track error) {
+          <p>{{ error.message }}</p>
+        }
+      </div>
+      }
+
+      <label class="remember-label">
+        <input type="checkbox" [formField]="loginForm.remember" />
+        Remember me
+      </label>
+
+      <button type="button" (click)="onSubmit()" [disabled]="loginForm().submitting()">Log In</button>
     </form>
-  </section>
+  </div>
 </main>
