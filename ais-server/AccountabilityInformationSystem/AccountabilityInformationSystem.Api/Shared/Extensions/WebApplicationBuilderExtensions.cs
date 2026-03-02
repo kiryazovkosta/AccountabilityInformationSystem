@@ -246,9 +246,28 @@ public static class WebApplicationBuilderExtensions
             {
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
+                    ValidateIssuer = true, 
+                    ValidateAudience  = true,       
+                    ValidateLifetime = true, 
+                    ValidateIssuerSigningKey = true,
+
                     ValidIssuer = jwtAuthOptions.Issuer,
                     ValidAudience = jwtAuthOptions.Audience,
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtAuthOptions.Key))
+                };
+
+                options.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = context =>
+                    {
+                        context.Request.Cookies.TryGetValue("accessToken", out var accessToken);
+                        if (!string.IsNullOrEmpty(accessToken))
+                        {
+                            context.Token = accessToken;
+                        }
+
+                        return Task.CompletedTask;
+                    }
                 };
             });
 
@@ -271,7 +290,6 @@ public static class WebApplicationBuilderExtensions
                     .AllowAnyHeader();
             });
         });
-
 
         return builder;
     }

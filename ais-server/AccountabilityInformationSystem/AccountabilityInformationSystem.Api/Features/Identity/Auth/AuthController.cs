@@ -13,6 +13,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Options;
+using System.Net;
+using System.Security.Cryptography;
+using System.Security;
 
 namespace AccountabilityInformationSystem.Api.Features.Identity.Auth;
 
@@ -29,76 +32,85 @@ public sealed class AuthController(
     private readonly JwtAuthOptions _jwtAuthOptions = options.Value;
 
     [HttpPost("register")]
-    public async Task<ActionResult<AccessTokenResponse>> Register(
+    public async Task<ActionResult> Register(
         RegisterUserRequest register,
         CancellationToken cancellationToken)
     {
-        await using IDbContextTransaction transaction = await identityDbContext.Database.BeginTransactionAsync(cancellationToken);
-        applicationDbContext.Database.SetDbConnection(identityDbContext.Database.GetDbConnection());
-        await applicationDbContext.Database.UseTransactionAsync(transaction.GetDbTransaction(), cancellationToken);
-
-        IdentityUser identityUser = new()
+        await identityDbContext.Database.CreateExecutionStrategy().ExecuteAsync(async () =>
         {
-            UserName = register.Email,
-            Email = register.Email,
-        };
+            await using IDbContextTransaction transaction = await identityDbContext.Database.BeginTransactionAsync(cancellationToken);
+            applicationDbContext.Database.SetDbConnection(identityDbContext.Database.GetDbConnection());
+            await applicationDbContext.Database.UseTransactionAsync(transaction.GetDbTransaction(), cancellationToken);
 
-        IdentityResult identityResult = await userManager.CreateAsync(identityUser, register.Password);
-        if (!identityResult.Succeeded)
-        {
-            Dictionary<string, object?> extensions = new()
+            IdentityUser identityUser = new()
             {
-                { "errors", identityResult.Errors.ToDictionary(e => e.Code, e => e.Description) }
+                UserName = register.Email,
+                Email = register.Email,
             };
-            return Problem(
-                detail: "Unable to register user, please try again!",
-                statusCode: StatusCodes.Status400BadRequest,
-                extensions: extensions
+
+            IdentityResult identityResult = await userManager.CreateAsync(identityUser, register.Password);
+            if (!identityResult.Succeeded)
+            {
+                Dictionary<string, object?> extensions = new()
+                {
+                    { "errors", identityResult.Errors.ToDictionary(e => e.Code, e => e.Description) }
+                };
+                
+                return Problem(
+                    detail: "Unable to register user, please try again!",
+                    statusCode: StatusCodes.Status400BadRequest,
+                    extensions: extensions
+                    );
+            }
+
+            //await userManager.SetTwoFactorEnabledAsync(identityUser, true);
+
+            IdentityResult addToRoleResult = await userManager.AddToRoleAsync(identityUser, Role.Member);
+            if (!addToRoleResult.Succeeded)
+            {
+                Dictionary<string, object?> extensions = new()
+                {
+                    { "errors", identityResult.Errors.ToDictionary(e => e.Code, e => e.Description) }
+                };
+                
+                return Problem(
+                    detail: "Unable to register user, please try again!",
+                    statusCode: StatusCodes.Status400BadRequest,
+                    extensions: extensions
                 );
-        }
+            }
 
-        //await userManager.SetTwoFactorEnabledAsync(identityUser, true);
+            User user = register.ToEntity();
+            user.IdentityId = identityUser.Id;
 
-        IdentityResult addToRoleResult = await userManager.AddToRoleAsync(identityUser, Role.Member);
-        if (!addToRoleResult.Succeeded)
-        {
-            Dictionary<string, object?> extensions = new()
+            await applicationDbContext.Users.AddAsync(user, cancellationToken);
+
+            await applicationDbContext.SaveChangesAsync(cancellationToken);
+
+            AccessTokenResponse response = tokenProvider.Create(new AccessTokenRequest(identityUser.Id, identityUser.Email, [Role.Member]));
+
+            RefreshToken refreshToken = new()
             {
-                { "errors", identityResult.Errors.ToDictionary(e => e.Code, e => e.Description) }
+                Id = $"rt_{Guid.CreateVersion7()}",
+                UserId = identityUser.Id,
+                Token = response.RefreshToken,
+                ExpiresAt = DateTime.UtcNow.AddDays(_jwtAuthOptions.RefreshTokenExpirationDays)
             };
-            return Problem(
-                detail: "Unable to register user, please try again!",
-                statusCode: StatusCodes.Status400BadRequest,
-                extensions: extensions
-            );
-        }
 
-        User user = register.ToEntity();
-        user.IdentityId = identityUser.Id;
+            await identityDbContext.RefreshTokens.AddAsync(refreshToken, cancellationToken);
 
-        await applicationDbContext.Users.AddAsync(user, cancellationToken);
+            await identityDbContext.SaveChangesAsync(cancellationToken);
 
-        await applicationDbContext.SaveChangesAsync(cancellationToken);
+            await transaction.CommitAsync(cancellationToken);
 
-        AccessTokenResponse response = tokenProvider.Create(new AccessTokenRequest(identityUser.Id, identityUser.Email, [Role.Member]));
+            this.SetTokensInsideCookies(response, HttpContext);
+            return Created();
+        });
 
-        RefreshToken refreshToken = new()
-        {
-            Id = $"rt_{Guid.CreateVersion7()}",
-            UserId = identityUser.Id,
-            Token = response.RefreshToken,
-            ExpiresAt = DateTime.UtcNow.AddDays(_jwtAuthOptions.RefreshTokenExpirationDays)
-        };
-
-        await identityDbContext.RefreshTokens.AddAsync(refreshToken, cancellationToken);
-
-        await identityDbContext.SaveChangesAsync(cancellationToken);
-
-        await transaction.CommitAsync(cancellationToken);
-
-
-
-        return Ok(response);
+        return Problem(
+            detail: "Unable to register user, please try again!",
+            statusCode: StatusCodes.Status400BadRequest
+        );
     }
 
     [HttpPost("login")]
@@ -130,31 +142,62 @@ public sealed class AuthController(
 
         await identityDbContext.SaveChangesAsync(cancellationToken);
 
-        return Ok(response);
+        this.SetTokensInsideCookies(response, HttpContext);
+        return Ok();
     }
 
     [HttpPost("refresh")]
-    public async Task<ActionResult<AccessTokenResponse>> Refresh(RefreshTokenRequest request, CancellationToken cancellationToken)
+    public async Task<ActionResult> Refresh(CancellationToken cancellationToken)
     {
-        RefreshToken? refreshToken =
-            await identityDbContext.RefreshTokens
-                .Include(rt => rt.User)
-                .FirstOrDefaultAsync(rt => rt.Token == request.RefreshToken, cancellationToken);
-        if (refreshToken is null || refreshToken.ExpiresAt < DateTime.UtcNow)
+        HttpContext.Request.Cookies.TryGetValue("refreshToken", out var refreshTokenValue);
+        if (!string.IsNullOrWhiteSpace(refreshTokenValue))
         {
-            return Problem(statusCode: StatusCodes.Status401Unauthorized, detail: "Unauthorized");
+            RefreshToken? refreshToken =
+                await identityDbContext.RefreshTokens
+                    .Include(rt => rt.User)
+                    .FirstOrDefaultAsync(rt => rt.Token == refreshTokenValue, cancellationToken);
+            if (refreshToken is null || refreshToken.ExpiresAt < DateTime.UtcNow)
+            {
+                return Problem(statusCode: StatusCodes.Status401Unauthorized, detail: "Unauthorized");
+            }
+
+            IEnumerable<string> roles = await userManager.GetRolesAsync(refreshToken.User);
+            AccessTokenRequest accessTokenRequest = new(refreshToken.User.Id, refreshToken.User.Email ?? string.Empty, roles);
+            AccessTokenResponse response = tokenProvider.Create(accessTokenRequest);
+
+            refreshToken.Token = response.RefreshToken;
+            refreshToken.ExpiresAt = DateTime.UtcNow.AddDays(_jwtAuthOptions.RefreshTokenExpirationDays);
+
+            identityDbContext.RefreshTokens.Update(refreshToken);
+            await identityDbContext.SaveChangesAsync(cancellationToken);
+
+            this.SetTokensInsideCookies(response, HttpContext);
+            return Ok();
         }
 
-        IEnumerable<string> roles = await userManager.GetRolesAsync(refreshToken.User);
-        AccessTokenRequest accessTokenRequest = new(refreshToken.User.Id, refreshToken.User.Email ?? string.Empty, roles);
-        AccessTokenResponse response = tokenProvider.Create(accessTokenRequest);
+        return NotFound();
+    }
 
-        refreshToken.Token = response.RefreshToken;
-        refreshToken.ExpiresAt = DateTime.UtcNow.AddDays(_jwtAuthOptions.RefreshTokenExpirationDays);
+    private void SetTokensInsideCookies(AccessTokenResponse token, HttpContext context)
+    {
+        context.Response.Cookies.Append("accessToken", token.AccessToken,
+            new CookieOptions
+            {
+                Expires = DateTimeOffset.UtcNow.AddMinutes(30),
+                HttpOnly = true,
+                IsEssential = true,
+                Secure = true,
+                SameSite = SameSiteMode.None
+            });
 
-        identityDbContext.RefreshTokens.Update(refreshToken);
-        await identityDbContext.SaveChangesAsync(cancellationToken);
-
-        return Ok(response);
+        context.Response.Cookies.Append("refreshToken", token.RefreshToken,
+            new CookieOptions
+            {
+                Expires = DateTimeOffset.UtcNow.AddDays(7),
+                HttpOnly = true,
+                IsEssential = true,
+                Secure = true,
+                SameSite = SameSiteMode.None
+            });
     }
 }
