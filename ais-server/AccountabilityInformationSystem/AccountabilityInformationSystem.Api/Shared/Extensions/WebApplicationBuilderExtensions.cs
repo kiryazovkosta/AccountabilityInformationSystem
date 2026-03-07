@@ -50,6 +50,7 @@ public static class WebApplicationBuilderExtensions
             .AddControllers(options =>
             {
                 options.ReturnHttpNotAcceptable = true;
+                options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());
             })
             .AddNewtonsoftJson(options =>
             {
@@ -96,6 +97,17 @@ public static class WebApplicationBuilderExtensions
         });
 
         builder.Services.AddResponseCaching();
+
+        builder.Services.AddAntiforgery(options =>
+        {
+            options.Cookie.Name = "XSRF-TOKEN";
+            options.Cookie.HttpOnly = false;
+            options.Cookie.IsEssential = true;
+            options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+            options.Cookie.SameSite = SameSiteMode.None;
+            options.Cookie.Path = "/";
+            options.HeaderName = "X-XSRF-TOKEN";
+        });
 
         return builder;
     }

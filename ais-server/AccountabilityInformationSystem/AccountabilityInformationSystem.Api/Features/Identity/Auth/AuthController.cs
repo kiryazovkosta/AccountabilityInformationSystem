@@ -8,6 +8,7 @@ using AccountabilityInformationSystem.Api.Features.Identity.Users.Shared;
 using AccountabilityInformationSystem.Api.Shared.Services.Tokenizing;
 using AccountabilityInformationSystem.Api.Settings;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -27,11 +28,13 @@ public sealed class AuthController(
     ApplicationIdentityDbContext identityDbContext,
     ApplicationDbContext applicationDbContext,
     TokenProvider tokenProvider,
+    IAntiforgery antiforgery,
     IOptions<JwtAuthOptions> options) : ControllerBase
 {
     private readonly JwtAuthOptions _jwtAuthOptions = options.Value;
 
     [HttpPost("register")]
+    [IgnoreAntiforgeryToken]
     public async Task<ActionResult> Register(
         RegisterUserRequest register,
         CancellationToken cancellationToken)
@@ -104,6 +107,8 @@ public sealed class AuthController(
             await transaction.CommitAsync(cancellationToken);
 
             this.SetTokensInsideCookies(response, HttpContext);
+            SetAntiforgeryToken();
+
             return Created();
         });
 
@@ -114,6 +119,7 @@ public sealed class AuthController(
     }
 
     [HttpPost("login")]
+    [IgnoreAntiforgeryToken]
     public async Task<IActionResult> Login(LoginUserRequest request, CancellationToken cancellationToken)
     {
         IdentityUser identityUser = await userManager.FindByEmailAsync(request.Email);
@@ -143,10 +149,13 @@ public sealed class AuthController(
         await identityDbContext.SaveChangesAsync(cancellationToken);
 
         this.SetTokensInsideCookies(response, HttpContext);
+        SetAntiforgeryToken();
+
         return Ok();
     }
 
     [HttpPost("refresh")]
+    [IgnoreAntiforgeryToken]
     public async Task<ActionResult> Refresh(CancellationToken cancellationToken)
     {
         HttpContext.Request.Cookies.TryGetValue("refreshToken", out var refreshTokenValue);
@@ -172,10 +181,20 @@ public sealed class AuthController(
             await identityDbContext.SaveChangesAsync(cancellationToken);
 
             this.SetTokensInsideCookies(response, HttpContext);
+            SetAntiforgeryToken();
+
             return Ok();
         }
 
         return NotFound();
+    }
+
+
+    [HttpGet("csrf-token")]
+    public IActionResult GetCsrfToken()
+    {
+        SetAntiforgeryToken();
+        return NoContent();
     }
 
     private void SetTokensInsideCookies(AccessTokenResponse token, HttpContext context)
@@ -187,7 +206,8 @@ public sealed class AuthController(
                 HttpOnly = true,
                 IsEssential = true,
                 Secure = true,
-                SameSite = SameSiteMode.None
+                SameSite = SameSiteMode.None,
+                Path = "/"
             });
 
         context.Response.Cookies.Append("refreshToken", token.RefreshToken,
@@ -197,7 +217,13 @@ public sealed class AuthController(
                 HttpOnly = true,
                 IsEssential = true,
                 Secure = true,
-                SameSite = SameSiteMode.None
+                SameSite = SameSiteMode.None,
+                Path = "/"
             });
+    }
+
+    private void SetAntiforgeryToken()
+    {
+        antiforgery.GetAndStoreTokens(HttpContext);
     }
 }
