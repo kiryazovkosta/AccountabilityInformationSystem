@@ -10,11 +10,9 @@
         </ul>
         <ul class="user-nav">
             <li>
-                @if (!isLoggedIn) {
-                    <a routerLink="/auth/login" routerLinkActive="active" class="login-btn">Login</a>
-                } @else {
+                @if (isLoggedIn()) {
                     <div class="has-submenu">
-                        <a href="#" class="profile-btn">{{ userName || 'User' }}</a>
+                        <a href="#" class="profile-btn">{{ userName()|| 'User' }}</a>
                         <div class="submenu-panel">
                             <div class="panel-header">
                                 <span class="panel-title"></span>
@@ -25,11 +23,15 @@
                             <div class="panel-body">
                                 <ul class="submenu">
                                     <li><a routerLink="/auth/user-profile" routerLinkActive="active">Profile</a></li>
-                                    <li><a routerLink="/auth/logout" >Logout</a></li>
+                                    <li><a (click)="logout()" class="logout-btn">Logout</a></li>
                                 </ul>
                             </div>
                         </div>
                     </div>
+                    
+                } @else {
+                    <a routerLink="/auth/login" routerLinkActive="active" class="login-btn">Login</a>
+                    <a routerLink="/auth/register" routerLinkActive="active" class="register-btn">Register</a>
                 }
             </li>
         </ul>

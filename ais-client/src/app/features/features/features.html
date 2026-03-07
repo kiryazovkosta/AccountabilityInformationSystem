@@ -1,12 +1,20 @@
 <main>
-    <section id="features">
-        <h2>Features</h2>
+  <section id="features">
+    <h2>Features</h2>
+    @if (ikunks.isLoading()) {
+      <p>Loading...</p>
+    } @else if (ikunks.error()) {
+      <p>Failed to load features.</p>
+    } @else {
+      @if (ikunks.value()!.length > 0) {
         <ul>
-            <li>Fast & Reliable</li>
-            <li>Modern Design</li>
-            <li>Secure Platform</li>
-            <li>24/7 Support</li>
+          @for (ikunk of ikunks.value(); track ikunk.id) {
+            <li>{{ ikunk.name }} — {{ ikunk.fullName }}</li>
+          }
         </ul>
-    </section>
+      } @else {
+        <p>No features available.</p>
+      }
+    }
+  </section>
 </main>
-

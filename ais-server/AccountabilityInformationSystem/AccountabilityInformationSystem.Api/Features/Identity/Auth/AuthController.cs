@@ -224,6 +224,14 @@ public sealed class AuthController(
 
     private void SetAntiforgeryToken()
     {
-        antiforgery.GetAndStoreTokens(HttpContext);
+        var tokens = antiforgery.GetAndStoreTokens(HttpContext);
+        HttpContext.Response.Cookies.Append("XSRF-TOKEN", tokens.RequestToken!, new CookieOptions
+        {
+            HttpOnly = false,
+            SameSite = SameSiteMode.None,
+            Secure = true,
+            IsEssential = true,
+            Path = "/"
+        });
     }
 }

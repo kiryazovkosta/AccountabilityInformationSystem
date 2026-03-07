@@ -1,39 +1,29 @@
-import { AfterViewInit, Component } from '@angular/core';
-import { RouterLink, RouterLinkActive } from '@angular/router';
-
+import { AfterViewInit, ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { RouterLink, RouterLinkActive, Router } from '@angular/router';
+import { AuthService } from '../../services/shared/auth.service';
 
 @Component({
   selector: 'app-header',
   imports: [RouterLink, RouterLinkActive],
   templateUrl: './header.html',
-  styleUrl: './header.css'
+  styleUrl: './header.css',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class Header implements AfterViewInit {
+  private readonly authService: AuthService = inject(AuthService);
+  private readonly router: Router = inject(Router);
+
   // Authentication state properties
-  isLoggedIn = false;
-  userName = '';
+  isLoggedIn = this.authService.isLoggedIn;
+  userName = signal<string|null>('Ivan Ivanov');
+
+  logout() {
+    this.authService.logout();
+    this.router.navigate(['/home']);
+  }
 
   ngAfterViewInit() {
     this.initMobileMenu();
-  }
-
-  // Authentication methods
-  login(event: Event) {
-    event.preventDefault();
-    // TODO: Implement actual login logic here
-    console.log('Login clicked');
-    // For demo purposes, simulate login
-    this.isLoggedIn = true;
-    this.userName = 'John Doe';
-  }
-
-  logout(event: Event) {
-    event.preventDefault();
-    // TODO: Implement actual logout logic here
-    console.log('Logout clicked');
-    // For demo purposes, simulate logout
-    this.isLoggedIn = false;
-    this.userName = '';
   }
 
   closeSubmenu(event: Event) {

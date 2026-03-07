@@ -33,5 +33,6 @@ app.UseCors(CorsOptions.PolicyName);
 app.UseResponseCaching();
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseAntiforgery();
 app.MapControllers();
 await app.RunAsync();
