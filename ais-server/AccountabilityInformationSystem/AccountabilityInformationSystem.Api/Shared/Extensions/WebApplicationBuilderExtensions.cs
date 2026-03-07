@@ -287,7 +287,8 @@ public static class WebApplicationBuilderExtensions
                 policy
                     .WithOrigins(corsOptions.AllowedOrigins)
                     .AllowAnyMethod()
-                    .AllowAnyHeader();
+                    .AllowAnyHeader()
+                    .AllowCredentials();
             });
         });
 
