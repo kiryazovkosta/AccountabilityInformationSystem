@@ -1,5 +1,5 @@
 import { ApplicationConfig, inject, provideAppInitializer, provideBrowserGlobalErrorListeners, provideZonelessChangeDetection } from '@angular/core';
-import { provideRouter } from '@angular/router';
+import { provideRouter, Router } from '@angular/router';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 
@@ -14,9 +14,13 @@ export const appConfig: ApplicationConfig = {
     provideZonelessChangeDetection(),
     provideRouter(routes),
     provideHttpClient(withInterceptors([csrfInterceptor, authInterceptor])),
-    provideAppInitializer(() => {
+    provideAppInitializer(async () => {
       const authService = inject(AuthService);
-      return firstValueFrom(authService.checkAuth());
+      const router = inject(Router);
+      const loggedIn = await firstValueFrom(authService.checkAuth());
+      if (!loggedIn) {
+        await router.navigate(['/auth/login']);
+      }
     })
   ]
 };
