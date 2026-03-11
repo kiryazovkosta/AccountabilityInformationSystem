@@ -13,10 +13,8 @@ public static class DatabaseExtensions
         try
         {
             await applicationDbContext.Database.MigrateAsync(cancellationToken);
-            Console.WriteLine("Successfully applied migration to ApplicationDbContext!");
 
             await identityDbContext.Database.MigrateAsync(cancellationToken);
-            Console.WriteLine("Successfully applied migration to ApplicationIdentityDbContext!");
         }
         catch (Exception exception)
         {

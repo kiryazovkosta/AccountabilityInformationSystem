@@ -14,7 +14,7 @@ public sealed class SortMappingProvider(IEnumerable<ISortMappingDefinition> sort
             throw new InvalidOperationException($"The mapping definition from '{typeof(TSource).Name}' to '{typeof(TDestination).Name}' was not found.");
         }
 
-        return sortMappingDefinition?.Mappings;
+        return sortMappingDefinition.Mappings;
     }
 
     public bool ValidateMappings<TSource, TDestination>(string? sort)
@@ -26,11 +26,10 @@ public sealed class SortMappingProvider(IEnumerable<ISortMappingDefinition> sort
             return true;
         }
 
-        List<string> sortFields = sort
+        List<string> sortFields = [..sort
             .Split(',')
             .Select(s => s.Trim().Split(' ')[0])
-            .Where(s => !string.IsNullOrWhiteSpace(s))
-            .ToList();
+            .Where(s => !string.IsNullOrWhiteSpace(s))];
 
         SortMapping[] mappings = GetMappings<TSource, TDestination>();
 

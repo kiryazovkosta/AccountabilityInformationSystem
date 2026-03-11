@@ -44,7 +44,7 @@ public sealed class BearerSecuritySchemeTransformer : IOpenApiDocumentTransforme
 
         foreach (IOpenApiPathItem path in document.Paths.Values)
         {
-            foreach (OpenApiOperation operation in path.Operations.Values)
+            foreach (OpenApiOperation operation in path.Operations!.Values)
             {
                 operation.Security ??= (List<OpenApiSecurityRequirement>)[];
                 operation.Security.Add(securityRequirement);

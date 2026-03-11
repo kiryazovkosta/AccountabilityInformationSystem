@@ -3,7 +3,7 @@ using AccountabilityInformationSystem.Api.Domain.Entities.Identity;
 
 namespace AccountabilityInformationSystem.Api.Features.Identity.Users.Shared;
 
-public class UserQueries
+public static class UserQueries
 {
     public static Expression<Func<User, UserResponse>> ProjectToResponse()
     {
