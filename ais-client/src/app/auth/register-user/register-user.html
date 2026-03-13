@@ -1,0 +1,94 @@
+<h1>Register</h1>
+<h3>Use this form to register if you don't have account</h3>
+<form>
+    <label>
+        Email:
+        <input type="email" [formField]="registerForm.email" />
+    </label>
+    @if (registerForm.email().touched() && registerForm.email().invalid()) {
+    <div class="error-list">
+        @for (error of registerForm.email().errors(); track error) {
+        <p>{{ error.message }}</p>
+        }
+    </div>
+    }
+
+    <label>
+        FirstName:
+        <input type="text" [formField]="registerForm.firstName" />
+    </label>
+    @if (registerForm.firstName().touched() && registerForm.firstName().invalid()) {
+    <div class="error-list">
+        @for (error of registerForm.firstName().errors(); track error) {
+        <p>{{ error.message }}</p>
+        }
+    </div>
+    }
+
+    @if (registerForm.middleName; as middleName) {
+    <label>
+        Middle Name:
+        <input type="text" [formField]="middleName" />
+    </label>
+    @if (middleName().touched() && middleName().invalid()) {
+    <div class="error-list">
+        @for (error of middleName().errors(); track error) {
+        <p>{{ error.message }}</p>
+        }
+    </div>
+    }
+    }
+
+    <label>
+        LastName:
+    <input type="text" [formField]="registerForm.lastName" />
+    </label>
+    @if (registerForm.lastName().touched() && registerForm.lastName().invalid()) {
+    <div class="error-list">
+        @for (error of registerForm.lastName().errors(); track error) {
+        <p>{{ error.message }}</p>
+        }
+    </div>
+    }
+
+    @if (registerForm.image; as image) {
+    <label>
+        Image:
+        <input type="file" [formField]="image" />
+    </label>
+    @if (image().touched() && image().invalid()) {
+    <div class="error-list">
+        @for (error of image().errors(); track error) {
+        <p>{{ error.message }}</p>
+        }
+    </div>
+    }
+    }
+
+    <label>
+        Password:
+    <input type="text" [formField]="registerForm.password" />
+    </label>
+    @if (registerForm.password().touched() && registerForm.password().invalid()) {
+    <div class="error-list">
+        @for (error of registerForm.password().errors(); track error) {
+        <p>{{ error.message }}</p>
+        }
+    </div>
+    }
+
+    <label>
+        Confirm password:
+    <input type="text" [formField]="registerForm.confirmPassword" />
+    </label>
+    @if (registerForm.confirmPassword().touched() && registerForm.confirmPassword().invalid()) {
+    <div class="error-list">
+        @for (error of registerForm.confirmPassword().errors(); track error) {
+        <p>{{ error.message }}</p>
+        }
+    </div>
+    }
+
+    <button type="button" (click)="onSubmit()" [disabled]="registerForm().submitting()">Register</button>
+</form>
+<p>If you already have account you can login from <a routerLink="/auth/login">here</a></p>  

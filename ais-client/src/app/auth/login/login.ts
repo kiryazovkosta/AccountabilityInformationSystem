@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/cor
 import { form, FormField, required, email, submit } from '@angular/forms/signals'
 import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
-import { LoginRequest } from './login.model';
+import { LoginUserRequest } from './login-user.request';
 import { AuthService } from '../../services/shared/auth.service';
 
 @Component({
@@ -16,7 +16,7 @@ export class Login {
   private readonly authService: AuthService = inject(AuthService);
   private readonly router: Router = inject(Router);
 
-  loginRequest = signal<LoginRequest>({
+  loginRequest = signal<LoginUserRequest>({
     email: '',
     password: '',
     remember: false

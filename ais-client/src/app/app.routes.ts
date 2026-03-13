@@ -10,6 +10,7 @@ export const routes: Routes = [
     { 
         path: 'auth',
         children: [
+            { path: 'register', loadComponent: () => import('./auth/register-user/register-user').then(r => r.RegisterUser) },
             { path: 'login', loadComponent: () => import('./auth/login/login').then(l => l.Login) },
             { path: 'user-profile', loadComponent: () => import('./auth/user-profile/user-profile').then(l => l.UserProfile) },
             { path: 'logout', loadComponent: () => import('./auth/logout/logout').then(l => l.Logout) }

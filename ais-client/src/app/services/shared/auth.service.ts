@@ -1,9 +1,10 @@
 import { HttpClient } from "@angular/common/http";
 import { inject, Injectable, signal } from "@angular/core";
-import { LoginRequest } from "../../auth/login/login.model";
+import { LoginUserRequest } from "../../auth/login/login-user.request";
 import { Observable, of } from "rxjs";
 import { catchError, map, tap } from "rxjs/operators";
 import { LogoutResponse } from "../../auth/logout/logout.response";
+import { RegisterUserRequest } from "../../auth/register-user/register-user.request";
 
 @Injectable({providedIn: 'root'})
 export class AuthService {
@@ -13,12 +14,25 @@ export class AuthService {
 
     public isLoggedIn = this._isLoggedIn.asReadonly();
 
-    login(request: LoginRequest): Observable<boolean> {
+    login(request: LoginUserRequest): Observable<boolean> {
         return this.httpClient.post("https://localhost:4001/api/identity/auth/login",
             request, { observe: 'response', withCredentials: true })
             .pipe(
                 map(response => response.ok),
                 tap(success => this._isLoggedIn.set(success))
+            );
+    }
+
+    register(request: RegisterUserRequest): Observable<boolean> {
+        return this.httpClient.post("https://localhost:4001/api/identity/auth/register",
+            request, { observe: 'response', withCredentials: true })
+            .pipe(
+                map(response => response.ok),
+                tap(() => true),
+                catchError(err => {
+                    console.error('Register failed', err);
+                    return of(false);
+                })
             );
     }
 
