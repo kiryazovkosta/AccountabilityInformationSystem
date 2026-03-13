@@ -3,6 +3,7 @@ import { inject, Injectable, signal } from "@angular/core";
 import { LoginRequest } from "../../auth/login/login.model";
 import { Observable, of } from "rxjs";
 import { catchError, map, tap } from "rxjs/operators";
+import { LogoutResponse } from "../../auth/logout/logout.response";
 
 @Injectable({providedIn: 'root'})
 export class AuthService {
@@ -18,6 +19,23 @@ export class AuthService {
             .pipe(
                 map(response => response.ok),
                 tap(success => this._isLoggedIn.set(success))
+            );
+    }
+
+    logout(): Observable<boolean> {
+        return this.httpClient.post<LogoutResponse>("https://localhost:4001/api/identity/auth/logout",
+            {},
+            { withCredentials: true })
+            .pipe(
+                map(() => true),
+                tap(() => this._isLoggedIn.set(false)),
+                catchError(
+                    err => {
+                        console.error('Logout failed', err);
+                        this._isLoggedIn.set(true);
+                        return of(false);
+                    }
+                )
             );
     }
 
@@ -42,10 +60,5 @@ export class AuthService {
                 return of(false);
             })
         );
-    }
-
-    logout(): Observable<boolean> {
-        this._isLoggedIn.set(false);
-        return of(true);
     }
 }

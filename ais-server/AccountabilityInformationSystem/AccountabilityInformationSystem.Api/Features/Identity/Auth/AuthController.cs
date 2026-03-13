@@ -1,28 +1,30 @@
-using AccountabilityInformationSystem.Api.Infrastructure.Data;
+using System.Linq.Dynamic.Core.Tokenizer;
+using System.Net;
+using System.Security;
+using System.Security.Cryptography;
 using AccountabilityInformationSystem.Api.Domain.Entities.Identity;
-using AccountabilityInformationSystem.Api.Features.Identity.Auth.Register;
 using AccountabilityInformationSystem.Api.Features.Identity.Auth.Login;
 using AccountabilityInformationSystem.Api.Features.Identity.Auth.Refresh;
+using AccountabilityInformationSystem.Api.Features.Identity.Auth.Register;
 using AccountabilityInformationSystem.Api.Features.Identity.Auth.Shared;
 using AccountabilityInformationSystem.Api.Features.Identity.Users.Shared;
-using AccountabilityInformationSystem.Api.Shared.Services.Tokenizing;
+using AccountabilityInformationSystem.Api.Infrastructure.Data;
 using AccountabilityInformationSystem.Api.Settings;
-using Microsoft.AspNetCore.Authorization;
+using AccountabilityInformationSystem.Api.Shared.Services.Tokenizing;
 using Microsoft.AspNetCore.Antiforgery;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Options;
-using System.Net;
-using System.Security.Cryptography;
-using System.Security;
+using Newtonsoft.Json.Linq;
 
 namespace AccountabilityInformationSystem.Api.Features.Identity.Auth;
 
 [ApiController]
 [Route("api/identity/auth")]
-[AllowAnonymous]
 public sealed class AuthController(
     UserManager<IdentityUser> userManager,
     ApplicationIdentityDbContext identityDbContext,
@@ -34,6 +36,7 @@ public sealed class AuthController(
     private readonly JwtAuthOptions _jwtAuthOptions = options.Value;
 
     [HttpPost("register")]
+    [AllowAnonymous]
     [IgnoreAntiforgeryToken]
     public async Task<ActionResult> Register(
         RegisterUserRequest register,
@@ -65,8 +68,6 @@ public sealed class AuthController(
                     extensions: extensions
                     );
             }
-
-            //await userManager.SetTwoFactorEnabledAsync(identityUser, true);
 
             IdentityResult addToRoleResult = await userManager.AddToRoleAsync(identityUser, Role.Member);
             if (!addToRoleResult.Succeeded)
@@ -106,7 +107,7 @@ public sealed class AuthController(
 
             await transaction.CommitAsync(cancellationToken);
 
-            this.SetTokensInsideCookies(response, HttpContext);
+            SetTokensInsideCookies(response, HttpContext);
             SetAntiforgeryToken();
 
             return Created();
@@ -119,6 +120,7 @@ public sealed class AuthController(
     }
 
     [HttpPost("login")]
+    [AllowAnonymous]
     [IgnoreAntiforgeryToken]
     public async Task<IActionResult> Login(LoginUserRequest request, CancellationToken cancellationToken)
     {
@@ -148,17 +150,18 @@ public sealed class AuthController(
 
         await identityDbContext.SaveChangesAsync(cancellationToken);
 
-        this.SetTokensInsideCookies(response, HttpContext);
+        SetTokensInsideCookies(response, HttpContext);
         SetAntiforgeryToken();
 
         return Ok();
     }
 
     [HttpPost("refresh")]
+    [AllowAnonymous]
     [IgnoreAntiforgeryToken]
     public async Task<ActionResult> Refresh(CancellationToken cancellationToken)
     {
-        HttpContext.Request.Cookies.TryGetValue("refreshToken", out var refreshTokenValue);
+        HttpContext.Request.Cookies.TryGetValue("refreshToken", out string? refreshTokenValue);
         if (!string.IsNullOrWhiteSpace(refreshTokenValue))
         {
             RefreshToken? refreshToken =
@@ -180,40 +183,63 @@ public sealed class AuthController(
             identityDbContext.RefreshTokens.Update(refreshToken);
             await identityDbContext.SaveChangesAsync(cancellationToken);
 
-            this.SetTokensInsideCookies(response, HttpContext);
+            SetTokensInsideCookies(response, HttpContext);
             SetAntiforgeryToken();
 
             return Ok();
         }
 
-        return NotFound();
+        return Problem(
+            detail: "Unable to get refresh token, please try again!",
+            statusCode: StatusCodes.Status401Unauthorized
+        );
     }
 
 
     [HttpGet("csrf-token")]
+    [AllowAnonymous]
     public IActionResult GetCsrfToken()
     {
         SetAntiforgeryToken();
         return NoContent();
     }
 
+    [HttpPost("logout")]
+    [Authorize]
+    [IgnoreAntiforgeryToken]
+    public async Task<ActionResult> Logout(CancellationToken cancellationToken)
+    {
+        if(HttpContext.Request.Cookies.TryGetValue("refreshToken", out string? refreshTokenValue))
+        {
+            RefreshToken? refreshToken = await identityDbContext.RefreshTokens.FirstOrDefaultAsync(rt => rt.Token == refreshTokenValue, cancellationToken);
+            if (refreshToken is null || refreshToken.ExpiresAt < DateTime.UtcNow)
+            {
+                return Problem(statusCode: StatusCodes.Status401Unauthorized, detail: "Unauthorized");
+            }
+
+            identityDbContext.RefreshTokens.Remove(refreshToken);
+            await identityDbContext.SaveChangesAsync(cancellationToken);
+        }
+
+        SetAccessTokenCookie("accessToken", string.Empty, -1440, HttpContext);
+        SetAccessTokenCookie("refreshToken", string.Empty, -1440, HttpContext);
+        SetAccessTokenCookie("XSRF-TOKEN", string.Empty, -1440, HttpContext);
+
+        return Ok(new { message = "Successfully logged out!" });
+    }
+
     private void SetTokensInsideCookies(AccessTokenResponse token, HttpContext context)
     {
-        context.Response.Cookies.Append("accessToken", token.AccessToken,
-            new CookieOptions
-            {
-                Expires = DateTimeOffset.UtcNow.AddMinutes(30),
-                HttpOnly = true,
-                IsEssential = true,
-                Secure = true,
-                SameSite = SameSiteMode.None,
-                Path = "/"
-            });
+        SetAccessTokenCookie("accessToken", token.AccessToken, 30, context);
+        SetAccessTokenCookie("refreshToken", token.RefreshToken, 10080, context);
+    }
 
-        context.Response.Cookies.Append("refreshToken", token.RefreshToken,
+    private static void SetAccessTokenCookie(string name, string value, int minutesExpires, HttpContext context)
+    {
+        context.Response.Cookies.Append(name, value,
             new CookieOptions
             {
-                Expires = DateTimeOffset.UtcNow.AddDays(7),
+                Expires = DateTimeOffset.UtcNow.AddMinutes(minutesExpires),
                 HttpOnly = true,
                 IsEssential = true,
                 Secure = true,
@@ -224,14 +250,18 @@ public sealed class AuthController(
 
     private void SetAntiforgeryToken()
     {
-        var tokens = antiforgery.GetAndStoreTokens(HttpContext);
-        HttpContext.Response.Cookies.Append("XSRF-TOKEN", tokens.RequestToken!, new CookieOptions
+        AntiforgeryTokenSet? tokens = antiforgery.GetAndStoreTokens(HttpContext);
+        if (tokens is not null)
         {
-            HttpOnly = false,
-            SameSite = SameSiteMode.None,
-            Secure = true,
-            IsEssential = true,
-            Path = "/"
-        });
+            HttpContext.Response.Cookies.Append("XSRF-TOKEN", tokens.RequestToken ?? string.Empty, new CookieOptions
+            {
+                HttpOnly = false,
+                SameSite = SameSiteMode.None,
+                Secure = true,
+                IsEssential = true,
+                Path = "/"
+            });
+        }
     }
+
 }

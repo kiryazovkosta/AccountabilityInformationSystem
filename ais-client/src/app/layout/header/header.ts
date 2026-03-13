@@ -17,10 +17,9 @@ export class Header implements AfterViewInit {
   isLoggedIn = this.authService.isLoggedIn;
   userName = signal<string|null>('Ivan Ivanov');
 
-  logout() {
-    this.authService.logout();
-    this.router.navigate(['/home']);
-  }
+  // logout() {
+  //   this.router.navigate(['/auth/logout']);
+  // }
 
   ngAfterViewInit() {
     this.initMobileMenu();
