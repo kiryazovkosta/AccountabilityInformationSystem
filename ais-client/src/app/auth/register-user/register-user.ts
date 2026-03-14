@@ -4,6 +4,7 @@ import { email, form, FormField, maxLength, minLength, required, SchemaPath, val
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/shared/auth.service';
 import { firstValueFrom } from 'rxjs';
+import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-register-user',
@@ -16,7 +17,7 @@ export class RegisterUser {
   private readonly router: Router = inject(Router);
   private readonly auth: AuthService = inject(AuthService);
 
-  loginError = signal<string | null>(null);
+  registerError = signal<string | null>(null);
   loading = signal<boolean>(false);
 
   registerUser = signal<RegisterUserRequest>({
@@ -83,12 +84,23 @@ export class RegisterUser {
   async onSubmit() {
     await submit(this.registerForm, async() => {
       this.loading.set(true);
-      this.loginError.set(null);
+      this.registerError.set(null);
       try {
-        await firstValueFrom(this.auth.register(this.registerUser()));
-        this.router.navigate(['/auth/login']);
-      } catch {
-        this.loginError.set('Failed to registed user.');
+        const success = await firstValueFrom(this.auth.register(this.registerUser()));
+        if (success) {
+          this.router.navigate(['/auth/login']);
+        } else {
+          this.registerError.set('Registration failed. Please try again.');
+        }
+      } catch (err) {
+        if (err instanceof HttpErrorResponse) {
+          const detail: string = err.error?.detail ?? 'Registration failed. Please try again.';
+          const errors: Record<string, string> = err.error?.errors ?? {};
+          const errorLines = Object.values(errors).join('\n');
+          this.registerError.set(errorLines ? `${detail}\n${errorLines}` : detail);
+        } else {
+          this.registerError.set('Registration failed. Please try again.');
+        }
       } finally {
         this.loading.set(false);
       }

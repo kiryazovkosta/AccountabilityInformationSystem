@@ -27,12 +27,7 @@ export class AuthService {
         return this.httpClient.post("https://localhost:4001/api/identity/auth/register",
             request, { observe: 'response', withCredentials: true })
             .pipe(
-                map(response => response.ok),
-                tap(() => true),
-                catchError(err => {
-                    console.error('Register failed', err);
-                    return of(false);
-                })
+                map(response => response.ok)
             );
     }
 

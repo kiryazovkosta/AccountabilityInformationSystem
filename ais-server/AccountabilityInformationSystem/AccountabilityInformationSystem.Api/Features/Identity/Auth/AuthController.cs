@@ -13,6 +13,7 @@ using AccountabilityInformationSystem.Api.Settings;
 using AccountabilityInformationSystem.Api.Shared.Services.Tokenizing;
 using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
@@ -42,7 +43,8 @@ public sealed class AuthController(
         RegisterUserRequest register,
         CancellationToken cancellationToken)
     {
-        await identityDbContext.Database.CreateExecutionStrategy().ExecuteAsync(async () =>
+        ActionResult? registerResult = 
+            await identityDbContext.Database.CreateExecutionStrategy().ExecuteAsync(async () =>
         {
             await using IDbContextTransaction transaction = await identityDbContext.Database.BeginTransactionAsync(cancellationToken);
             applicationDbContext.Database.SetDbConnection(identityDbContext.Database.GetDbConnection());
@@ -61,7 +63,7 @@ public sealed class AuthController(
                 {
                     { "errors", identityResult.Errors.ToDictionary(e => e.Code, e => e.Description) }
                 };
-                
+
                 return Problem(
                     detail: "Unable to register user, please try again!",
                     statusCode: StatusCodes.Status400BadRequest,
@@ -113,7 +115,7 @@ public sealed class AuthController(
             return Created();
         });
 
-        return Problem(
+        return registerResult ?? Problem(
             detail: "Unable to register user, please try again!",
             statusCode: StatusCodes.Status400BadRequest
         );
@@ -159,40 +161,40 @@ public sealed class AuthController(
     [HttpPost("refresh")]
     [AllowAnonymous]
     [IgnoreAntiforgeryToken]
-    public async Task<ActionResult> Refresh(CancellationToken cancellationToken)
+    public async Task<IActionResult> Refresh(CancellationToken cancellationToken)
     {
-        HttpContext.Request.Cookies.TryGetValue("refreshToken", out string? refreshTokenValue);
-        if (!string.IsNullOrWhiteSpace(refreshTokenValue))
+        if (!HttpContext.Request.Cookies.TryGetValue("refreshToken", out string? refreshTokenValue) 
+            || string.IsNullOrWhiteSpace(refreshTokenValue))
         {
-            RefreshToken? refreshToken =
-                await identityDbContext.RefreshTokens
-                    .Include(rt => rt.User)
-                    .FirstOrDefaultAsync(rt => rt.Token == refreshTokenValue, cancellationToken);
-            if (refreshToken is null || refreshToken.ExpiresAt < DateTime.UtcNow)
-            {
-                return Problem(statusCode: StatusCodes.Status401Unauthorized, detail: "Unauthorized");
-            }
-
-            IEnumerable<string> roles = await userManager.GetRolesAsync(refreshToken.User);
-            AccessTokenRequest accessTokenRequest = new(refreshToken.User.Id, refreshToken.User.Email ?? string.Empty, roles);
-            AccessTokenResponse response = tokenProvider.Create(accessTokenRequest);
-
-            refreshToken.Token = response.RefreshToken;
-            refreshToken.ExpiresAt = DateTime.UtcNow.AddDays(_jwtAuthOptions.RefreshTokenExpirationDays);
-
-            identityDbContext.RefreshTokens.Update(refreshToken);
-            await identityDbContext.SaveChangesAsync(cancellationToken);
-
-            SetTokensInsideCookies(response, HttpContext);
-            SetAntiforgeryToken();
-
-            return Ok();
+            return Unauthorized("Refresh token missing.");
         }
 
-        return Problem(
-            detail: "Unable to get refresh token, please try again!",
-            statusCode: StatusCodes.Status401Unauthorized
-        );
+        RefreshToken? storedToken = await identityDbContext.RefreshTokens
+            .Include(rt => rt.User)
+            .FirstOrDefaultAsync(rt => rt.Token == refreshTokenValue, cancellationToken);
+
+        if (storedToken == null || storedToken.ExpiresAt < DateTime.UtcNow)
+        {
+            return Unauthorized("Token expired or invalid.");
+        }
+
+        IList<string> roles = await userManager.GetRolesAsync(storedToken.User);
+        AccessTokenRequest accessTokenRequest = new(
+            storedToken.User.Id,
+            storedToken.User.Email ?? string.Empty,
+            roles);
+
+        AccessTokenResponse response = tokenProvider.Create(accessTokenRequest);
+
+        storedToken.Token = response.RefreshToken;
+        storedToken.ExpiresAt = DateTime.UtcNow.AddDays(_jwtAuthOptions.RefreshTokenExpirationDays);
+        identityDbContext.RefreshTokens.Update(storedToken);
+        await identityDbContext.SaveChangesAsync(cancellationToken);
+
+        SetTokensInsideCookies(response, HttpContext);
+        SetAntiforgeryToken();
+
+        return Ok();
     }
 
 

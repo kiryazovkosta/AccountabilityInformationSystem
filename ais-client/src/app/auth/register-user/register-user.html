@@ -1,13 +1,16 @@
 <h1>Register</h1>
 <h3>Use this form to register if you don't have account</h3>
+@if (registerError()) {
+    <p class="register-error">{{registerError()}}</p>
+}
 <form>
     <label>
         Email:
-        <input type="email" [formField]="registerForm.email" />
+        <input type="email" [formField]="registerForm.email" autocomplete="username" />
     </label>
     @if (registerForm.email().touched() && registerForm.email().invalid()) {
     <div class="error-list">
-        @for (error of registerForm.email().errors(); track error) {
+        @for (error of registerForm.email().errors(); track error.message) {
         <p>{{ error.message }}</p>
         }
     </div>
@@ -19,7 +22,7 @@
     </label>
     @if (registerForm.firstName().touched() && registerForm.firstName().invalid()) {
     <div class="error-list">
-        @for (error of registerForm.firstName().errors(); track error) {
+        @for (error of registerForm.firstName().errors(); track error.message) {
         <p>{{ error.message }}</p>
         }
     </div>
@@ -32,7 +35,7 @@
     </label>
     @if (middleName().touched() && middleName().invalid()) {
     <div class="error-list">
-        @for (error of middleName().errors(); track error) {
+        @for (error of middleName().errors(); track error.message) {
         <p>{{ error.message }}</p>
         }
     </div>
@@ -45,7 +48,7 @@
     </label>
     @if (registerForm.lastName().touched() && registerForm.lastName().invalid()) {
     <div class="error-list">
-        @for (error of registerForm.lastName().errors(); track error) {
+        @for (error of registerForm.lastName().errors(); track error.message) {
         <p>{{ error.message }}</p>
         }
     </div>
@@ -58,7 +61,7 @@
     </label>
     @if (image().touched() && image().invalid()) {
     <div class="error-list">
-        @for (error of image().errors(); track error) {
+        @for (error of image().errors(); track error.message) {
         <p>{{ error.message }}</p>
         }
     </div>
@@ -67,11 +70,11 @@
 
     <label>
         Password:
-    <input type="text" [formField]="registerForm.password" />
+    <input type="password" autocomplete="new-password" [formField]="registerForm.password" />
     </label>
     @if (registerForm.password().touched() && registerForm.password().invalid()) {
     <div class="error-list">
-        @for (error of registerForm.password().errors(); track error) {
+        @for (error of registerForm.password().errors(); track error.message) {
         <p>{{ error.message }}</p>
         }
     </div>
@@ -79,11 +82,11 @@
 
     <label>
         Confirm password:
-    <input type="text" [formField]="registerForm.confirmPassword" />
+    <input type="password" autocomplete="new-password" [formField]="registerForm.confirmPassword" />
     </label>
     @if (registerForm.confirmPassword().touched() && registerForm.confirmPassword().invalid()) {
     <div class="error-list">
-        @for (error of registerForm.confirmPassword().errors(); track error) {
+        @for (error of registerForm.confirmPassword().errors(); track error.message) {
         <p>{{ error.message }}</p>
         }
     </div>

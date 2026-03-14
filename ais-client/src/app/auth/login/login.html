@@ -8,7 +8,7 @@
     <form>
       <label>
         Email:
-        <input type="email" [formField]="loginForm.email" />
+        <input type="email" [formField]="loginForm.email" autocomplete="username" />
       </label>
       @if (loginForm.email().touched() && loginForm.email().invalid()) {
       <div class="error-list">
@@ -20,7 +20,7 @@
 
       <label>
         Password:
-        <input type="password" [formField]="loginForm.password" />
+        <input type="password" [formField]="loginForm.password" autocomplete="current-password" />
       </label>
       @if (loginForm.password().touched() && loginForm.password().invalid()) {
       <div class="error-list">
