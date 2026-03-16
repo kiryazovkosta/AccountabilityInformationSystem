@@ -1,19 +1,22 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
-import { RegisterUserRequest } from './register-user.request';
-import { email, form, FormField, maxLength, minLength, required, SchemaPath, validate, submit } from '@angular/forms/signals';
+import { ChangeDetectionStrategy, Component, inject, linkedSignal, signal } from '@angular/core';
+import { RegisterUserRequest, RegisterUserFormRequest, toRegisterUserFormRequest, toRegisterUserRequest } from './register-user.request';
+import { email, form, maxLength, minLength, required, SchemaPath, validate, submit, FormField } from '@angular/forms/signals';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/shared/auth.service';
 import { firstValueFrom } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
+import { APP_ROUTES } from '../../common/app-routes';
 
 @Component({
   selector: 'app-register-user',
-  imports: [FormField, RouterLink],
   templateUrl: './register-user.html',
   styleUrl: './register-user.css',
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [FormField, RouterLink]
 })
 export class RegisterUser {
+
+  readonly Paths = APP_ROUTES;
   private readonly router: Router = inject(Router);
   private readonly auth: AuthService = inject(AuthService);
 
@@ -30,7 +33,11 @@ export class RegisterUser {
     confirmPassword: ''
   });
 
-  registerForm = form(this.registerUser, (schemaPath) => {
+  protected readonly registeredUserForm = linkedSignal<RegisterUserFormRequest>(
+    () => toRegisterUserFormRequest(this.registerUser())
+  );
+
+  registerForm = form(this.registeredUserForm, (schemaPath) => {
     required(schemaPath.email, {message: 'Email is required'});
     email(schemaPath.email, {message: 'Enter a valid email address'});
 
@@ -86,7 +93,8 @@ export class RegisterUser {
       this.loading.set(true);
       this.registerError.set(null);
       try {
-        const success = await firstValueFrom(this.auth.register(this.registerUser()));
+        const success = await firstValueFrom(
+          this.auth.register(toRegisterUserRequest(this.registerForm().value())));
         if (success) {
           this.router.navigate(['/auth/login']);
         } else {

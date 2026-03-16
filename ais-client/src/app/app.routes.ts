@@ -6,8 +6,7 @@ export const routes: Routes = [
     { path: 'features', loadComponent: () => import('./features/features/features').then(m => m.Features) },
     { path: 'pricing', loadComponent: () => import('./features/pricing/pricing').then(m => m.Pricing) },
     { path: 'contact', loadComponent: () => import('./features/contact/contact').then(m => m.Contact) },
-    { path: 'kendo-demos', loadComponent: () => import('./features/kendo-demos/kendo-demos').then(m => m.KendoDemos) },
-    { 
+{ 
         path: 'auth',
         children: [
             { path: 'register', loadComponent: () => import('./auth/register-user/register-user').then(r => r.RegisterUser) },

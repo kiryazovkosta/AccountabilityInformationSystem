@@ -1,6 +1,24 @@
 /* You can add global styles to this file, and also import other style files */
 @import "tailwindcss";
 
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+app-root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+
+  > *:not(app-header):not(app-footer):not(router-outlet) {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+}
+
 @theme {
   --color-brand: #ee1431;
   --color-ink: #2C2C2C;
@@ -30,11 +48,11 @@
   }
 
   .app-header-3 {
-    @apply font-normal text-heading-3 text-ink font-sans mb-6;
+    @apply font-semibold text-heading-3 text-ink font-sans mb-6;
   }
 
   .form-error-message {
-    @apply text-red-800 text-sm whitespace-pre-line;
+    @apply text-red-800 text-sm whitespace-pre-line italic;
   }
 
   .error-summary {
