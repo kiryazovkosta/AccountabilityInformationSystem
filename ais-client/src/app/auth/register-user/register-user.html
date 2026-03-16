@@ -1,97 +1,105 @@
-<h1>Register</h1>
-<h3>Use this form to register if you don't have account</h3>
-@if (registerError()) {
-    <p class="register-error">{{registerError()}}</p>
-}
-<form>
+<main class="app-main-container">
+  <h1 class="app-header-1">Register</h1>
+  <h3 class="app-header-3">Use this form to register if you don't have account</h3>
+  @if (registerError()) {
+    <div class="error-summary">{{ registerError() }}</div>
+  }
+  <form>
     <label>
-        Email:
-        <input type="email" [formField]="registerForm.email" autocomplete="username" />
+      Email:
+      <input type="email" [formField]="registerForm.email" autocomplete="username" />
     </label>
     @if (registerForm.email().touched() && registerForm.email().invalid()) {
-    <div class="error-list">
+    <div class="form-error-message">
         @for (error of registerForm.email().errors(); track error.message) {
         <p>{{ error.message }}</p>
         }
-    </div>
+      </div>
     }
 
     <label>
-        FirstName:
-        <input type="text" [formField]="registerForm.firstName" />
+      FirstName:
+      <input type="text" [formField]="registerForm.firstName" />
     </label>
     @if (registerForm.firstName().touched() && registerForm.firstName().invalid()) {
-    <div class="error-list">
+      <div class="form-error-message">
         @for (error of registerForm.firstName().errors(); track error.message) {
-        <p>{{ error.message }}</p>
+          <p>{{ error.message }}</p>
         }
-    </div>
+      </div>
     }
 
     @if (registerForm.middleName; as middleName) {
-    <label>
+      <label>
         Middle Name:
         <input type="text" [formField]="middleName" />
-    </label>
-    @if (middleName().touched() && middleName().invalid()) {
-    <div class="error-list">
-        @for (error of middleName().errors(); track error.message) {
-        <p>{{ error.message }}</p>
-        }
-    </div>
-    }
+      </label>
+      @if (middleName().touched() && middleName().invalid()) {
+        <div class="form-error-message">
+          @for (error of middleName().errors(); track error.message) {
+            <p>{{ error.message }}</p>
+          }
+        </div>
+      }
     }
 
     <label>
-        LastName:
-    <input type="text" [formField]="registerForm.lastName" />
+      LastName:
+      <input type="text" [formField]="registerForm.lastName" />
     </label>
     @if (registerForm.lastName().touched() && registerForm.lastName().invalid()) {
-    <div class="error-list">
+      <div class="form-error-message">
         @for (error of registerForm.lastName().errors(); track error.message) {
-        <p>{{ error.message }}</p>
+          <p>{{ error.message }}</p>
         }
-    </div>
+      </div>
     }
 
     @if (registerForm.image; as image) {
-    <label>
+      <label>
         Image:
         <input type="file" [formField]="image" />
-    </label>
-    @if (image().touched() && image().invalid()) {
-    <div class="error-list">
-        @for (error of image().errors(); track error.message) {
-        <p>{{ error.message }}</p>
-        }
-    </div>
-    }
+      </label>
+      @if (image().touched() && image().invalid()) {
+        <div class="form-error-message">
+          @for (error of image().errors(); track error.message) {
+            <p>{{ error.message }}</p>
+          }
+        </div>
+      }
     }
 
     <label>
-        Password:
-    <input type="password" autocomplete="new-password" [formField]="registerForm.password" />
+      Password:
+      <input type="password" autocomplete="new-password" [formField]="registerForm.password" />
     </label>
     @if (registerForm.password().touched() && registerForm.password().invalid()) {
-    <div class="error-list">
+      <div class="form-error-message">
         @for (error of registerForm.password().errors(); track error.message) {
-        <p>{{ error.message }}</p>
+          <p>{{ error.message }}</p>
         }
-    </div>
+      </div>
     }
 
     <label>
-        Confirm password:
-    <input type="password" autocomplete="new-password" [formField]="registerForm.confirmPassword" />
+      Confirm password:
+      <input
+        type="password"
+        autocomplete="new-password"
+        [formField]="registerForm.confirmPassword"
+      />
     </label>
     @if (registerForm.confirmPassword().touched() && registerForm.confirmPassword().invalid()) {
-    <div class="error-list">
+      <div class="form-error-message">
         @for (error of registerForm.confirmPassword().errors(); track error.message) {
-        <p>{{ error.message }}</p>
+          <p>{{ error.message }}</p>
         }
-    </div>
+      </div>
     }
 
-    <button type="button" (click)="onSubmit()" [disabled]="registerForm().submitting()">Register</button>
-</form>
-<p>If you already have account you can login from <a routerLink="/auth/login">here</a></p>  
+    <button type="button" (click)="onSubmit()" [disabled]="registerForm().invalid()">
+      Register
+    </button>
+  </form>
+  <p>If you already have account you can login from <a routerLink="/auth/login">here</a></p>
+</main>

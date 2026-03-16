@@ -50,7 +50,9 @@
     "@angular/build": "^21.1.2",
     "@angular/cli": "^21.1.2",
     "@angular/compiler-cli": "^21.1.2",
+    "@tailwindcss/postcss": "^4.1.12",
     "@types/jasmine": "~5.1.0",
+    "@types/tailwindcss": "^3.0.11",
     "baseline-browser-mapping": "^2.9.19",
     "jasmine-core": "~5.9.0",
     "karma": "~6.4.0",
@@ -58,6 +60,8 @@
     "karma-coverage": "~2.2.0",
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
+    "postcss": "^8.5.3",
+    "tailwindcss": "^4.2.1",
     "typescript": "~5.9.2"
   },
   "overrides": {

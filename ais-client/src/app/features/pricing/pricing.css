@@ -1,18 +1,3 @@
-/* Main styles */
-main {
-  background-color: #FFFBF9;
-  font-family: 'Inter', sans-serif;
-  color: #2C2C2C;
-  flex: 1 0 auto;
-  margin: 16px auto;
-  width: 96%;
-  max-width: 92%;
-  border-radius: 16px;
-  box-shadow: 0 4px 16px rgba(238, 20, 49, 0.06);
-  border: 1.5px solid #f0e0d6;
-  padding: 40px 3vw;
-}
-
 main section {
   margin-bottom: 32px;
   padding-bottom: 16px;

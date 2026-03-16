@@ -1,1 +1,46 @@
 /* You can add global styles to this file, and also import other style files */
+@import "tailwindcss";
+
+@theme {
+  --color-brand: #ee1431;
+  --color-ink: #2C2C2C;
+  --color-surface: #FFFBF9;
+  --color-rose-muted: #f0e0d6;
+
+  --text-heading-1: 2rem;
+  --text-heading-3: 1.05rem;
+
+  --shadow-card: 0 4px 16px rgba(238, 20, 49, 0.06);
+
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+
+  --color-error-surface: rgba(238, 20, 49, 0.05);
+  --color-error-border: rgba(238, 20, 49, 0.22);
+  --color-error-text: #9b1c2e;
+}
+
+@layer components {
+  .app-main-container {
+    @apply flex-auto m-4 w-[98%] max-w-[98%] rounded-2xl p-10
+           bg-surface text-ink font-sans shadow-card border-[1.5px] border-rose-muted;
+  }
+
+  .app-header-1 {
+    @apply text-center font-bold text-heading-1 text-brand font-sans mb-1;
+  }
+
+  .app-header-3 {
+    @apply font-normal text-heading-3 text-ink font-sans mb-6;
+  }
+
+  .form-error-message {
+    @apply text-red-800 text-sm whitespace-pre-line;
+  }
+
+  .error-summary {
+    @apply rounded-xl border px-5 py-4 mb-5 font-sans text-sm font-semibold whitespace-pre-line;
+    background-color: var(--color-error-surface);
+    border-color: var(--color-error-border);
+    color: var(--color-error-text);
+  }
+}
