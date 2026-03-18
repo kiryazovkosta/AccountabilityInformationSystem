@@ -38,9 +38,42 @@ app-root {
 }
 
 @layer components {
+  .app-auth-page {
+    @apply flex justify-center items-center flex-auto bg-surface p-8;
+  }
+
+  .app-auth-card {
+    @apply bg-white w-full max-w-4xl
+           border border-rose-muted rounded-2xl
+           shadow-card p-10;
+  }
+
   .app-main-container {
     @apply flex-auto m-4 w-[98%] max-w-[98%] rounded-2xl p-10
            bg-surface text-ink font-sans shadow-card border-[1.5px] border-rose-muted;
+  }
+
+  .app-form {
+    @apply w-full max-w-3xl mx-auto flex flex-col gap-4 font-sans;
+  }
+
+  .app-form-label {
+    @apply flex flex-col gap-1 text-ink font-medium text-[0.9rem];
+  }
+
+  .app-form-input {
+    @apply w-full bg-white text-ink border border-rose-muted rounded-md
+           py-[0.6rem] px-3 text-base font-[inherit]
+           transition-[border-color,box-shadow] duration-200
+           focus:outline-none focus:border-brand focus:shadow-[0_0_0_3px_rgba(238,20,49,0.08)];
+  }
+
+  .app-form-button {
+    @apply px-6 py-3 bg-brand text-white border-none rounded-md
+           text-base font-semibold font-[inherit] cursor-pointer
+           transition-colors duration-200
+           hover:bg-[#990f26] active:bg-[#990f26]
+           disabled:opacity-50 disabled:cursor-not-allowed;
   }
 
   .app-header-1 {

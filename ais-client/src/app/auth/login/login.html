@@ -1,15 +1,14 @@
-<main class="app-main-container">
-<div class="login-page">
-  <div class="login-card">
+<div class="app-auth-page">
+  <div class="app-auth-card max-w-md">
     <h1 class="app-header-1">Login</h1>
     <h3 class="app-header-3">Use this form to login if you have account</h3>
     @if (loginError()) {
       <div class=error-summary>{{loginError()}}</div>
     }
-    <form>
-      <label>
+    <form class="app-form">
+      <label class="app-form-label">
         Email:
-        <input type="email" [formField]="loginForm.email" autocomplete="username" />
+        <input type="email" class="app-form-input" [formField]="loginForm.email" autocomplete="username" />
       </label>
       @if (loginForm.email().touched() && loginForm.email().invalid()) {
       <div class="error-list">
@@ -19,9 +18,9 @@
       </div>
       }
 
-      <label>
+      <label class="app-form-label">
         Password:
-        <input type="password" [formField]="loginForm.password" autocomplete="current-password" />
+        <input type="password" class="app-form-input" [formField]="loginForm.password" autocomplete="current-password" />
       </label>
       @if (loginForm.password().touched() && loginForm.password().invalid()) {
       <div class="error-list">
@@ -31,13 +30,12 @@
       </div>
       }
 
-      <label class="remember-label">
+      <label class="remember-label app-form-label">
         <input type="checkbox" [formField]="loginForm.remember" />
         Remember me
       </label>
 
-      <button type="button" (click)="onSubmit()" [disabled]="loginForm().submitting()">Log In</button>
+      <button type="button" class="app-form-button" (click)="onSubmit()" [disabled]="loginForm().submitting()">Log In</button>
     </form>
   </div>
 </div>
-</main>
