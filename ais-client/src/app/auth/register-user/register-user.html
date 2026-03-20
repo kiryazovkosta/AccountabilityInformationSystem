@@ -28,6 +28,7 @@
         <label class="app-form-label" for="firstName">
           FirstName:
           <input type="text" [formField]="registerForm.firstName"
+          autocomplete="name"
           class="app-form-input" />
         </label>
         @if (registerForm.firstName().touched() && registerForm.firstName().invalid()) {
@@ -56,6 +57,7 @@
         <label class="app-form-label" for="lastName">
           LastName:
           <input type="text" [formField]="registerForm.lastName"
+          autocomplete="family-name"
           class="app-form-input" />
         </label>
         @if (registerForm.lastName().touched() && registerForm.lastName().invalid()) {
@@ -103,7 +105,7 @@
         <div class="w-full md:w-1/2 px-3">
         <label class="app-form-label" for="confirmPassword">
             Confirm password:
-            <input type="password" autocomplete="new-password" [formField]="registerForm.password" 
+            <input type="password" autocomplete="off" [formField]="registerForm.confirmPassword"
             class="app-form-input">
         </label>
         @if (registerForm.confirmPassword().touched() && registerForm.confirmPassword().invalid()) {
@@ -116,8 +118,8 @@
     </div>
     </div>
 
-        <div>
-      <button type="button" class="app-form-button" (click)="onSubmit()" [disabled]="registerForm().invalid()">
+    <div class="flex flex-col items-center">
+      <button type="button" class="app-primary-button w-2xs" (click)="onSubmit()" [disabled]="registerForm().submitting()">
         Register
       </button>
     </div>

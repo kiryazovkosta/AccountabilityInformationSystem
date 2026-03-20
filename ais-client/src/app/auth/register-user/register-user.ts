@@ -45,25 +45,25 @@ export class RegisterUser {
     minLength(schemaPath.firstName, 3, {message: 'FirstName must be at least 3 characters'});
     maxLength(schemaPath.firstName, 32, {message: 'FirstName must be at maximum 32 characters'});
 
-    validate(schemaPath.middleName as unknown as SchemaPath<string>, ({value}) => {
-      const middleName = value();
-      if (middleName !== undefined && middleName !== null) {
-        if (middleName.length > 32) {
-          return {
-            kind: 'maxLength',
-            message: 'MiddleName must be at maximum 32 characters'
-          };
-        }
-        if (middleName.length < 3) {
-          return {
-            kind: 'minLength',
-            message: 'MiddleName must be at least 3 characters'
-          };
-        }
-        return null;
-      }
-      return null;
-    });
+    // validate(schemaPath.middleName as unknown as SchemaPath<string>, ({value}) => {
+    //   const middleName = value();
+    //   if (middleName !== undefined && middleName !== null) {
+    //     if (middleName.length > 32) {
+    //       return {
+    //         kind: 'maxLength',
+    //         message: 'MiddleName must be at maximum 32 characters'
+    //       };
+    //     }
+    //     if (middleName.length < 3) {
+    //       return {
+    //         kind: 'minLength',
+    //         message: 'MiddleName must be at least 3 characters'
+    //       };
+    //     }
+    //     return null;
+    //   }
+    //   return null;
+    // });
 
     required(schemaPath.lastName, {message: 'LastName is required'});
     minLength(schemaPath.lastName, 3, {message: 'LastName must be at least 3 characters'});

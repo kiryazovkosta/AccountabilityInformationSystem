@@ -68,7 +68,7 @@ app-root {
            focus:outline-none focus:border-brand focus:shadow-[0_0_0_3px_rgba(238,20,49,0.08)];
   }
 
-  .app-form-button {
+  .app-primary-button {
     @apply px-6 py-3 bg-brand text-white border-none rounded-md
            text-base font-semibold font-[inherit] cursor-pointer
            transition-colors duration-200
@@ -85,7 +85,7 @@ app-root {
   }
 
   .form-error-message {
-    @apply text-red-800 text-sm whitespace-pre-line italic;
+    @apply text-red-800 text-xs whitespace-pre-line italic;
   }
 
   .error-summary {
