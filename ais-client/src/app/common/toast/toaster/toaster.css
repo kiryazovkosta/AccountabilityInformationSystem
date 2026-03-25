@@ -1,0 +1,36 @@
+.toast-container {
+    position: fixed; 
+    top: 20px; 
+    right: 20px; 
+    width: 300px;
+    z-index: 1000; 
+}
+    
+.toast { 
+    padding: 1rem; 
+    margin-bottom: 10px; 
+    border-radius: 8px; 
+    color: white;
+    cursor: pointer; 
+    animation: slideIn 0.3s ease;
+}
+
+.success { 
+    background: #2ecc71; 
+}
+
+.info { 
+    background: #3498db; 
+}
+
+.warning { 
+    background: #e1fb3b; }
+
+.error { 
+    background: #e74c3c; 
+}
+
+
+@keyframes slideIn { 
+    from { transform: translateX(100%); } to { transform: translateX(0); } 
+}

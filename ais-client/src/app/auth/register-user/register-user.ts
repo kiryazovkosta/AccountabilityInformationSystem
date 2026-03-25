@@ -6,6 +6,7 @@ import { AuthService } from '../../services/shared/auth.service';
 import { firstValueFrom } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
 import { APP_ROUTES } from '../../common/app-routes';
+import { ToastService } from '../../common/toast/toast-service';
 
 @Component({
   selector: 'app-register-user',
@@ -19,6 +20,7 @@ export class RegisterUser {
   readonly Paths = APP_ROUTES;
   private readonly router: Router = inject(Router);
   private readonly auth: AuthService = inject(AuthService);
+  private readonly toaster = inject(ToastService);
 
   registerError = signal<string | null>(null);
   loading = signal<boolean>(false);
@@ -96,6 +98,7 @@ export class RegisterUser {
         const success = await firstValueFrom(
           this.auth.register(toRegisterUserRequest(this.registerForm().value())));
         if (success) {
+          this.toaster.show('Successfully register!', 'success');
           this.router.navigate(['/auth/login']);
         } else {
           this.registerError.set('Registration failed. Please try again.');
