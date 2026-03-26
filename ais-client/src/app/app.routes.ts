@@ -3,7 +3,7 @@ import { Routes } from '@angular/router';
 export const routes: Routes = [
     { path: '', loadComponent: () => import('./features/home/home').then(m => m.Home) },
     { path: 'home', loadComponent: () => import('./features/home/home').then(m => m.Home) },
-    { path: 'features', loadComponent: () => import('./features/features/features').then(m => m.Features) },
+    { path: 'ikunks', loadComponent: () => import('./features/measurement-flow/ikunks/ikunks-list/ikunks-list').then(m => m.IkunksList) },
     { path: 'pricing', loadComponent: () => import('./features/pricing/pricing').then(m => m.Pricing) },
     { path: 'contact', loadComponent: () => import('./features/contact/contact').then(m => m.Contact) },
 { 

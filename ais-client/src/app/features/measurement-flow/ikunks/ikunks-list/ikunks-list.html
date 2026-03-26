@@ -1,1 +1,20 @@
-<p>ikunks-list works!</p>
+<main class="app-main-container">
+  <section>
+    <h2>Features</h2>
+    @if (ikunks.isLoading()) {
+      <p>Loading...</p>
+    } @else if (ikunks.error()) {
+      <p>Failed to load features.</p>
+    } @else {
+      @if (ikunks.value()?.items!.length > 0) {
+        <ul>
+          @for (ikunk of ikunks.value()?.items; track ikunk.id) {
+            <app-ikunk-item [ikunk]="ikunk" />
+          }
+        </ul>
+      } @else {
+        <p>No features available.</p>
+      }
+    }
+  </section>
+</main>

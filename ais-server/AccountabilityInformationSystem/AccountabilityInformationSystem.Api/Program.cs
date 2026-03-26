@@ -14,7 +14,8 @@ builder
     .AddObservability()
     .AddApplicationServices()
     .AddAuthenticationServices()
-    .AddCorsPolicy();
+    .AddCorsPolicy()
+    .AddMapster();
 
 WebApplication app = builder.Build();
 

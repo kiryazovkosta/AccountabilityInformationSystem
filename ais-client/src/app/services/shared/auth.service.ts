@@ -1,10 +1,12 @@
-import { HttpClient } from "@angular/common/http";
-import { inject, Injectable, signal } from "@angular/core";
-import { LoginUserRequest } from "../../auth/login/login-user.request";
-import { Observable, of } from "rxjs";
-import { catchError, map, tap } from "rxjs/operators";
-import { LogoutResponse } from "../../auth/logout/logout.response";
-import { RegisterUserRequest } from "../../auth/register-user/register-user.request";
+import { HttpClient } from '@angular/common/http';
+import { inject, Injectable, signal } from '@angular/core';
+import { LoginUserRequest } from '../../auth/login/login-user.request';
+import { Observable, of } from 'rxjs';
+import { catchError, map, tap } from 'rxjs/operators';
+import { LogoutResponse } from '../../auth/logout/logout.response';
+import { RegisterUserRequest } from '../../auth/register-user/register-user.request';
+import { environment } from '../../../environments/environment';
+import { Endpoints } from '../../common/endpoints-config';
 
 @Injectable({providedIn: 'root'})
 export class AuthService {
@@ -15,7 +17,7 @@ export class AuthService {
     public isLoggedIn = this._isLoggedIn.asReadonly();
 
     login(request: LoginUserRequest): Observable<boolean> {
-        return this.httpClient.post("https://localhost:4001/api/identity/auth/login",
+        return this.httpClient.post(`${environment.apiBaseUrl}${Endpoints.login}`,
             request, { observe: 'response', withCredentials: true })
             .pipe(
                 map(response => response.ok),
@@ -24,7 +26,7 @@ export class AuthService {
     }
 
     register(request: RegisterUserRequest): Observable<boolean> {
-        return this.httpClient.post("https://localhost:4001/api/identity/auth/register",
+        return this.httpClient.post(`${environment.apiBaseUrl}${Endpoints.register}`,
             request, { observe: 'response', withCredentials: true })
             .pipe(
                 map(response => response.ok)
@@ -32,7 +34,7 @@ export class AuthService {
     }
 
     logout(): Observable<boolean> {
-        return this.httpClient.post<LogoutResponse>("https://localhost:4001/api/identity/auth/logout",
+        return this.httpClient.post<LogoutResponse>(`${environment.apiBaseUrl}${Endpoints.logout}`,
             {},
             { withCredentials: true })
             .pipe(
@@ -40,8 +42,7 @@ export class AuthService {
                 tap(() => this._isLoggedIn.set(false)),
                 catchError(
                     err => {
-                        console.error('Logout failed', err);
-                        this._isLoggedIn.set(true);
+                        this._isLoggedIn.set(false);
                         return of(false);
                     }
                 )
@@ -49,7 +50,7 @@ export class AuthService {
     }
 
     checkAuth(): Observable<boolean> {
-        return this.httpClient.get("https://localhost:4001/api/identity/users/me",
+        return this.httpClient.get(`${environment.apiBaseUrl}${Endpoints.checkAuth}`,
             { observe: 'response', withCredentials: true }
         ).pipe(
             map(response => response.ok),
@@ -59,7 +60,7 @@ export class AuthService {
     }
 
     refresh(): Observable<boolean> {
-        return this.httpClient.post("https://localhost:4001/api/identity/auth/refresh", {},
+        return this.httpClient.post(`${environment.apiBaseUrl}${Endpoints.refresh}`, {},
             { observe: 'response', withCredentials: true }
         ).pipe(
             map(response => response.ok),

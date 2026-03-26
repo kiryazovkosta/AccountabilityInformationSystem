@@ -1,10 +1,11 @@
+using System.Reflection;
 using System.Text;
-using AccountabilityInformationSystem.Api.Shared.Constants;
-using AccountabilityInformationSystem.Api.Infrastructure.Data;
 using AccountabilityInformationSystem.Api.Domain.Entities;
 using AccountabilityInformationSystem.Api.Domain.Entities.Excise;
 using AccountabilityInformationSystem.Api.Domain.Entities.Flow;
-using AccountabilityInformationSystem.Api.Middleware;
+using AccountabilityInformationSystem.Api.Features.ExciseNomenclatures.ApCodes.CreateApCode;
+using AccountabilityInformationSystem.Api.Features.ExciseNomenclatures.BrandNames.CreateBrandName;
+using AccountabilityInformationSystem.Api.Features.ExciseNomenclatures.CnCodes.CreateCnCode;
 using AccountabilityInformationSystem.Api.Features.ExciseNomenclatures.Shared;
 using AccountabilityInformationSystem.Api.Features.ExciseNomenclatures.Shared.CreateExciseNomenclature;
 using AccountabilityInformationSystem.Api.Features.ExciseNomenclatures.Shared.CreateExciseNomenclatureBatch;
@@ -13,16 +14,21 @@ using AccountabilityInformationSystem.Api.Features.Flow.MeasurementPoints.Shared
 using AccountabilityInformationSystem.Api.Features.Flow.MeasurementPointsData.Shared;
 using AccountabilityInformationSystem.Api.Features.ProductTypes.Shared;
 using AccountabilityInformationSystem.Api.Features.Warehouses.Shared;
+using AccountabilityInformationSystem.Api.Infrastructure.Data;
+using AccountabilityInformationSystem.Api.Middleware;
+using AccountabilityInformationSystem.Api.Settings;
+using AccountabilityInformationSystem.Api.Shared.Constants;
 using AccountabilityInformationSystem.Api.Shared.Services.DataShaping;
 using AccountabilityInformationSystem.Api.Shared.Services.Encrypting;
 using AccountabilityInformationSystem.Api.Shared.Services.Linking;
+using AccountabilityInformationSystem.Api.Shared.Services.Seeding;
 using AccountabilityInformationSystem.Api.Shared.Services.Sorting;
 using AccountabilityInformationSystem.Api.Shared.Services.Tokenizing;
 using AccountabilityInformationSystem.Api.Shared.Services.UserContexting;
-using AccountabilityInformationSystem.Api.Shared.Services.Seeding;
-using AccountabilityInformationSystem.Api.Settings;
 using Asp.Versioning;
 using FluentValidation;
+using Mapster;
+using MapsterMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -31,13 +37,10 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json.Serialization;
+using OpenTelemetry;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
-using OpenTelemetry;
-using AccountabilityInformationSystem.Api.Features.ExciseNomenclatures.ApCodes.CreateApCode;
-using AccountabilityInformationSystem.Api.Features.ExciseNomenclatures.BrandNames.CreateBrandName;
-using AccountabilityInformationSystem.Api.Features.ExciseNomenclatures.CnCodes.CreateCnCode;
 
 namespace AccountabilityInformationSystem.Api.Shared.Extensions;
 
@@ -303,6 +306,13 @@ public static class WebApplicationBuilderExtensions
             });
         });
 
+        return builder;
+    }
+
+    public static WebApplicationBuilder AddMapster(this WebApplicationBuilder builder)
+    {
+        TypeAdapterConfig config = TypeAdapterConfig.GlobalSettings;
+        config.Scan(Assembly.GetExecutingAssembly());
         return builder;
     }
 }

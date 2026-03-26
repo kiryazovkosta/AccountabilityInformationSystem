@@ -16,6 +16,7 @@ using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Mapster;
 
 namespace AccountabilityInformationSystem.Api.Features.Flow.Ikunks;
 
@@ -62,7 +63,8 @@ public sealed class IkunksController(ApplicationDbContext dbContext, UserContext
             )
             .ApplySort(query.Sort, sortMappings, "OrderPosition")
             .AsNoTracking()
-            .Select(IkunkQueries.ProjectToResponse());
+            //.Select(IkunkQueries.ProjectToResponse());
+            .ProjectToType<IkunkResponse>();
 
         PaginationResponse<ExpandoObject> response = new()
         {
@@ -98,7 +100,8 @@ public sealed class IkunksController(ApplicationDbContext dbContext, UserContext
         IkunkResponse? ikunkResponse = await dbContext
             .Ikunks
             .AsNoTracking()
-            .Select(IkunkQueries.ProjectToResponse())
+            //.Select(IkunkQueries.ProjectToResponse())
+            .ProjectToType<IkunkResponse>()
             .FirstOrDefaultAsync(ikunk => ikunk.Id == id, cancellationToken);
         if (ikunkResponse is null)
         {
@@ -127,7 +130,8 @@ public sealed class IkunksController(ApplicationDbContext dbContext, UserContext
         IkunkResponseV2? ikunkResponse = await dbContext
             .Ikunks
             .AsNoTracking()
-            .Select(IkunkQueries.ProjectToResponseV2())
+            //.Select(IkunkQueries.ProjectToResponseV2())
+            .ProjectToType<IkunkResponseV2>()
             .FirstOrDefaultAsync(ikunk => ikunk.Id == id, cancellationToken);
         if (ikunkResponse is null)
         {
