@@ -10,7 +10,9 @@ using AccountabilityInformationSystem.Api.Features.Identity.Auth.Shared;
 using AccountabilityInformationSystem.Api.Features.Identity.Users.Shared;
 using AccountabilityInformationSystem.Api.Infrastructure.Data;
 using AccountabilityInformationSystem.Api.Settings;
+using AccountabilityInformationSystem.Api.Shared;
 using AccountabilityInformationSystem.Api.Shared.Services.Tokenizing;
+using Mapster;
 using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -24,7 +26,6 @@ using Newtonsoft.Json.Linq;
 
 namespace AccountabilityInformationSystem.Api.Features.Identity.Auth;
 
-[ApiController]
 [Route("api/identity/auth")]
 public sealed class AuthController(
     UserManager<IdentityUser> userManager,
@@ -32,18 +33,18 @@ public sealed class AuthController(
     ApplicationDbContext applicationDbContext,
     TokenProvider tokenProvider,
     IAntiforgery antiforgery,
-    IOptions<JwtAuthOptions> options) : ControllerBase
+    IOptions<JwtAuthOptions> options) : ApiController
 {
     private readonly JwtAuthOptions _jwtAuthOptions = options.Value;
 
     [HttpPost("register")]
     [AllowAnonymous]
     [IgnoreAntiforgeryToken]
-    public async Task<ActionResult> Register(
-        RegisterUserRequest register,
+    public async Task<IActionResult> Register(
+        RegisterUserRequest registerRequest,
         CancellationToken cancellationToken)
     {
-        ActionResult? registerResult = 
+        IActionResult? registerResult = 
             await identityDbContext.Database.CreateExecutionStrategy().ExecuteAsync(async () =>
         {
             await using IDbContextTransaction transaction = await identityDbContext.Database.BeginTransactionAsync(cancellationToken);
@@ -52,41 +53,23 @@ public sealed class AuthController(
 
             IdentityUser identityUser = new()
             {
-                UserName = register.Email,
-                Email = register.Email,
+                UserName = registerRequest.Email,
+                Email = registerRequest.Email,
             };
 
-            IdentityResult identityResult = await userManager.CreateAsync(identityUser, register.Password);
+            IdentityResult identityResult = await userManager.CreateAsync(identityUser, registerRequest.Password);
             if (!identityResult.Succeeded)
             {
-                Dictionary<string, object?> extensions = new()
-                {
-                    { "errors", identityResult.Errors.ToDictionary(e => e.Code, e => e.Description) }
-                };
-
-                return Problem(
-                    detail: "Unable to register user, please try again!",
-                    statusCode: StatusCodes.Status400BadRequest,
-                    extensions: extensions
-                    );
+                return IdentityProblem("Unable to register user, please try again!", identityResult.Errors);
             }
 
-            IdentityResult addToRoleResult = await userManager.AddToRoleAsync(identityUser, Role.Member);
-            if (!addToRoleResult.Succeeded)
+            identityResult = await userManager.AddToRoleAsync(identityUser, Role.Member);
+            if (!identityResult.Succeeded)
             {
-                Dictionary<string, object?> extensions = new()
-                {
-                    { "errors", identityResult.Errors.ToDictionary(e => e.Code, e => e.Description) }
-                };
-                
-                return Problem(
-                    detail: "Unable to register user, please try again!",
-                    statusCode: StatusCodes.Status400BadRequest,
-                    extensions: extensions
-                );
+                return IdentityProblem("Unable to register user, please try again!", identityResult.Errors);
             }
 
-            User user = register.ToEntity();
+            User user = registerRequest.ToEntity();
             user.IdentityId = identityUser.Id;
 
             await applicationDbContext.Users.AddAsync(user, cancellationToken);

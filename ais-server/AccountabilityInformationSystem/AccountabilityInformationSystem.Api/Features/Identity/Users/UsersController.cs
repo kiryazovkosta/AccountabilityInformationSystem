@@ -1,15 +1,15 @@
 using AccountabilityInformationSystem.Api.Domain.Entities.Identity;
 using AccountabilityInformationSystem.Api.Features.Identity.Users.Shared;
 using AccountabilityInformationSystem.Api.Shared.Services.UserContexting;
+using AccountabilityInformationSystem.Api.Shared;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AccountabilityInformationSystem.Api.Features.Identity.Users;
 
-[ApiController]
 [Route("api/identity/users")]
 [Authorize]
-public sealed class UsersController(UserContext userContext) : ControllerBase
+public sealed class UsersController(UserContext userContext) : ApiController
 {
     [HttpGet("{id}")]
     [Authorize(Roles = $"{Role.Admin}")]

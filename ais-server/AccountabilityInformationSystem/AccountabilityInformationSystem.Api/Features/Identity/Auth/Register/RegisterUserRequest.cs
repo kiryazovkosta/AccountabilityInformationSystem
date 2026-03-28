@@ -1,3 +1,5 @@
+using AccountabilityInformationSystem.Api.Shared.Services.Mapping;
+
 namespace AccountabilityInformationSystem.Api.Features.Identity.Auth.Register;
 
 public sealed record RegisterUserRequest
@@ -9,4 +11,5 @@ public sealed record RegisterUserRequest
     public string? Image { get; init; }
     public string Password { get; init; }
     public string ConfirmPassword { get; init; }
+    public required bool Enable2fa { get; init; }
 }
