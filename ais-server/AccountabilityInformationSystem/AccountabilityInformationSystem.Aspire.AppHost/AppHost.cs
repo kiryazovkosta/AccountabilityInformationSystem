@@ -12,25 +12,29 @@ IResourceBuilder<SqlServerServerResource> sqlServer = builder.AddSqlServer("ais-
 
 IResourceBuilder<SqlServerDatabaseResource> database = sqlServer.AddDatabase("AccountabilityInformationSystemDb");
 
+IResourceBuilder<MailPitContainerResource> mailpit = builder.AddMailPit("mailpit");
+
 IResourceBuilder<ProjectResource> backend = builder.AddProject<Projects.AccountabilityInformationSystem_Api>("ais-api")
+    .WithReference(mailpit)
+    .WaitFor(mailpit)
     .WithReference(database)
     .WaitFor(sqlServer)
     .WithEnvironment("ASPNETCORE_ENVIRONMENT", "Development");
 
 builder.Eventing.Subscribe<BeforeStartEvent>(async (ev, ct) =>
 {
-    var certPath = Path.GetFullPath(
+    string certPath = Path.GetFullPath(
         Path.Combine(builder.AppHostDirectory, "../../../ais-client/localhost.pem"));
 
     if (!File.Exists(certPath))
     {
-        var psi = new ProcessStartInfo
+        ProcessStartInfo psi = new ProcessStartInfo
         {
             FileName = "dotnet",
             Arguments = $"dev-certs https --export-path \"{certPath}\" --format Pem --no-password",
             UseShellExecute = false
         };
-        using var process = Process.Start(psi)!;
+        using Process process = Process.Start(psi)!;
         await process.WaitForExitAsync(ct);
     }
 });

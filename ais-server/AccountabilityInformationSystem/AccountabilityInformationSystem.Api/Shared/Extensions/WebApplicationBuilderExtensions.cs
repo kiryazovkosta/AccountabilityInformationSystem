@@ -21,6 +21,7 @@ using AccountabilityInformationSystem.Api.Shared.Constants;
 using AccountabilityInformationSystem.Api.Shared.Services.DataShaping;
 using AccountabilityInformationSystem.Api.Shared.Services.Encrypting;
 using AccountabilityInformationSystem.Api.Shared.Services.Linking;
+using AccountabilityInformationSystem.Api.Shared.Services.Messaging;
 using AccountabilityInformationSystem.Api.Shared.Services.Seeding;
 using AccountabilityInformationSystem.Api.Shared.Services.Sorting;
 using AccountabilityInformationSystem.Api.Shared.Services.Tokenizing;
@@ -31,6 +32,7 @@ using Mapster;
 using MapsterMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.EntityFrameworkCore;
@@ -236,6 +238,9 @@ public static class WebApplicationBuilderExtensions
         builder.Services.AddTransient<EncryptionService>();
 
         builder.Services.AddHostedService<RoleSeedingService>();
+
+        builder.Services.Configure<SmtpOptions>(builder.Configuration.GetSection(SmtpOptions.SectionName));
+        builder.Services.AddScoped<IEmailSender, MailKitEmailSender>();
 
         return builder;
     }
