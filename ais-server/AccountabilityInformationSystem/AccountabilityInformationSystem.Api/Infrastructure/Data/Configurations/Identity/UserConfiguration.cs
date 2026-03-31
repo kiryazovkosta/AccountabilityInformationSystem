@@ -44,6 +44,15 @@ public sealed class UserConfiguration : IEntityTypeConfiguration<User>
             .HasMaxLength(EntitiesConstants.ModifiedByMaxLength)
             .IsRequired(false);
 
+        builder.Property(user => user.Username)
+            .HasMaxLength(EntitiesConstants.UsernameMaxLength)
+            .IsRequired(true);
+        
+        builder.Property(user => user.SecretKey2Fa)
+            .HasMaxLength(EntitiesConstants.SecretKey2FaMaxLength)
+            .IsRequired(false);
+
+        builder.HasIndex(user => user.Username).IsUnique();
         builder.HasIndex(user => user.Email).IsUnique();
         builder.HasIndex(user => user.IdentityId).IsUnique();
     }

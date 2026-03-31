@@ -11,11 +11,13 @@ public static class UserMappings
         return new User
         {
             Id = $"u_{Guid.CreateVersion7()}",
+            Username = request.Username,
             Email = request.Email,
             FirstName = request.FirstName,
             MiddleName = request.MiddleName,
             LastName = request.LastName,
-            Image = request.Image,
+            Image = request.Image, 
+            Enable2Fa = request.Enable2Fa,
             CreatedAt = DateTime.UtcNow,
             CreatedBy = EntitiesConstants.DefaultSystemUser
         };
@@ -26,6 +28,7 @@ public static class UserMappings
         return new UserResponse
         {
             Id = user.Id,
+            Username = user.Username,
             Email = user.Email,
             FullName =
                 user.MiddleName != null ?

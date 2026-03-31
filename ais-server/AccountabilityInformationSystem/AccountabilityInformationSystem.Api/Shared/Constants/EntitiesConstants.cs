@@ -17,7 +17,8 @@ public static class EntitiesConstants
     public const int MiddleNameMaxLength = 100;
     public const int LastNameMaxLength = 100;
     public const int ImageMaxLength = 2048;
-
+    public const int UsernameMaxLength = 128;
+    public const int SecretKey2FaMaxLength = 128;
     public const int CreatedByMaxLength = 128;
     public const int ModifiedByMaxLength = 128;
 

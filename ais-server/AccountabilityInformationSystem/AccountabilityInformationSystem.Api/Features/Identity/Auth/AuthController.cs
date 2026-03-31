@@ -53,7 +53,7 @@ public sealed class AuthController(
 
             IdentityUser identityUser = new()
             {
-                UserName = registerRequest.Email,
+                UserName = registerRequest.Username,
                 Email = registerRequest.Email,
             };
 
