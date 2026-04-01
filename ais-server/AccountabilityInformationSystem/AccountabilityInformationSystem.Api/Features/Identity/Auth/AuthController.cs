@@ -18,6 +18,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
@@ -33,6 +34,7 @@ public sealed class AuthController(
     ApplicationDbContext applicationDbContext,
     TokenProvider tokenProvider,
     IAntiforgery antiforgery,
+    IEmailSender emailSender,
     IOptions<JwtAuthOptions> options) : ApiController
 {
     private readonly JwtAuthOptions _jwtAuthOptions = options.Value;
@@ -76,24 +78,29 @@ public sealed class AuthController(
 
             await applicationDbContext.SaveChangesAsync(cancellationToken);
 
-            AccessTokenResponse response = tokenProvider.Create(new AccessTokenRequest(identityUser.Id, identityUser.Email, [Role.Member]));
+            //AccessTokenResponse response = tokenProvider.Create(new AccessTokenRequest(identityUser.Id, identityUser.Email, [Role.Member]));
 
-            RefreshToken refreshToken = new()
-            {
-                Id = $"rt_{Guid.CreateVersion7()}",
-                UserId = identityUser.Id,
-                Token = response.RefreshToken,
-                ExpiresAt = DateTime.UtcNow.AddDays(_jwtAuthOptions.RefreshTokenExpirationDays)
-            };
+            //RefreshToken refreshToken = new()
+            //{
+            //    Id = $"rt_{Guid.CreateVersion7()}",
+            //    UserId = identityUser.Id,
+            //    Token = response.RefreshToken,
+            //    ExpiresAt = DateTime.UtcNow.AddDays(_jwtAuthOptions.RefreshTokenExpirationDays)
+            //};
 
-            await identityDbContext.RefreshTokens.AddAsync(refreshToken, cancellationToken);
+            //await identityDbContext.RefreshTokens.AddAsync(refreshToken, cancellationToken);
 
-            await identityDbContext.SaveChangesAsync(cancellationToken);
+            //await identityDbContext.SaveChangesAsync(cancellationToken);
 
             await transaction.CommitAsync(cancellationToken);
 
-            SetTokensInsideCookies(response, HttpContext);
-            SetAntiforgeryToken();
+            string token = await userManager.GenerateEmailConfirmationTokenAsync(identityUser);
+            
+            string confirmationLink = Url.Action(nameof(ConfirmEmail), "Auth", new { token, username = user.Username }, Request.Scheme);
+            string message = $"Hello {user.FirstName},\n\nThank you for registering with the Accountability Information System.\n\nPlease confirm your email address by clicking the link below:\n\n{confirmationLink}\n\nIf you did not create this account, you can safely ignore this email.\n\nRegards,\nThe AIS Team";
+            await emailSender.SendEmailAsync(identityUser.Email!, "AIS Registration confirmation", message);
+            //SetTokensInsideCookies(response, HttpContext);
+            //SetAntiforgeryToken();
 
             return Created();
         });
@@ -178,6 +185,34 @@ public sealed class AuthController(
         SetAntiforgeryToken();
 
         return Ok();
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> ConfirmEmail(string token, string email)
+    {
+        IdentityUser identityUser = await userManager.FindByEmailAsync(email);
+        if (identityUser is null)
+        {
+            return Problem(
+                detail: "Invalid username or password!",
+                statusCode: StatusCodes.Status401Unauthorized);
+        }
+
+        User user = await applicationDbContext.Users.FirstOrDefaultAsync(user => user.Email == email && user.IdentityId == identityUser.Id);
+        if (user is null)
+        {
+            return Problem(
+                detail: "Invalid username or password!",
+                statusCode: StatusCodes.Status401Unauthorized);
+        }
+
+        IdentityResult identityResult = await userManager.ConfirmEmailAsync(identityUser, token);
+        if (!identityResult.Succeeded)
+        {
+            return IdentityProblem("Unable to register user, please try again!", identityResult.Errors);
+        }
+
+        return Ok($"Account with {email} and token {token} is confirmed successfully!");
     }
 
 

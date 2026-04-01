@@ -12,7 +12,8 @@ IResourceBuilder<SqlServerServerResource> sqlServer = builder.AddSqlServer("ais-
 
 IResourceBuilder<SqlServerDatabaseResource> database = sqlServer.AddDatabase("AccountabilityInformationSystemDb");
 
-IResourceBuilder<MailPitContainerResource> mailpit = builder.AddMailPit("mailpit");
+IResourceBuilder<MailPitContainerResource> mailpit = builder.AddMailPit("mailpit")
+    .WithDataVolume("mailpit-data");
 
 IResourceBuilder<ProjectResource> backend = builder.AddProject<Projects.AccountabilityInformationSystem_Api>("ais-api")
     .WithReference(mailpit)
