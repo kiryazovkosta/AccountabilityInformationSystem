@@ -1,9 +1,12 @@
-<h2>Confirm your account</h2>
-
-@if (confirmResource.isLoading()) {
-    <p>Verifying your email and confirm your account...</p>
-} @else if (confirmResource.value()) {
-    <div class="success">{{ confirmResource.value() }}</div>
-} @else if (confirmResource.error()) {
-    <div class="error">Verification failed. The link may be expired.</div>
-}
+<div class="app-auth-page">
+  <div class="app-auth-card max-w-md">
+    <h1 class="app-header-1">Urer confirmation</h1>
+    @if (confirmResource.isLoading()) {
+        <h3 class="app-header-3">Verifying your email and confirm your account...</h3>
+    } @else if (confirmResource.value()) {
+        <h3 class="app-header-3">{{ confirmResource.value() }}</h3>
+    } @else if (confirmResource.error()) {
+        <h3 class="app-header-3">Verification failed. The link may be expired.</h3>
+    }
+  </div>
+</div>

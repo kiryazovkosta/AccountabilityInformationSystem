@@ -15,6 +15,7 @@ using AccountabilityInformationSystem.Api.Features.Flow.MeasurementPointsData.Sh
 using AccountabilityInformationSystem.Api.Features.ProductTypes.Shared;
 using AccountabilityInformationSystem.Api.Features.Warehouses.Shared;
 using AccountabilityInformationSystem.Api.Infrastructure.Data;
+using AccountabilityInformationSystem.Api.Infrastructure.Data.Identity;
 using AccountabilityInformationSystem.Api.Middleware;
 using AccountabilityInformationSystem.Api.Settings;
 using AccountabilityInformationSystem.Api.Shared.Constants;
@@ -31,6 +32,7 @@ using FluentValidation;
 using Mapster;
 using MapsterMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -250,6 +252,8 @@ public static class WebApplicationBuilderExtensions
 
     public static WebApplicationBuilder AddAuthenticationServices(this WebApplicationBuilder builder)
     {
+        builder.Services.AddDataProtection().SetApplicationName(ApplicationConstants.ApplicationName);
+
         builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
         {
             options.SignIn.RequireConfirmedEmail = true;
@@ -262,7 +266,8 @@ public static class WebApplicationBuilderExtensions
             
         })
             .AddEntityFrameworkStores<ApplicationIdentityDbContext>()
-            .AddDefaultTokenProviders();
+            .AddDefaultTokenProviders()
+            .AddUserStore<EncryptedUserStore<IdentityUser>>();
 
         builder.Services.Configure<JwtAuthOptions>(builder.Configuration.GetSection("Jwt"));
 
