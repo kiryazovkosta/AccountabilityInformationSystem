@@ -1,132 +1,195 @@
 <div class="app-auth-page">
   <div class="app-auth-card">
-  <h1 class="app-header-1">Register</h1>
-  <h3 class="app-header-3 text-center">Use this form to register if you don't have account</h3>
-  @if (registerError()) {
-    <div class="error-summary">{{ registerError() }}</div>
-  }
-  <form class="app-form">
-    <div class="flex flex-wrap -mx-3 mb-6">
-      <div class="w-full px-3">
-        <label class="app-form-label" for="email">
-          Email:
-          <input type="email" [formField]="registerForm.email" autocomplete="email"
-            class="app-form-input" />
-        </label>
-        @if (registerForm.email().touched() && registerForm.email().invalid()) {
-          <div class="form-error-message">
-            @for (error of registerForm.email().errors(); track error.message) {
-              <div class="form-error-message">{{ error.message }}</div>
-            }
-          </div>
-        }
-      </div>
-    </div>
-
-    <div class="flex flex-wrap -mx-3 mb-2">
-      <div class="w-full md:w-1/3 px-3 mb-6 md:mb-0">
-        <label class="app-form-label" for="firstName">
-          FirstName:
-          <input type="text" [formField]="registerForm.firstName"
-          autocomplete="name"
-          class="app-form-input" />
-        </label>
-        @if (registerForm.firstName().touched() && registerForm.firstName().invalid()) {
-          <div class="form-error-message">
-            @for (error of registerForm.firstName().errors(); track error.message) {
-              <div class="form-error-message">{{ error.message }}</div>
-            }
-          </div>
-        }
-      </div>
-      <div class="w-full md:w-1/3 px-3 mb-6 md:mb-0">
-        <label class="app-form-label" for="middleName">
-            Middle Name:
-            <input type="text" [formField]="registerForm.middleName"
-            class="app-form-input" />
-        </label>
-        @if (registerForm.middleName().touched() && registerForm.middleName().invalid()) {
-        <div class="form-error-message">
-            @for (error of registerForm.middleName().errors(); track error.message) {
-            <div class="form-error-message">{{ error.message }}</div>
-            }
-        </div>
-}
-      </div>
-      <div class="w-full md:w-1/3 px-3 mb-6 md:mb-0">
-        <label class="app-form-label" for="lastName">
-          LastName:
-          <input type="text" [formField]="registerForm.lastName"
-          autocomplete="family-name"
-          class="app-form-input" />
-        </label>
-        @if (registerForm.lastName().touched() && registerForm.lastName().invalid()) {
-          <div class="form-error-message">
-            @for (error of registerForm.lastName().errors(); track error.message) {
-              <div class="form-error-message">{{ error.message }}</div>
-            }
-          </div>
-        }
-      </div>
-    </div>
-
-    <div class="flex flex-wrap -mx-3 mb-6">
-      <div class="w-full px-3">
-        <label class="app-form-label" for="image">
-          Image:
-          <input type="file" [formField]="registerForm.image"
-            class="app-form-input" />
-        </label>
-        @if (registerForm.image().touched() && registerForm.image().invalid()) {
-          <div class="form-error-message">
-            @for (error of registerForm.image().errors(); track error.message) {
-              <div class="form-error-message">{{ error.message }}</div>
-            }
-          </div>
-        }
-      </div>
-    </div>
-
-    <div class="flex flex-wrap -mx-3 mb-6">
+    <h1 class="app-header-1">Register</h1>
+    <h3 class="app-header-3 text-center">Use this form to register if you don't have account</h3>
+    @if (registerError()) {
+      <div class="error-summary">{{ registerError() }}</div>
+    }
+    <form class="app-form">
+      <div class="flex flex-wrap -mx-3 mb-6">
         <div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
-        <label  class="app-form-label" for="password">
-            Password
-            <input type="password" autocomplete="new-password" [formField]="registerForm.password" 
-            class="app-form-input">
-        </label>
-        @if (registerForm.password().touched() && registerForm.password().invalid()) {
-          <div class="form-error-message">
-            @for (error of registerForm.password().errors(); track error.message) {
-              <div class="form-error-message">{{ error.message }}</div>
-            }
-          </div>
-        }
+          <label class="app-form-label" for="email">
+            Email:
+            <input
+              type="email"
+              [formField]="registerForm.email"
+              autocomplete="email"
+              class="app-form-input"
+            />
+          </label>
+          @if (registerForm.email().touched() && registerForm.email().invalid()) {
+            <div class="form-error-message">
+              @for (error of registerForm.email().errors(); track error.message) {
+                <div class="form-error-message">{{ error.message }}</div>
+              }
+            </div>
+          }
         </div>
         <div class="w-full md:w-1/2 px-3">
-        <label class="app-form-label" for="confirmPassword">
+          <label class="app-form-label" for="username">
+            Username:
+            <input
+              type="text"
+              [formField]="registerForm.username"
+              autocomplete="username"
+              class="app-form-input"
+            />
+          </label>
+          @if (registerForm.username().touched() && registerForm.username().invalid()) {
+            <div class="form-error-message">
+              @for (error of registerForm.username().errors(); track error.message) {
+                <div class="form-error-message">{{ error.message }}</div>
+              }
+            </div>
+          }
+        </div>
+      </div>
+
+      <div class="flex flex-wrap -mx-3 mb-2">
+        <div class="w-full md:w-1/3 px-3 mb-6 md:mb-0">
+          <label class="app-form-label" for="firstName">
+            FirstName:
+            <input
+              type="text"
+              [formField]="registerForm.firstName"
+              autocomplete="name"
+              class="app-form-input"
+            />
+          </label>
+          @if (registerForm.firstName().touched() && registerForm.firstName().invalid()) {
+            <div class="form-error-message">
+              @for (error of registerForm.firstName().errors(); track error.message) {
+                <div class="form-error-message">{{ error.message }}</div>
+              }
+            </div>
+          }
+        </div>
+        <div class="w-full md:w-1/3 px-3 mb-6 md:mb-0">
+          <label class="app-form-label" for="middleName">
+            Middle Name:
+            <input type="text" [formField]="registerForm.middleName" class="app-form-input" />
+          </label>
+          @if (registerForm.middleName().touched() && registerForm.middleName().invalid()) {
+            <div class="form-error-message">
+              @for (error of registerForm.middleName().errors(); track error.message) {
+                <div class="form-error-message">{{ error.message }}</div>
+              }
+            </div>
+          }
+        </div>
+        <div class="w-full md:w-1/3 px-3 mb-6 md:mb-0">
+          <label class="app-form-label" for="lastName">
+            LastName:
+            <input
+              type="text"
+              [formField]="registerForm.lastName"
+              autocomplete="family-name"
+              class="app-form-input"
+            />
+          </label>
+          @if (registerForm.lastName().touched() && registerForm.lastName().invalid()) {
+            <div class="form-error-message">
+              @for (error of registerForm.lastName().errors(); track error.message) {
+                <div class="form-error-message">{{ error.message }}</div>
+              }
+            </div>
+          }
+        </div>
+      </div>
+
+      <div class="flex flex-wrap -mx-3 mb-6">
+        <div class="w-full px-3">
+          <label class="app-form-label" for="image">
+            Image:
+            <input type="file" [formField]="registerForm.image" class="app-form-input" />
+          </label>
+          @if (registerForm.image().touched() && registerForm.image().invalid()) {
+            <div class="form-error-message">
+              @for (error of registerForm.image().errors(); track error.message) {
+                <div class="form-error-message">{{ error.message }}</div>
+              }
+            </div>
+          }
+        </div>
+      </div>
+
+      <div class="flex flex-wrap -mx-3 mb-6">
+        <div class="w-full px-3">
+          <label class="app-form-label label-inline" for="enable2Fa">
+            Enable two-factor authentication :
+            <input
+              type="checkbox"
+              [formField]="registerForm.enable2Fa"
+              class="app-form-input checkbox-auto"
+            />
+          </label>
+          @if (registerForm.enable2Fa().touched() && registerForm.enable2Fa().invalid()) {
+            <div class="form-error-message">
+              @for (error of registerForm.enable2Fa().errors(); track error.message) {
+                <div class="form-error-message">{{ error.message }}</div>
+              }
+            </div>
+          }
+        </div>
+      </div>
+
+      <div class="flex flex-wrap -mx-3 mb-6">
+        <div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
+          <label class="app-form-label" for="password">
+            Password
+            <input
+              type="password"
+              autocomplete="new-password"
+              [formField]="registerForm.password"
+              class="app-form-input"
+            />
+          </label>
+          @if (registerForm.password().touched() && registerForm.password().invalid()) {
+            <div class="form-error-message">
+              @for (error of registerForm.password().errors(); track error.message) {
+                <div class="form-error-message">{{ error.message }}</div>
+              }
+            </div>
+          }
+        </div>
+        <div class="w-full md:w-1/2 px-3">
+          <label class="app-form-label" for="confirmPassword">
             Confirm password:
-            <input type="password" autocomplete="off" [formField]="registerForm.confirmPassword"
-            class="app-form-input">
-        </label>
-        @if (registerForm.confirmPassword().touched() && registerForm.confirmPassword().invalid()) {
-          <div class="form-error-message">
-            @for (error of registerForm.confirmPassword().errors(); track error.message) {
-              <p>{{ error.message }}</p>
-            }
-          </div>
-        }
-    </div>
-    </div>
+            <input
+              type="password"
+              autocomplete="off"
+              [formField]="registerForm.confirmPassword"
+              class="app-form-input"
+            />
+          </label>
+          @if (
+            registerForm.confirmPassword().touched() && registerForm.confirmPassword().invalid()
+          ) {
+            <div class="form-error-message">
+              @for (error of registerForm.confirmPassword().errors(); track error.message) {
+                <p>{{ error.message }}</p>
+              }
+            </div>
+          }
+        </div>
+      </div>
 
-    <div class="flex flex-col items-center">
-      <button type="button" class="app-primary-button w-2xs" (click)="onSubmit()" [disabled]="registerForm().submitting()">
-        Register
-      </button>
-    </div>
+      <div class="flex flex-col items-center">
+        <button
+          type="button"
+          class="app-primary-button w-2xs"
+          (click)="onSubmit()"
+          [disabled]="registerForm().submitting()"
+        >
+          Register
+        </button>
+      </div>
 
-    <div>
-      <p>If you already have account you can login from <a routerLink="{{Paths.LOGIN}}">here</a></p>
-    </div>
-  </form>
+      <div>
+        <p>
+          If you already have account you can login from <a class="login-link" routerLink="{{ Paths.LOGIN }}">here</a>
+        </p>
+      </div>
+    </form>
   </div>
 </div>

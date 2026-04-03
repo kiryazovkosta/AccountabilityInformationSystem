@@ -243,6 +243,8 @@ public static class WebApplicationBuilderExtensions
         builder.Services.Configure<SmtpOptions>(builder.Configuration.GetSection(SmtpOptions.SectionName));
         builder.Services.AddScoped<IEmailSender, MailKitEmailSender>();
 
+        builder.Services.Configure<FrontendOptions>(builder.Configuration.GetSection(FrontendOptions.SectionName));
+
         return builder;
     }
 

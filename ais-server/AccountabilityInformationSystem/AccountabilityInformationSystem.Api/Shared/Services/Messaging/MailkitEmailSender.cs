@@ -21,7 +21,8 @@ public class MailKitEmailSender(
         message.From.Add(MailboxAddress.Parse(smtp.From));
         message.To.Add(MailboxAddress.Parse(email));
         message.Subject = subject;
-        message.Body = new TextPart("plain") { Text = htmlMessage };
+        BodyBuilder builder = new(){ HtmlBody = htmlMessage };
+        message.Body = builder.ToMessageBody();
 
         using SmtpClient client = new SmtpClient();
         await client.ConnectAsync(host, port, SecureSocketOptions.None);

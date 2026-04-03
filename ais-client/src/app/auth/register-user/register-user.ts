@@ -26,13 +26,15 @@ export class RegisterUser {
   loading = signal<boolean>(false);
 
   registerUser = signal<RegisterUserRequest>({
+    username: '',
     email: '',
     firstName: '',
     middleName: undefined,
     lastName: '',
     image: undefined,
     password: '',
-    confirmPassword: ''
+    confirmPassword: '',
+    enable2Fa: false
   });
 
   protected readonly registeredUserForm = linkedSignal<RegisterUserFormRequest>(
@@ -40,6 +42,8 @@ export class RegisterUser {
   );
 
   registerForm = form(this.registeredUserForm, (schemaPath) => {
+    required(schemaPath.username, {message: 'Username is required'});
+
     required(schemaPath.email, {message: 'Email is required'});
     email(schemaPath.email, {message: 'Enter a valid email address'});
 

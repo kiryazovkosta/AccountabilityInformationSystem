@@ -2,6 +2,8 @@ using System.Linq.Dynamic.Core.Tokenizer;
 using System.Net;
 using System.Security;
 using System.Security.Cryptography;
+using System.Text;
+using System.Text.Encodings.Web;
 using AccountabilityInformationSystem.Api.Domain.Entities.Identity;
 using AccountabilityInformationSystem.Api.Features.Identity.Auth.Login;
 using AccountabilityInformationSystem.Api.Features.Identity.Auth.Refresh;
@@ -20,6 +22,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Options;
@@ -35,9 +38,11 @@ public sealed class AuthController(
     TokenProvider tokenProvider,
     IAntiforgery antiforgery,
     IEmailSender emailSender,
-    IOptions<JwtAuthOptions> options) : ApiController
+    IOptions<JwtAuthOptions> options,
+    IOptions<FrontendOptions> frontendOptions) : ApiController
 {
     private readonly JwtAuthOptions _jwtAuthOptions = options.Value;
+    private readonly FrontendOptions _frontendOptions = frontendOptions.Value;
 
     [HttpPost("register")]
     [AllowAnonymous]
@@ -75,33 +80,23 @@ public sealed class AuthController(
             user.IdentityId = identityUser.Id;
 
             await applicationDbContext.Users.AddAsync(user, cancellationToken);
-
             await applicationDbContext.SaveChangesAsync(cancellationToken);
 
-            //AccessTokenResponse response = tokenProvider.Create(new AccessTokenRequest(identityUser.Id, identityUser.Email, [Role.Member]));
-
-            //RefreshToken refreshToken = new()
-            //{
-            //    Id = $"rt_{Guid.CreateVersion7()}",
-            //    UserId = identityUser.Id,
-            //    Token = response.RefreshToken,
-            //    ExpiresAt = DateTime.UtcNow.AddDays(_jwtAuthOptions.RefreshTokenExpirationDays)
-            //};
-
-            //await identityDbContext.RefreshTokens.AddAsync(refreshToken, cancellationToken);
-
-            //await identityDbContext.SaveChangesAsync(cancellationToken);
+            await identityDbContext.SaveChangesAsync(cancellationToken);
 
             await transaction.CommitAsync(cancellationToken);
 
-            string token = await userManager.GenerateEmailConfirmationTokenAsync(identityUser);
-            
-            string confirmationLink = Url.Action(nameof(ConfirmEmail), "Auth", new { token, username = user.Username }, Request.Scheme);
-            string message = $"Hello {user.FirstName},\n\nThank you for registering with the Accountability Information System.\n\nPlease confirm your email address by clicking the link below:\n\n{confirmationLink}\n\nIf you did not create this account, you can safely ignore this email.\n\nRegards,\nThe AIS Team";
-            await emailSender.SendEmailAsync(identityUser.Email!, "AIS Registration confirmation", message);
-            //SetTokensInsideCookies(response, HttpContext);
-            //SetAntiforgeryToken();
+            string code = await userManager.GenerateEmailConfirmationTokenAsync(identityUser);
+            code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+            string callbackUrl = $"{_frontendOptions.HostName}{_frontendOptions.ConfirmEmail}?userId={identityUser.Id}&code={code}";
+            string encodedcallbackUrl = HtmlEncoder.Default.Encode(callbackUrl);
 
+            string message = @$"Hello {user.FirstName},<br/><br/>
+Thank you for registering with the Accountability Information System.<br/>
+Please confirm your email address by clicking the following <a href='{encodedcallbackUrl}'>link</a><br/><br/>
+If you did not create this account, you can safely ignore this email.<br/><br/>Regards,<br/>
+The AIS Team";
+            await emailSender.SendEmailAsync(identityUser.Email!, "AIS Registration confirmation", message);
             return Created();
         });
 
@@ -187,32 +182,34 @@ public sealed class AuthController(
         return Ok();
     }
 
-    [HttpGet]
-    public async Task<IActionResult> ConfirmEmail(string token, string email)
+    [HttpGet("confirm-email", Name = "ConfirmEmailRoute")]
+    [AllowAnonymous]
+    [IgnoreAntiforgeryToken]
+    public async Task<IActionResult> ConfirmEmail(string userId, string code)
     {
-        IdentityUser identityUser = await userManager.FindByEmailAsync(email);
+        if (string.IsNullOrWhiteSpace(userId) || string.IsNullOrWhiteSpace(code))
+        {
+            return Problem(
+                detail: "Invalid user identifier or code!",
+                statusCode: StatusCodes.Status400BadRequest);
+        }
+
+        IdentityUser identityUser = await userManager.FindByIdAsync(userId);
         if (identityUser is null)
         {
             return Problem(
-                detail: "Invalid username or password!",
-                statusCode: StatusCodes.Status401Unauthorized);
+                detail: $"Unable to load user with ID '{userId}'.",
+                statusCode: StatusCodes.Status404NotFound);
         }
 
-        User user = await applicationDbContext.Users.FirstOrDefaultAsync(user => user.Email == email && user.IdentityId == identityUser.Id);
-        if (user is null)
-        {
-            return Problem(
-                detail: "Invalid username or password!",
-                statusCode: StatusCodes.Status401Unauthorized);
-        }
-
-        IdentityResult identityResult = await userManager.ConfirmEmailAsync(identityUser, token);
+        code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(code));
+        IdentityResult identityResult = await userManager.ConfirmEmailAsync(identityUser, code);
         if (!identityResult.Succeeded)
         {
-            return IdentityProblem("Unable to register user, please try again!", identityResult.Errors);
+            return IdentityProblem("Unable to confirm email, please try again!", identityResult.Errors);
         }
 
-        return Ok($"Account with {email} and token {token} is confirmed successfully!");
+        return Ok("Thank you for confirming your email.");
     }
 
 

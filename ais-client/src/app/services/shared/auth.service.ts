@@ -16,20 +16,28 @@ export class AuthService {
 
     public isLoggedIn = this._isLoggedIn.asReadonly();
 
+    register(request: RegisterUserRequest): Observable<boolean> {
+        return this.httpClient.post(`${environment.apiBaseUrl}${Endpoints.register}`,
+            request, { observe: 'response', withCredentials: true })
+            .pipe(
+                map(response => response.ok)
+            );
+    }
+
+    confirmEmail(userId: string, code: string): Observable<string> {
+        return this.httpClient.get(`${environment.apiBaseUrl}${Endpoints.confirmEmail}`,
+            { 
+                observe: 'response', 
+                responseType: 'text', params: { userId, code } 
+            }).pipe(map(response => response.body ?? ''));
+    }
+
     login(request: LoginUserRequest): Observable<boolean> {
         return this.httpClient.post(`${environment.apiBaseUrl}${Endpoints.login}`,
             request, { observe: 'response', withCredentials: true })
             .pipe(
                 map(response => response.ok),
                 tap(success => this._isLoggedIn.set(success))
-            );
-    }
-
-    register(request: RegisterUserRequest): Observable<boolean> {
-        return this.httpClient.post(`${environment.apiBaseUrl}${Endpoints.register}`,
-            request, { observe: 'response', withCredentials: true })
-            .pipe(
-                map(response => response.ok)
             );
     }
 
