@@ -1,4 +1,5 @@
 using AccountabilityInformationSystem.Api.Infrastructure.Data;
+using AccountabilityInformationSystem.Api.Shared.Constants;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -19,7 +20,7 @@ public class EncryptedUserStore<TUser> : UserStore<TUser>
     public override Task SetTokenAsync(TUser user, string loginProvider, string name,
         string? value, CancellationToken cancellationToken)
     {
-        if (name == "AuthenticatorKey" && value is not null)
+        if (name == ApplicationConstants.AuthenticatorTokenKey && value is not null)
         {
             value = protector.Protect(value);
         }
@@ -31,7 +32,7 @@ public class EncryptedUserStore<TUser> : UserStore<TUser>
         CancellationToken cancellationToken)
     {
         string? protectedValue = await base.GetTokenAsync(user, loginProvider, name, cancellationToken);
-        if (name == "AuthenticatorKey" && protectedValue is not null)
+        if (name == ApplicationConstants.AuthenticatorTokenKey && protectedValue is not null)
         {
             return protector.Unprotect(protectedValue);
         }
