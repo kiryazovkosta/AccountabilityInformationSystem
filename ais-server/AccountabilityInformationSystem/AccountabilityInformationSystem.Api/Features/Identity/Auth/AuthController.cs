@@ -17,6 +17,7 @@ using AccountabilityInformationSystem.Api.Shared.Services.Tokenizing;
 using Mapster;
 using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -111,7 +112,7 @@ The AIS Team";
     [IgnoreAntiforgeryToken]
     public async Task<IActionResult> Login(LoginUserRequest request, CancellationToken cancellationToken)
     {
-        IdentityUser identityUser = await userManager.FindByEmailAsync(request.Email);
+        IdentityUser identityUser = await userManager.FindByNameAsync(request.Username);
         if (identityUser is null ||
             !await userManager.CheckPasswordAsync(identityUser, request.Password))
         {
@@ -122,7 +123,7 @@ The AIS Team";
 
         IEnumerable<string> roles = await userManager.GetRolesAsync(identityUser);
 
-        AccessTokenRequest accessTokenRequest = new(identityUser.Id, identityUser.Email ?? string.Empty, roles);
+        AccessTokenRequest accessTokenRequest = new(identityUser.Id, identityUser.UserName ?? string.Empty, roles);
         AccessTokenResponse response = tokenProvider.Create(accessTokenRequest);
 
         RefreshToken refreshToken = new()

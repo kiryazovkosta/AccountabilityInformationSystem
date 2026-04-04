@@ -8,11 +8,11 @@
     <form class="app-form">
       <label class="app-form-label">
         Email:
-        <input type="email" class="app-form-input" [formField]="loginForm.email" autocomplete="username" />
+        <input type="username" class="app-form-input" [formField]="loginForm.username" autocomplete="username" />
       </label>
-      @if (loginForm.email().touched() && loginForm.email().invalid()) {
+      @if (loginForm.username().touched() && loginForm.username().invalid()) {
       <div class="form-error-message">
-        @for (error of loginForm.email().errors(); track error.message) {
+        @for (error of loginForm.username().errors(); track error.message) {
           <p>{{ error.message }}</p>
         }
       </div>

@@ -29,7 +29,7 @@ public sealed class TokenProvider(IOptionsSnapshot<JwtAuthOptions> options)
         List<Claim> claims =
         [
             new(JwtRegisteredClaimNames.Sub, tokenRequest.UserId),
-            new(JwtRegisteredClaimNames.Email, tokenRequest.Email),
+            new(JwtRegisteredClaimNames.Email, tokenRequest.Username),
             ..tokenRequest.Roles.Select(role => new Claim(ClaimTypes.Role, role))
         ];
 

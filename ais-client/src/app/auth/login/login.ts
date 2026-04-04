@@ -17,7 +17,7 @@ export class Login {
   private readonly router: Router = inject(Router);
 
   loginRequest = signal<LoginUserRequest>({
-    email: '',
+    username: '',
     password: '',
     remember: false
   });
@@ -26,9 +26,7 @@ export class Login {
   loading = signal<boolean>(false);
 
   loginForm = form(this.loginRequest, (schemaPath) => {
-    required(schemaPath.email, { message: 'Email is required!'});
-    email(schemaPath.email, {message: 'Enter a valid email address'});
-
+    required(schemaPath.username, { message: 'Username is required!'});
     required(schemaPath.password, {message: 'Password is required'});
   });
 
