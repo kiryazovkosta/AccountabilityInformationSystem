@@ -2,11 +2,11 @@
   <div class="app-auth-card max-w-md">
     <h1 class="app-header-1">Urer confirmation</h1>
     @if (confirmResource.isLoading()) {
-        <h3 class="app-header-3">Verifying your email and confirm your account...</h3>
-    } @else if (confirmResource.value()) {
-        <h3 class="app-header-3">{{ confirmResource.value() }}</h3>
+    <h3 class="app-header-3">Verifying your email...</h3>
+    } @else if (confirmResource.value() && !confirmResource.value()!.requiresTwoFactorSetup) {
+    <h3 class="app-header-3">Email confirmed! You can now log in.</h3>
     } @else if (confirmResource.error()) {
-        <h3 class="app-header-3">Verification failed. The link may be expired.</h3>
+    <h3 class="app-header-3">Verification failed. The link may be expired.</h3>
     }
   </div>
 </div>

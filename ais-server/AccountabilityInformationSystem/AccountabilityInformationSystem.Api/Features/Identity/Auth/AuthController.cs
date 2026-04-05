@@ -28,6 +28,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json.Linq;
+using AccountabilityInformationSystem.Api.Features.Identity.Auth.TwoFactor;
+using QRCoder;
 
 namespace AccountabilityInformationSystem.Api.Features.Identity.Auth;
 
@@ -40,10 +42,13 @@ public sealed class AuthController(
     IAntiforgery antiforgery,
     IEmailSender emailSender,
     IOptions<JwtAuthOptions> options,
-    IOptions<FrontendOptions> frontendOptions) : ApiController
+    IOptions<FrontendOptions> frontendOptions,
+    IDataProtectionProvider dataProtectionProvider) : ApiController
 {
     private readonly JwtAuthOptions _jwtAuthOptions = options.Value;
     private readonly FrontendOptions _frontendOptions = frontendOptions.Value;
+    private readonly ITimeLimitedDataProtector _setupProtector =
+        dataProtectionProvider.CreateProtector("TwoFactorSetupToken").ToTimeLimitedDataProtector();
 
     [HttpPost("register")]
     [AllowAnonymous]
@@ -121,6 +126,43 @@ The AIS Team";
                 statusCode: StatusCodes.Status401Unauthorized);
         }
 
+        // Handle 2FA setup incomplete: user opted in but never completed setup
+        if (!identityUser.TwoFactorEnabled)
+        {
+            User? appUser = await applicationDbContext.Users
+                .FirstOrDefaultAsync(u => u.IdentityId == identityUser.Id, cancellationToken);
+
+            if (appUser?.Enable2Fa == true)
+            {
+                string setupToken = _setupProtector.Protect(identityUser.Id, TimeSpan.FromMinutes(10));
+                return StatusCode(StatusCodes.Status202Accepted,
+                    new { requiresTwoFactorSetup = true, setupToken });
+            }
+        }
+
+        // Handle 2FA validation when enabled — code must be provided in the same request
+        if (identityUser.TwoFactorEnabled)
+        {
+            if (string.IsNullOrWhiteSpace(request.Code))
+            {
+                return Problem(
+                    detail: "Authenticator code is required.",
+                    statusCode: StatusCodes.Status401Unauthorized);
+            }
+
+            bool isValid = await userManager.VerifyTwoFactorTokenAsync(
+                identityUser,
+                userManager.Options.Tokens.AuthenticatorTokenProvider,
+                request.Code);
+
+            if (!isValid)
+            {
+                return Problem(
+                    detail: "Invalid authenticator code!",
+                    statusCode: StatusCodes.Status401Unauthorized);
+            }
+        }
+
         IEnumerable<string> roles = await userManager.GetRolesAsync(identityUser);
 
         AccessTokenRequest accessTokenRequest = new(identityUser.Id, identityUser.UserName ?? string.Empty, roles);
@@ -186,7 +228,7 @@ The AIS Team";
     [HttpGet("confirm-email", Name = "ConfirmEmailRoute")]
     [AllowAnonymous]
     [IgnoreAntiforgeryToken]
-    public async Task<IActionResult> ConfirmEmail(string userId, string code)
+    public async Task<IActionResult> ConfirmEmail(string userId, string code, CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(userId) || string.IsNullOrWhiteSpace(code))
         {
@@ -203,6 +245,15 @@ The AIS Team";
                 statusCode: StatusCodes.Status404NotFound);
         }
 
+        User? user = await applicationDbContext.Users
+            .FirstOrDefaultAsync(u => u.IdentityId == identityUser.Id, cancellationToken);
+        if (user is null)
+        {
+            return Problem(
+                detail: $"Unable to load user with ID '{userId}'.",
+                statusCode: StatusCodes.Status404NotFound);
+        }
+
         code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(code));
         IdentityResult identityResult = await userManager.ConfirmEmailAsync(identityUser, code);
         if (!identityResult.Succeeded)
@@ -210,7 +261,104 @@ The AIS Team";
             return IdentityProblem("Unable to confirm email, please try again!", identityResult.Errors);
         }
 
-        return Ok("Thank you for confirming your email.");
+        // Check if 2FA setup is required
+        if (user.Enable2Fa == true && !identityUser.TwoFactorEnabled)
+        {
+            string setupToken = _setupProtector.Protect(identityUser.Id, TimeSpan.FromMinutes(10));
+            return Ok(new { requiresTwoFactorSetup = true, setupToken });
+        }
+
+        return Ok(new { requiresTwoFactorSetup = false });
+    }
+
+    [HttpPost("2fa/setup")]
+    [AllowAnonymous]
+    [IgnoreAntiforgeryToken]
+    public async Task<IActionResult> SetupTwoFactor(
+        SetupTwoFactorRequest request)
+    {
+        string userId = _setupProtector.Unprotect(request.SetupToken);
+
+        IdentityUser? identityUser = await userManager.FindByIdAsync(userId);
+        if (identityUser is null)
+        {
+            return Problem(
+                detail: "User not found.",
+                statusCode: StatusCodes.Status404NotFound);
+        }
+
+        if (identityUser.TwoFactorEnabled)
+        {
+            return Problem(
+                detail: "Two-factor authentication is already configured.",
+                statusCode: StatusCodes.Status409Conflict);
+        }
+
+        await userManager.ResetAuthenticatorKeyAsync(identityUser);
+        string? key = await userManager.GetAuthenticatorKeyAsync(identityUser);
+        if (string.IsNullOrEmpty(key))
+        {
+            return Problem(
+                detail: "Failed to return authentication key for the user",
+                statusCode: StatusCodes.Status400BadRequest);
+        }
+
+        string otpauthUri =
+            $"otpauth://totp/AIS:{identityUser.Email}?secret={key}&issuer=AIS&digits=6&algorithm=SHA1&period=30";
+
+        using QRCodeGenerator qrGenerator = new();
+        QRCodeData qrCodeData = qrGenerator.CreateQrCode(otpauthUri, QRCodeGenerator.ECCLevel.Q);
+        using PngByteQRCode qrCode = new(qrCodeData);
+        byte[] qrCodeBytes = qrCode.GetGraphic(20);
+        string qrCodeBase64 = $"data:image/png;base64,{Convert.ToBase64String(qrCodeBytes)}";
+
+        return Ok(new SetupTwoFactorResponse(qrCodeBase64, key));
+    }
+
+    [HttpPost("2fa/verify")]
+    [AllowAnonymous]
+    [IgnoreAntiforgeryToken]
+    public async Task<IActionResult> VerifyTwoFactor(
+        VerifyTwoFactorRequest request)
+    {
+        string userId;
+        try
+        {
+            userId = _setupProtector.Unprotect(request.SetupToken);
+        }
+        catch
+        {
+            return Problem(
+                detail: "Invalid or expired setup token.",
+                statusCode: StatusCodes.Status400BadRequest);
+        }
+
+        IdentityUser? identityUser = await userManager.FindByIdAsync(userId);
+        if (identityUser is null)
+        {
+            return Problem(
+                detail: "User not found.",
+                statusCode: StatusCodes.Status404NotFound);
+        }
+
+        bool isValid = await userManager.VerifyTwoFactorTokenAsync(
+            identityUser,
+            userManager.Options.Tokens.AuthenticatorTokenProvider,
+            request.Code);
+
+        if (!isValid)
+        {
+            return Problem(
+                detail: "Invalid authenticator code.",
+                statusCode: StatusCodes.Status400BadRequest);
+        }
+
+        await userManager.SetTwoFactorEnabledAsync(identityUser, true);
+           // Generate recovery codes (shown once — user must save them)
+        IEnumerable<string>? recoveryCodes =
+            await userManager.GenerateNewTwoFactorRecoveryCodesAsync(identityUser, 10);
+
+        return Ok(new { recoveryCodes });
     }
 
 

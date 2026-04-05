@@ -1,0 +1,46 @@
+<div class="app-auth-page">
+  <div class="app-auth-card max-w-md">
+    <h1 class="app-header-1">Set Up Two-Factor Authentication</h1>
+
+    @if (setupResource.isLoading()) {
+      <h3 class="app-header-3">Loading QR code...</h3>
+    } @else if (setupResource.error()) {
+      <h3 class="app-header-3">Failed to load QR code. The setup link may have expired.</h3>
+    } @else if (recoveryCodes().length > 0) {
+      <h3 class="app-header-3">2FA enabled successfully!</h3>
+      <p><strong>Save these recovery codes somewhere safe.</strong> Each code can be used once to access your account if you lose your authenticator device. They will not be shown again.</p>
+      <ul>
+        @for (recoveryCode of recoveryCodes(); track recoveryCode) {
+          <li><code>{{ recoveryCode }}</code></li>
+        }
+      </ul>
+      <button type="button" class="app-primary-button" (click)="goToLogin()">
+        I have saved my codes — Go to Login
+      </button>
+    } @else if (setupResource.value()) {
+      <p>Scan this QR code with your authenticator app (Google Authenticator, Authy, etc.):</p>
+      <img [src]="setupResource.value()!.qrCodeBase64" alt="2FA QR Code" class="qr-code" />
+      <p>Or enter this key manually: <strong>{{ setupResource.value()!.manualEntryKey }}</strong></p>
+
+      <div class="app-form">
+        <label class="app-form-label">
+          Enter the 6-digit code from your app:
+          <input type="text" class="app-form-input"
+                 [value]="code()"
+                 (input)="code.set($any($event.target).value)"
+                 autocomplete="one-time-code"
+                 inputmode="numeric"
+                 maxlength="6" />
+        </label>
+        @if (verifyError()) {
+          <div class="error-summary">{{ verifyError() }}</div>
+        }
+        <button type="button" class="app-primary-button"
+                (click)="onVerify()"
+                [disabled]="verifying() || code().length < 6">
+          {{ verifying() ? 'Verifying...' : 'Enable Two-Factor Authentication' }}
+        </button>
+      </div>
+    }
+  </div>
+</div>

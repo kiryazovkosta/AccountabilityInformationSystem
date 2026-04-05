@@ -8,6 +8,29 @@ import { RegisterUserRequest } from '../../auth/register-user/register-user.requ
 import { environment } from '../../../environments/environment';
 import { Endpoints } from '../../common/endpoints-config';
 
+export interface ConfirmEmailResponse {
+  requiresTwoFactorSetup: boolean;
+  setupToken?: string;
+}
+
+export interface Setup2faResponse {
+  qrCodeBase64: string;
+  manualEntryKey: string;
+}
+
+export interface Verify2faResponse {
+  recoveryCodes: string[];
+}
+
+export type LoginResult =
+  | { success: true }
+  | { requiresTwoFactorSetup: true; setupToken: string };
+
+interface LoginTwoFactorSetupRequired {
+    requiresTwoFactorSetup: true;
+    setupToken: string;
+}
+
 @Injectable({providedIn: 'root'})
 export class AuthService {
     private readonly httpClient = inject(HttpClient);
@@ -24,21 +47,44 @@ export class AuthService {
             );
     }
 
-    confirmEmail(userId: string, code: string): Observable<string> {
-        return this.httpClient.get(`${environment.apiBaseUrl}${Endpoints.confirmEmail}`,
-            { 
-                observe: 'response', 
-                responseType: 'text', params: { userId, code } 
-            }).pipe(map(response => response.body ?? ''));
+    confirmEmail(userId: string, code: string): Observable<ConfirmEmailResponse> {
+        return this.httpClient.get<ConfirmEmailResponse>(
+            `${environment.apiBaseUrl}${Endpoints.confirmEmail}`,
+            { params: { userId, code }, withCredentials: true }
+        );
     }
 
-    login(request: LoginUserRequest): Observable<boolean> {
-        return this.httpClient.post(`${environment.apiBaseUrl}${Endpoints.login}`,
-            request, { observe: 'response', withCredentials: true })
-            .pipe(
-                map(response => response.ok),
-                tap(success => this._isLoggedIn.set(success))
-            );
+    setup2fa(setupToken: string): Observable<Setup2faResponse> {
+        return this.httpClient.post<Setup2faResponse>(
+            `${environment.apiBaseUrl}${Endpoints.setup2fa}`,
+            { setupToken },
+            { withCredentials: true }
+        );
+    }
+
+    verify2fa(setupToken: string, code: string): Observable<Verify2faResponse> {
+        return this.httpClient.post<Verify2faResponse>(
+            `${environment.apiBaseUrl}${Endpoints.verify2fa}`,
+            { setupToken, code },
+            { withCredentials: true }
+        );
+    }
+
+    login(request: LoginUserRequest): Observable<LoginResult> {
+        return this.httpClient.post<LoginTwoFactorSetupRequired>(
+            `${environment.apiBaseUrl}${Endpoints.login}`,
+            request, 
+            { observe: 'response', withCredentials: true }
+        )
+        .pipe(
+            map(response => {
+                if (response.status === 202 && response.body?.requiresTwoFactorSetup) {
+                    return { requiresTwoFactorSetup: true, setupToken: response.body.setupToken } as LoginResult;
+                }
+                this._isLoggedIn.set(true);
+                return { success: true } as LoginResult;
+            })
+        );
     }
 
     logout(): Observable<boolean> {

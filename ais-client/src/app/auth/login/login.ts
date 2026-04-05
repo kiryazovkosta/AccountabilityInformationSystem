@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { LoginUserRequest } from './login-user.request';
 import { AuthService } from '../../services/shared/auth.service';
+import { APP_ROUTES } from '../../common/app-routes';
 
 @Component({
   selector: 'app-login',
@@ -19,7 +20,8 @@ export class Login {
   loginRequest = signal<LoginUserRequest>({
     username: '',
     password: '',
-    remember: false
+    remember: false, 
+    code: ''
   });
 
   loginError = signal<string | null>(null);
@@ -35,8 +37,12 @@ export class Login {
       this.loading.set(true);
       this.loginError.set(null);
       try {
-        await firstValueFrom(this.authService.login(this.loginRequest()));
-        this.router.navigate(['/home']);
+        const loginResult = await firstValueFrom(this.authService.login(this.loginRequest()));
+        if ('success' in loginResult) {
+          this.router.navigate(['/home']);
+        } else if ('requiresTwoFactorSetup' in loginResult) {
+          this.router.navigate([APP_ROUTES.SETUP_2FA], { state: { setupToken: loginResult.setupToken } });
+        }
       } catch {
         this.loginError.set('Invalid email or password.');
       } finally {

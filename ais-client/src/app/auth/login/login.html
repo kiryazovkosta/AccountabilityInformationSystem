@@ -7,7 +7,7 @@
     }
     <form class="app-form">
       <label class="app-form-label">
-        Email:
+        Username:
         <input type="username" class="app-form-input" [formField]="loginForm.username" autocomplete="username" />
       </label>
       @if (loginForm.username().touched() && loginForm.username().invalid()) {
@@ -29,6 +29,12 @@
         }
       </div>
       }
+
+      <label class="app-form-label">
+        2FA Code (only if 2FA is enabled):
+        <input type="text" class="app-form-input" [formField]="loginForm.code" 
+          autocomplete="one-time-code" />
+      </label>
 
       <label class="remember-label app-form-label">
         <input type="checkbox" [formField]="loginForm.remember" />

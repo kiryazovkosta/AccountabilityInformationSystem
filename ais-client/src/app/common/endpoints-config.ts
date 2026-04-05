@@ -5,4 +5,6 @@ export const Endpoints = {
   logout: 'api/identity/auth/logout',
   checkAuth: 'api/identity/users/me',
   refresh: 'api/identity/auth/refresh',
+  setup2fa: 'api/identity/auth/2fa/setup',
+  verify2fa: 'api/identity/auth/2fa/verify',
 } as const;
