@@ -14,6 +14,8 @@ public abstract class ApiController : ControllerBase
         };
 
         return Problem(
+            type: "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+            title: "Bad Request",
             detail: detail,
             statusCode: StatusCodes.Status400BadRequest,
             extensions: extensions
