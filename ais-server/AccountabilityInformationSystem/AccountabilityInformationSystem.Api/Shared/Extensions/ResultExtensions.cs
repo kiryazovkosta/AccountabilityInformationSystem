@@ -1,54 +1,34 @@
-using AccountabilityInformationSystem.Api.Domain.Entities.Abstraction;
-using Microsoft.AspNetCore.Mvc;
+//using AccountabilityInformationSystem.Api.Domain.Entities.Abstraction;
+//using Microsoft.AspNetCore.Mvc;
 
-namespace AccountabilityInformationSystem.Api.Shared.Extensions;
+//namespace AccountabilityInformationSystem.Api.Shared.Extensions;
 
-public static class ResultExtensions
-{
-    public static IActionResult ToResult<TResult>(this Result<TResult> result)
-        where TResult : notnull
-    {
-        if (result.IsFailure && result.Errors is { Count: > 0 })
-        {
-            return ErrorResponseFactory.Create(result.Errors);
-        }
+//public static class ResultExtensions
+//{
+//    public static IActionResult ToResult<TResult>(this Result<TResult> result)
+//        where TResult : notnull
+//        => result.Match(
+//            value => new OkObjectResult(value),
+//            ErrorResponseFactory.Create);
 
-        return new OkObjectResult(result.Value);
-    }
+//    public static IActionResult ToCreatedResult<TResult>(
+//        this Result<TResult> result,
+//        string actionName,
+//        object? routeValues)
+//        where TResult : notnull
+//        => result.Match(
+//            value => new CreatedAtActionResult(actionName, controllerName: null, routeValues, value),
+//            ErrorResponseFactory.Create);
 
-    public static IActionResult ToCreatedResult<TResult>(
-        this Result<TResult> result,
-        string actionName,
-        object? routeValues)
-        where TResult : notnull
-    {
-        if (result.IsFailure && result.Errors is { Count: > 0 })
-        {
-            return ErrorResponseFactory.Create(result.Errors);
-        }
+//    public static IActionResult ToNoContentResult<TResult>(this Result<TResult> result)
+//        where TResult : notnull
+//        => result.Match(
+//            _ => new NoContentResult(),
+//            ErrorResponseFactory.Create);
 
-        return new CreatedAtActionResult(actionName, controllerName: null, routeValues, result.Value);
-    }
-
-    public static IActionResult ToNoContentResult<TResult>(this Result<TResult> result)
-        where TResult : notnull
-    {
-        if (result.IsFailure && result.Errors is { Count: > 0 })
-        {
-            return ErrorResponseFactory.Create(result.Errors);
-        }
-
-        return new NoContentResult();
-    }
-
-    public static IActionResult ToAcceptedResult<TResult>(this Result<TResult> result)
-        where TResult : notnull
-    {
-        if (result.IsFailure && result.Errors is { Count: > 0 })
-        {
-            return ErrorResponseFactory.Create(result.Errors);
-        }
-
-        return new AcceptedResult();
-    }
-}
+//    public static IActionResult ToAcceptedResult<TResult>(this Result<TResult> result)
+//        where TResult : notnull
+//        => result.Match(
+//            value => new AcceptedResult()
+//            ErrorResponseFactory.Create);
+//}

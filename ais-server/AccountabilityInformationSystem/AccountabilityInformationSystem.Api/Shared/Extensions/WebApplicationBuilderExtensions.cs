@@ -26,6 +26,7 @@ using AccountabilityInformationSystem.Api.Shared.Services.Messaging;
 using AccountabilityInformationSystem.Api.Shared.Services.Seeding;
 using AccountabilityInformationSystem.Api.Shared.Services.Sorting;
 using AccountabilityInformationSystem.Api.Shared.Services.Tokenizing;
+using AccountabilityInformationSystem.Api.Features.Identity.Auth.Login;
 using AccountabilityInformationSystem.Api.Shared.Services.UserContexting;
 using Asp.Versioning;
 using FluentValidation;
@@ -233,6 +234,7 @@ public static class WebApplicationBuilderExtensions
         builder.Services.AddTransient<LinkService>();
 
         builder.Services.AddTransient<TokenProvider>();
+        builder.Services.AddScoped<LoginUserRequestHandler>();
 
         builder.Services.AddMemoryCache();
         builder.Services.AddScoped<UserContext>();
@@ -297,7 +299,7 @@ public static class WebApplicationBuilderExtensions
                 {
                     OnMessageReceived = context =>
                     {
-                        context.Request.Cookies.TryGetValue("accessToken", out var accessToken);
+                        context.Request.Cookies.TryGetValue("accessToken", out string? accessToken);
                         if (!string.IsNullOrEmpty(accessToken))
                         {
                             context.Token = accessToken;

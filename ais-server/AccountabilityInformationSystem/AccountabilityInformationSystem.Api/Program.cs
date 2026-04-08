@@ -2,6 +2,7 @@ using AccountabilityInformationSystem.Api.Shared.Extensions;
 using AccountabilityInformationSystem.Api.Settings;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
+using Wolverine;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -15,7 +16,11 @@ builder
     .AddApplicationServices()
     .AddAuthenticationServices()
     .AddCorsPolicy()
-    .AddMapster();
+    .AddMapster()
+    .UseWolverine(opts =>
+    {
+        opts.Durability.Mode = DurabilityMode.MediatorOnly;
+    });
 
 WebApplication app = builder.Build();
 

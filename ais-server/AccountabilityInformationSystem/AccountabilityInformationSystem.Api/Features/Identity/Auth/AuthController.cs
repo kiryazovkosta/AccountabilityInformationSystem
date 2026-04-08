@@ -5,6 +5,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.Encodings.Web;
 using AccountabilityInformationSystem.Api.Domain.Entities.Identity;
+using AccountabilityInformationSystem.Api.Domain.Entities.Abstraction;
 using AccountabilityInformationSystem.Api.Features.Identity.Auth.Login;
 using AccountabilityInformationSystem.Api.Features.Identity.Auth.Refresh;
 using AccountabilityInformationSystem.Api.Features.Identity.Auth.Register;
@@ -30,6 +31,7 @@ using Microsoft.Extensions.Options;
 using Newtonsoft.Json.Linq;
 using AccountabilityInformationSystem.Api.Features.Identity.Auth.TwoFactor;
 using QRCoder;
+using AccountabilityInformationSystem.Api.Shared.Extensions;
 
 namespace AccountabilityInformationSystem.Api.Features.Identity.Auth;
 
@@ -115,74 +117,21 @@ The AIS Team";
     [HttpPost("login")]
     [AllowAnonymous]
     [IgnoreAntiforgeryToken]
-    public async Task<IActionResult> Login(LoginUserRequest request, CancellationToken cancellationToken)
+    public async Task<IActionResult> Login(/*LoginUserRequest request, CancellationToken cancellationToken*/)
     {
-        IdentityUser identityUser = await userManager.FindByNameAsync(request.Username);
-        if (identityUser is null ||
-            !await userManager.CheckPasswordAsync(identityUser, request.Password))
-        {
-            return Problem(
-                detail: "Invalid username or password!",
-                statusCode: StatusCodes.Status401Unauthorized);
-        }
+        //Result<LoginUserResponse> result = await loginHandler.Handle(request, cancellationToken);
+        //if (result.IsFailure)
+        //{
+        //    return ErrorResponseFactory.Create(result.Error);
+        //}
 
-        // Handle 2FA setup incomplete: user opted in but never completed setup
-        if (!identityUser.TwoFactorEnabled)
-        {
-            User? appUser = await applicationDbContext.Users
-                .FirstOrDefaultAsync(u => u.IdentityId == identityUser.Id, cancellationToken);
+        //if (result.IsSuccess && result.Value is not null && result.Value.RequiresTwoFactorSetup)
+        //{
+        //    return StatusCode(StatusCodes.Status202Accepted, result.Value);
+        //}
 
-            if (appUser?.Enable2Fa == true)
-            {
-                string setupToken = _setupProtector.Protect(identityUser.Id, TimeSpan.FromMinutes(10));
-                return StatusCode(StatusCodes.Status202Accepted,
-                    new { requiresTwoFactorSetup = true, setupToken });
-            }
-        }
-
-        // Handle 2FA validation when enabled — code must be provided in the same request
-        if (identityUser.TwoFactorEnabled)
-        {
-            if (string.IsNullOrWhiteSpace(request.Code))
-            {
-                return Problem(
-                    detail: "Authenticator code is required.",
-                    statusCode: StatusCodes.Status401Unauthorized);
-            }
-
-            bool isValid = await userManager.VerifyTwoFactorTokenAsync(
-                identityUser,
-                userManager.Options.Tokens.AuthenticatorTokenProvider,
-                request.Code);
-
-            if (!isValid)
-            {
-                return Problem(
-                    detail: "Invalid authenticator code!",
-                    statusCode: StatusCodes.Status401Unauthorized);
-            }
-        }
-
-        IEnumerable<string> roles = await userManager.GetRolesAsync(identityUser);
-
-        AccessTokenRequest accessTokenRequest = new(identityUser.Id, identityUser.UserName ?? string.Empty, roles);
-        AccessTokenResponse response = tokenProvider.Create(accessTokenRequest);
-
-        RefreshToken refreshToken = new()
-        {
-            Id = $"rt_{Guid.CreateVersion7()}",
-            UserId = identityUser.Id,
-            Token = response.RefreshToken,
-            ExpiresAt = DateTime.UtcNow.AddDays(_jwtAuthOptions.RefreshTokenExpirationDays)
-        };
-
-        await identityDbContext.RefreshTokens.AddAsync(refreshToken, cancellationToken);
-
-        await identityDbContext.SaveChangesAsync(cancellationToken);
-
-        SetTokensInsideCookies(response, HttpContext);
-        SetAntiforgeryToken();
-
+        //SetTokensInsideCookies(new AccessTokenResponse(result.Value.AccessToken!, result.Value.RefreshToken!), HttpContext);
+        //SetAntiforgeryToken();
         return Ok();
     }
 
