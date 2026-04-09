@@ -7,14 +7,14 @@
         {
             "type": "aspire",
             "request": "launch",
-            "name": "Aspire: Launch default apphost",
+            "name": "Aspire: Launch AppHost",
             "program": "${workspaceFolder}"
         },
         {
-            "type": "aspire",
-            "request": "launch",
-            "name": "Aspire: Launch default apphost",
-            "program": "${workspaceFolder}"
+            "name": "Attach to AIS API",
+            "type": "coreclr",
+            "request": "attach",
+            "processName": "AccountabilityInformationSystem.Api"
         }
     ]
 }

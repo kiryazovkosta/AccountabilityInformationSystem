@@ -234,7 +234,6 @@ public static class WebApplicationBuilderExtensions
         builder.Services.AddTransient<LinkService>();
 
         builder.Services.AddTransient<TokenProvider>();
-        builder.Services.AddScoped<LoginUserRequestHandler>();
 
         builder.Services.AddMemoryCache();
         builder.Services.AddScoped<UserContext>();

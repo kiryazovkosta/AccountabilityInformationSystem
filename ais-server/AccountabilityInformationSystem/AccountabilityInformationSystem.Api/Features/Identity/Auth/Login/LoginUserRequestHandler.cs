@@ -42,9 +42,17 @@ public class LoginUserRequestHandler(
 
             if (appUser?.Enable2Fa == true)
             {
+                if (!identityUser.EmailConfirmed)
+                {
+                    return Result<LoginUserResponse>.Failure(
+                        new Error("ErrorCodes.Forbidden", "Email must be confirmed before setting up two-factor authentication."),
+                        ResultFailureType.Forbidden);
+                }
+
                 string setupToken = _setupProtector.Protect(identityUser.Id, TimeSpan.FromMinutes(10));
                 return Result<LoginUserResponse>.Success(
-                    new LoginUserResponse(RequiresTwoFactorSetup: true, SetupToken: setupToken));
+                    new LoginUserResponse(RequiresTwoFactorSetup: true, SetupToken: setupToken),
+                    ResultSuccessType.Accepted);
             }
         }
 
@@ -72,7 +80,6 @@ public class LoginUserRequestHandler(
         }
 
         IEnumerable<string> roles = await userManager.GetRolesAsync(identityUser);
-
         AccessTokenRequest accessTokenRequest = new(identityUser.Id, identityUser.UserName ?? string.Empty, roles);
         AccessTokenResponse response = tokenProvider.Create(accessTokenRequest);
         RefreshToken refreshToken = new()
