@@ -6,6 +6,7 @@ using System.Text;
 using System.Text.Encodings.Web;
 using AccountabilityInformationSystem.Api.Domain.Entities.Abstraction;
 using AccountabilityInformationSystem.Api.Domain.Entities.Identity;
+using AccountabilityInformationSystem.Api.Features.Identity.Auth.ConfirmEmail;
 using AccountabilityInformationSystem.Api.Features.Identity.Auth.Login;
 using AccountabilityInformationSystem.Api.Features.Identity.Auth.Refresh;
 using AccountabilityInformationSystem.Api.Features.Identity.Auth.Register;
@@ -40,17 +41,17 @@ namespace AccountabilityInformationSystem.Api.Features.Identity.Auth;
 public sealed class AuthController(
     UserManager<IdentityUser> userManager,
     ApplicationIdentityDbContext identityDbContext,
-    ApplicationDbContext applicationDbContext,
-    TokenProvider tokenProvider,
+    //ApplicationDbContext applicationDbContext,
+    //TokenProvider tokenProvider,
     IAntiforgery antiforgery,
-    IEmailSender emailSender,
-    IOptions<JwtAuthOptions> options,
-    IOptions<FrontendOptions> frontendOptions,
+    //IEmailSender emailSender,
+    //IOptions<JwtAuthOptions> options,
+    //IOptions<FrontendOptions> frontendOptions,
     IDataProtectionProvider dataProtectionProvider,
     IMessageBus bus) : ApiController
 {
-    private readonly JwtAuthOptions _jwtAuthOptions = options.Value;
-    private readonly FrontendOptions _frontendOptions = frontendOptions.Value;
+    //private readonly JwtAuthOptions _jwtAuthOptions = options.Value;
+    //private readonly FrontendOptions _frontendOptions = frontendOptions.Value;
     private readonly ITimeLimitedDataProtector _setupProtector =
         dataProtectionProvider.CreateProtector("TwoFactorSetupToken").ToTimeLimitedDataProtector();
 
@@ -61,59 +62,62 @@ public sealed class AuthController(
         RegisterUserRequest registerRequest,
         CancellationToken cancellationToken)
     {
-        IActionResult? registerResult = 
-            await identityDbContext.Database.CreateExecutionStrategy().ExecuteAsync(async () =>
-        {
-            await using IDbContextTransaction transaction = await identityDbContext.Database.BeginTransactionAsync(cancellationToken);
-            applicationDbContext.Database.SetDbConnection(identityDbContext.Database.GetDbConnection());
-            await applicationDbContext.Database.UseTransactionAsync(transaction.GetDbTransaction(), cancellationToken);
+        Result result = await bus.InvokeAsync<Result>(registerRequest, cancellationToken);
+        return result.ToActionResult();
 
-            IdentityUser identityUser = new()
-            {
-                UserName = registerRequest.Username,
-                Email = registerRequest.Email,
-            };
+//         IActionResult? registerResult = 
+//             await identityDbContext.Database.CreateExecutionStrategy().ExecuteAsync(async () =>
+//         {
+//             await using IDbContextTransaction transaction = await identityDbContext.Database.BeginTransactionAsync(cancellationToken);
+//             applicationDbContext.Database.SetDbConnection(identityDbContext.Database.GetDbConnection());
+//             await applicationDbContext.Database.UseTransactionAsync(transaction.GetDbTransaction(), cancellationToken);
 
-            IdentityResult identityResult = await userManager.CreateAsync(identityUser, registerRequest.Password);
-            if (!identityResult.Succeeded)
-            {
-                return IdentityProblem("Unable to register user, please try again!", identityResult.Errors);
-            }
+//             IdentityUser identityUser = new()
+//             {
+//                 UserName = registerRequest.Username,
+//                 Email = registerRequest.Email,
+//             };
 
-            identityResult = await userManager.AddToRoleAsync(identityUser, Role.Member);
-            if (!identityResult.Succeeded)
-            {
-                return IdentityProblem("Unable to register user, please try again!", identityResult.Errors);
-            }
+//             IdentityResult identityResult = await userManager.CreateAsync(identityUser, registerRequest.Password);
+//             if (!identityResult.Succeeded)
+//             {
+//                 return IdentityProblem("Unable to register user, please try again!", identityResult.Errors);
+//             }
 
-            User user = registerRequest.ToEntity();
-            user.IdentityId = identityUser.Id;
+//             identityResult = await userManager.AddToRoleAsync(identityUser, Role.Member);
+//             if (!identityResult.Succeeded)
+//             {
+//                 return IdentityProblem("Unable to register user, please try again!", identityResult.Errors);
+//             }
 
-            await applicationDbContext.Users.AddAsync(user, cancellationToken);
-            await applicationDbContext.SaveChangesAsync(cancellationToken);
+//             User user = registerRequest.ToEntity();
+//             user.IdentityId = identityUser.Id;
 
-            await identityDbContext.SaveChangesAsync(cancellationToken);
+//             await applicationDbContext.Users.AddAsync(user, cancellationToken);
+//             await applicationDbContext.SaveChangesAsync(cancellationToken);
 
-            await transaction.CommitAsync(cancellationToken);
+//             await identityDbContext.SaveChangesAsync(cancellationToken);
 
-            string code = await userManager.GenerateEmailConfirmationTokenAsync(identityUser);
-            code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
-            string callbackUrl = $"{_frontendOptions.HostName}{_frontendOptions.ConfirmEmail}?userId={identityUser.Id}&code={code}";
-            string encodedcallbackUrl = HtmlEncoder.Default.Encode(callbackUrl);
+//             await transaction.CommitAsync(cancellationToken);
 
-            string message = @$"Hello {user.FirstName},<br/><br/>
-Thank you for registering with the Accountability Information System with username:<strong>{user.Username}</strong>.<br/>
-Please confirm your email address by clicking the following <strong><a href='{encodedcallbackUrl}'>link</a></strong><br/><br/>
-If you did not create this account, you can safely ignore this email.<br/><br/>Regards,<br/>
-The AIS Team";
-            await emailSender.SendEmailAsync(identityUser.Email!, "AIS Registration confirmation", message);
-            return Created();
-        });
+//             string code = await userManager.GenerateEmailConfirmationTokenAsync(identityUser);
+//             code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+//             string callbackUrl = $"{_frontendOptions.HostName}{_frontendOptions.ConfirmEmail}?userId={identityUser.Id}&code={code}";
+//             string encodedcallbackUrl = HtmlEncoder.Default.Encode(callbackUrl);
 
-        return registerResult ?? Problem(
-            detail: "Unable to register user, please try again!",
-            statusCode: StatusCodes.Status400BadRequest
-        );
+//             string message = @$"Hello {user.FirstName},<br/><br/>
+// Thank you for registering with the Accountability Information System with username:<strong>{user.Username}</strong>.<br/>
+// Please confirm your email address by clicking the following <strong><a href='{encodedcallbackUrl}'>link</a></strong><br/><br/>
+// If you did not create this account, you can safely ignore this email.<br/><br/>Regards,<br/>
+// The AIS Team";
+//             await emailSender.SendEmailAsync(identityUser.Email!, "AIS Registration confirmation", message);
+//             return Created();
+//         });
+
+//         return registerResult ?? Problem(
+//             detail: "Unable to register user, please try again!",
+//             statusCode: StatusCodes.Status400BadRequest
+//         );
     }
 
     [HttpPost("login")]
@@ -141,35 +145,23 @@ The AIS Team";
         if (!HttpContext.Request.Cookies.TryGetValue("refreshToken", out string? refreshTokenValue) 
             || string.IsNullOrWhiteSpace(refreshTokenValue))
         {
-            return Unauthorized("Refresh token missing.");
+            return Result.Failure(
+                new Error("Unauthorized", "Refresh token missing."),
+                ResultFailureType.Unauthorized)
+                .ToActionResult();
         }
 
-        RefreshToken? storedToken = await identityDbContext.RefreshTokens
-            .Include(rt => rt.User)
-            .FirstOrDefaultAsync(rt => rt.Token == refreshTokenValue, cancellationToken);
-
-        if (storedToken == null || storedToken.ExpiresAt < DateTime.UtcNow)
+        RefreshTokenRequest request = new() { RefreshToken = refreshTokenValue };
+        Result<AccessTokenResponse> result = await bus.InvokeAsync<Result<AccessTokenResponse>>(request, cancellationToken);
+        if (result.IsSuccessWith(ResultSuccessType.Ok))
         {
-            return Unauthorized("Token expired or invalid.");
+            SetTokensInsideCookies(
+                new AccessTokenResponse(result.Value!.AccessToken!, result.Value.RefreshToken!),
+                HttpContext);
+            SetAntiforgeryToken();
         }
 
-        IList<string> roles = await userManager.GetRolesAsync(storedToken.User);
-        AccessTokenRequest accessTokenRequest = new(
-            storedToken.User.Id,
-            storedToken.User.Email ?? string.Empty,
-            roles);
-
-        AccessTokenResponse response = tokenProvider.Create(accessTokenRequest);
-
-        storedToken.Token = response.RefreshToken;
-        storedToken.ExpiresAt = DateTime.UtcNow.AddDays(_jwtAuthOptions.RefreshTokenExpirationDays);
-        identityDbContext.RefreshTokens.Update(storedToken);
-        await identityDbContext.SaveChangesAsync(cancellationToken);
-
-        SetTokensInsideCookies(response, HttpContext);
-        SetAntiforgeryToken();
-
-        return Ok();
+        return result.ToActionResult();
     }
 
     [HttpGet("confirm-email", Name = "ConfirmEmailRoute")]
@@ -177,45 +169,9 @@ The AIS Team";
     [IgnoreAntiforgeryToken]
     public async Task<IActionResult> ConfirmEmail(string userId, string code, CancellationToken cancellationToken)
     {
-        if (string.IsNullOrWhiteSpace(userId) || string.IsNullOrWhiteSpace(code))
-        {
-            return Problem(
-                detail: "Invalid user identifier or code!",
-                statusCode: StatusCodes.Status400BadRequest);
-        }
-
-        IdentityUser identityUser = await userManager.FindByIdAsync(userId);
-        if (identityUser is null)
-        {
-            return Problem(
-                detail: $"Unable to load user with ID '{userId}'.",
-                statusCode: StatusCodes.Status404NotFound);
-        }
-
-        User? user = await applicationDbContext.Users
-            .FirstOrDefaultAsync(u => u.IdentityId == identityUser.Id, cancellationToken);
-        if (user is null)
-        {
-            return Problem(
-                detail: $"Unable to load user with ID '{userId}'.",
-                statusCode: StatusCodes.Status404NotFound);
-        }
-
-        code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(code));
-        IdentityResult identityResult = await userManager.ConfirmEmailAsync(identityUser, code);
-        if (!identityResult.Succeeded)
-        {
-            return IdentityProblem("Unable to confirm email, please try again!", identityResult.Errors);
-        }
-
-        // Check if 2FA setup is required
-        if (user.Enable2Fa == true && !identityUser.TwoFactorEnabled)
-        {
-            string setupToken = _setupProtector.Protect(identityUser.Id, TimeSpan.FromMinutes(10));
-            return Ok(new { requiresTwoFactorSetup = true, setupToken });
-        }
-
-        return Ok(new { requiresTwoFactorSetup = false });
+        ConfirmEmailRequest request = new(userId, code);
+        Result<ConfirmEmailResponse> result = await bus.InvokeAsync<Result<ConfirmEmailResponse>>(request, cancellationToken);
+        return result.ToActionResult();
     }
 
     [HttpPost("2fa/setup")]
