@@ -44,13 +44,19 @@ public sealed class RegisterUserRequestHandler(
             IdentityResult identityResult = await userManager.CreateAsync(identityUser, request.Password);
             if (!identityResult.Succeeded)
             {
-                return Result.Failure(new Error("", "Unable to register user, please try again!"), ResultFailureType.BadRequest);
+                IReadOnlyList<Error> errors = identityResult.Errors
+                    .Select(e => new Error(e.Code, e.Description))
+                    .ToList();
+                return Result.Failure(errors, ResultFailureType.BadRequest);
             }
 
             identityResult = await userManager.AddToRoleAsync(identityUser, Role.Member);
             if (!identityResult.Succeeded)
             {
-                return Result.Failure(new Error("", "Unable to register user, please try again!"), ResultFailureType.BadRequest);
+                IReadOnlyList<Error> errors = identityResult.Errors
+                    .Select(e => new Error(e.Code, e.Description))
+                    .ToList();
+                return Result.Failure(errors, ResultFailureType.BadRequest);
             }
 
             User user = request.ToEntity();

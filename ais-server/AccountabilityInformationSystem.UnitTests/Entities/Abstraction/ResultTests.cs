@@ -1,4 +1,5 @@
 ﻿using AccountabilityInformationSystem.Api.Domain.Entities.Abstraction;
+using System.Collections.Generic;
 
 namespace AccountabilityInformationSystem.UnitTests.Entities.Abstraction;
 
@@ -19,7 +20,7 @@ public class ResultTests
         Assert.False(successResult.IsFailure);
         Assert.Equal(ResultSuccessType.Ok, successResult.SuccessType);
         Assert.Null(successResult.FailureType);
-        Assert.Null(successResult.Error);
+        Assert.Empty(successResult.Errors);
     }
 
     [Theory]
@@ -37,22 +38,26 @@ public class ResultTests
         Assert.False(successResult.IsFailure);
         Assert.Equal(expected, successResult.SuccessType);
         Assert.Null(successResult.FailureType);
-        Assert.Null(successResult.Error);
+        Assert.Empty(successResult.Errors);
     }
 
     [Fact]
     public void Validate_ShouldSuccess_WhenCreateAFailureResult()
     {
         //Arrange && Act
-        Result failureResult = Result.Failure(error);
+        Error newError = new("Code", "New error message");
+        Result failureResult = Result.Failure([error, newError]);
 
         // Assert
         Assert.True(failureResult.IsFailure);
         Assert.False(failureResult.IsSuccess);
         Assert.Equal(ResultFailureType.BadRequest, failureResult.FailureType);
-        Assert.NotNull(failureResult.Error);
-        Assert.Equal(error.Code, failureResult.Error.Code);
-        Assert.Equal(error.Message, failureResult.Error.Message);
+        Assert.NotEmpty(failureResult.Errors);
+        Assert.Equal(2, failureResult.Errors.Count);
+        Assert.Equal(error.Code, failureResult.Errors[0].Code);
+        Assert.Equal(error.Message, failureResult.Errors[0].Message);
+        Assert.Equal(newError.Code, failureResult.Errors[1].Code);
+        Assert.Equal(newError.Message, failureResult.Errors[1].Message);
         Assert.Null(failureResult.SuccessType);
     }
 
@@ -73,9 +78,25 @@ public class ResultTests
         Assert.True(failureResult.IsFailure);
         Assert.False(failureResult.IsSuccess);
         Assert.Equal(expected, failureResult.FailureType);
-        Assert.NotNull(failureResult.Error);
-        Assert.Equal(error.Code, failureResult.Error.Code);
-        Assert.Equal(error.Message, failureResult.Error.Message);
+        Assert.NotEmpty(failureResult.Errors);
+        Assert.Equal(error.Code, failureResult.Errors[0].Code);
+        Assert.Equal(error.Message, failureResult.Errors[0].Message);
+        Assert.Null(failureResult.SuccessType);
+    }
+
+    [Fact]
+    public void Validate_ShouldSuccess_WhenCreateAFailureResultWithErrorsCollection()
+    {
+        //Arrange && Act
+        Result failureResult = Result.Failure(error);
+
+        // Assert
+        Assert.True(failureResult.IsFailure);
+        Assert.False(failureResult.IsSuccess);
+        Assert.Equal(ResultFailureType.BadRequest, failureResult.FailureType);
+        Assert.NotEmpty(failureResult.Errors);
+        Assert.Equal(error.Code, failureResult.Errors[0].Code);
+        Assert.Equal(error.Message, failureResult.Errors[0].Message);
         Assert.Null(failureResult.SuccessType);
     }
 
@@ -91,7 +112,7 @@ public class ResultTests
         Assert.Equal(ResultSuccessType.Ok, successResult.SuccessType);
         Assert.True(successResult.Value);
         Assert.Null(successResult.FailureType);
-        Assert.Null(successResult.Error);
+        Assert.Empty(successResult.Errors);
     }
 
     [Theory]
@@ -111,7 +132,7 @@ public class ResultTests
         Assert.NotNull(successResult.Value);
         Assert.Equal("Some message", successResult.Value);
         Assert.Null(successResult.FailureType);
-        Assert.Null(successResult.Error);
+        Assert.Empty(successResult.Errors);
     }
 
     [Fact]
@@ -124,9 +145,9 @@ public class ResultTests
         Assert.True(failureResult.IsFailure);
         Assert.False(failureResult.IsSuccess);
         Assert.Equal(ResultFailureType.BadRequest, failureResult.FailureType);
-        Assert.NotNull(failureResult.Error);
-        Assert.Equal(error.Code, failureResult.Error.Code);
-        Assert.Equal(error.Message, failureResult.Error.Message);
+        Assert.NotEmpty(failureResult.Errors);
+        Assert.Equal(error.Code, failureResult.Errors[0].Code);
+        Assert.Equal(error.Message, failureResult.Errors[0].Message);
         Assert.Null(failureResult.SuccessType);
     }
 
@@ -148,10 +169,30 @@ public class ResultTests
         Assert.True(failureResult.IsFailure);
         Assert.False(failureResult.IsSuccess);
         Assert.Equal(expected, failureResult.FailureType);
-        Assert.NotNull(failureResult.Error);
-        Assert.Equal(error.Code, failureResult.Error.Code);
-        Assert.Equal(error.Message, failureResult.Error.Message);
+        Assert.NotEmpty(failureResult.Errors);
+        Assert.Equal(error.Code, failureResult.Errors[0].Code);
+        Assert.Equal(error.Message, failureResult.Errors[0].Message);
         Assert.Null(failureResult.Value);
+        Assert.Null(failureResult.SuccessType);
+    }
+
+    [Fact]
+    public void Validate_ShouldSuccess_WhenCreateAFailureGenericResultWithErrorsCollection()
+    {
+        //Arrange && Act
+        Error newError = new("Code", "New error message");
+        Result failureResult = Result<bool>.Failure([error, newError]);
+
+        // Assert
+        Assert.True(failureResult.IsFailure);
+        Assert.False(failureResult.IsSuccess);
+        Assert.Equal(ResultFailureType.BadRequest, failureResult.FailureType);
+        Assert.NotEmpty(failureResult.Errors);
+        Assert.Equal(2, failureResult.Errors.Count);
+        Assert.Equal(error.Code, failureResult.Errors[0].Code);
+        Assert.Equal(error.Message, failureResult.Errors[0].Message);
+        Assert.Equal(newError.Code, failureResult.Errors[1].Code);
+        Assert.Equal(newError.Message, failureResult.Errors[1].Message);
         Assert.Null(failureResult.SuccessType);
     }
 }

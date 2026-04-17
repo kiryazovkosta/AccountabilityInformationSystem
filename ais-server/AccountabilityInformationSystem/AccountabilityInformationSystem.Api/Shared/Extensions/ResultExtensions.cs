@@ -9,7 +9,7 @@ public static class ResultExtensions
     {
         ArgumentNullException.ThrowIfNull(result);
 
-        if (result.IsFailure && result.Error is not null)
+        if (result.IsFailure && result.Errors.Count > 0)
         {
             ResultFailureType failureType = result.FailureType!.Value;
             if (!ErrorMapping.Map.TryGetValue(failureType, out ErrorData? errorData))
@@ -17,15 +17,10 @@ public static class ResultExtensions
                 errorData = ErrorData.Default;
             }
 
-            //Dictionary<string, object?> errorExtensions = new()
-            //{
-            //    { "errors", errors.GroupBy(e => e.Code)
-            //        .ToDictionary(g => g.Key, g => g.Select(e => e.Message).ToArray()) }
-            //};
-
             Dictionary<string, object?> extensions = new()
             {
-                { "errors", new Dictionary<string, string>{ {result.Error!.Code, result.Error!.Message } } }
+                { "errors", result.Errors.GroupBy(e => e.Code)
+                    .ToDictionary(g => g.Key, g => g.Select(e => e.Message).ToArray()) }
             };
 
             ProblemDetails problem = new()

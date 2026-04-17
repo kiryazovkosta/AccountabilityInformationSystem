@@ -48,11 +48,10 @@ public class ConfirmEmailRequestHandler(
         IdentityResult identityResult = await userManager.ConfirmEmailAsync(identityUser, code);
         if (!identityResult.Succeeded)
         {
-            // TODO: Extend Result<T> to have collection of errors
-            //return IdentityProblem("Unable to confirm email, please try again!", identityResult.Errors);
-            return Result<ConfirmEmailResponse>.Failure(
-                new Error("UserId", "Unable to confirm email, please try again!"),
-                ResultFailureType.BadRequest);
+            IReadOnlyList<Error> errors = identityResult.Errors
+                .Select(e => new Error(e.Code, e.Description))
+                .ToList();
+            return Result<ConfirmEmailResponse>.Failure(errors, ResultFailureType.BadRequest);
         }
 
         // Check if 2FA setup is required

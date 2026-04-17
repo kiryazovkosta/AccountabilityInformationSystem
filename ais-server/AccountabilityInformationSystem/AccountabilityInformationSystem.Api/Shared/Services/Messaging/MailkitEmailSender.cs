@@ -15,7 +15,7 @@ public class MailKitEmailSender(
     private readonly SmtpOptions smtp = options.Value;
     public async Task SendEmailAsync(string email, string subject, string htmlMessage)
     {
-        var (host, port) = ResolveSmtpEndpoint();
+        SmtpConfig smtpConfig = ResolveSmtpEndpoint();
 
         using MimeMessage message = new();
         message.From.Add(MailboxAddress.Parse(smtp.From));
@@ -25,9 +25,9 @@ public class MailKitEmailSender(
         message.Body = builder.ToMessageBody();
 
         using SmtpClient client = new();
-        await client.ConnectAsync(host, port, SecureSocketOptions.None);
+        await client.ConnectAsync(smtpConfig.Host, smtpConfig.Port, SecureSocketOptions.None);
 
-        if (!string.IsNullOrEmpty(smtp.Username))
+        if (!string.IsNullOrEmpty(smtp.Username) && !string.IsNullOrEmpty(smtp.Password))
         {
             await client.AuthenticateAsync(smtp.Username, smtp.Password);
         }
@@ -36,19 +36,21 @@ public class MailKitEmailSender(
         await client.DisconnectAsync(true);
     }
 
-    private (string host, int port) ResolveSmtpEndpoint()
+    private SmtpConfig ResolveSmtpEndpoint()
     {
         string? connectionString = configuration.GetConnectionString("mailpit");
         if (!string.IsNullOrEmpty(connectionString))
         {
-            var csb = new DbConnectionStringBuilder { ConnectionString = connectionString };
+            DbConnectionStringBuilder csb = new()  { ConnectionString = connectionString };
             if (csb.TryGetValue("endpoint", out object val))
             {
                 Uri uri = new(val.ToString()!);
-                return (uri.Host, uri.Port);
+                return new SmtpConfig(uri.Host, uri.Port);
             }
         }
 
-        return (options.Value.Host, options.Value.Port);
+        return new SmtpConfig(options.Value.Host, options.Value.Port);
     }
+
+    private sealed record SmtpConfig(string Host, int Port);
 }

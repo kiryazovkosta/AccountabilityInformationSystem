@@ -25,25 +25,31 @@ public class Result
     public bool IsFailure => !IsSuccess;
     public ResultSuccessType? SuccessType { get; }
     public ResultFailureType? FailureType { get; }
-    public Error? Error { get; }
+    public IReadOnlyList<Error> Errors { get; }
 
     protected Result(ResultSuccessType successType)
     {
         IsSuccess = true;
         SuccessType = successType;
+        Errors = [];
     }
 
-    protected Result(Error error, ResultFailureType failureType)
+    protected Result(IReadOnlyList<Error> errors, ResultFailureType failureType)
     {
         IsSuccess = false;
         FailureType = failureType;
-        Error = error;
+        Errors = errors;
     }
 
-    public static Result Success(ResultSuccessType successType = ResultSuccessType.Ok) 
+    //protected Result(Error error, ResultFailureType failureType)
+    //    : this([error], failureType) { }
+
+    public static Result Success(ResultSuccessType successType = ResultSuccessType.Ok)
         => new(successType);
-    public static Result Failure(Error error, ResultFailureType failureType = ResultFailureType.BadRequest) 
-        => new(error, failureType);
+    public static Result Failure(Error error, ResultFailureType failureType = ResultFailureType.BadRequest)
+        => new([error], failureType);
+    public static Result Failure(IReadOnlyList<Error> errors, ResultFailureType failureType = ResultFailureType.BadRequest)
+        => new(errors, failureType);
 }
 
 public sealed class Result<T> : Result
@@ -55,10 +61,14 @@ public sealed class Result<T> : Result
         Value = value;
     }
 
-    private Result(Error error, ResultFailureType failureType) : base(error, failureType) { }
+    //private Result(Error error, ResultFailureType failureType) : base(error, failureType) { }
 
-    public static Result<T> Success(T value, ResultSuccessType successType = ResultSuccessType.Ok) 
+    private Result(IReadOnlyList<Error> errors, ResultFailureType failureType) : base(errors, failureType) { }
+
+    public static Result<T> Success(T value, ResultSuccessType successType = ResultSuccessType.Ok)
         => new(value, successType);
-    public static new Result<T> Failure(Error error, ResultFailureType failureType = ResultFailureType.BadRequest) 
-        => new(error, failureType);
+    public static new Result<T> Failure(Error error, ResultFailureType failureType = ResultFailureType.BadRequest)
+        => new([error], failureType);
+    public static new Result<T> Failure(IReadOnlyList<Error> errors, ResultFailureType failureType = ResultFailureType.BadRequest)
+        => new(errors, failureType);
 }

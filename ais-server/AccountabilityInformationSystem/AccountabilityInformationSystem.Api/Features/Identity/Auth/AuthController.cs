@@ -41,17 +41,10 @@ namespace AccountabilityInformationSystem.Api.Features.Identity.Auth;
 public sealed class AuthController(
     UserManager<IdentityUser> userManager,
     ApplicationIdentityDbContext identityDbContext,
-    //ApplicationDbContext applicationDbContext,
-    //TokenProvider tokenProvider,
     IAntiforgery antiforgery,
-    //IEmailSender emailSender,
-    //IOptions<JwtAuthOptions> options,
-    //IOptions<FrontendOptions> frontendOptions,
     IDataProtectionProvider dataProtectionProvider,
     IMessageBus bus) : ApiController
 {
-    //private readonly JwtAuthOptions _jwtAuthOptions = options.Value;
-    //private readonly FrontendOptions _frontendOptions = frontendOptions.Value;
     private readonly ITimeLimitedDataProtector _setupProtector =
         dataProtectionProvider.CreateProtector("TwoFactorSetupToken").ToTimeLimitedDataProtector();
 
@@ -64,60 +57,6 @@ public sealed class AuthController(
     {
         Result result = await bus.InvokeAsync<Result>(registerRequest, cancellationToken);
         return result.ToActionResult();
-
-//         IActionResult? registerResult = 
-//             await identityDbContext.Database.CreateExecutionStrategy().ExecuteAsync(async () =>
-//         {
-//             await using IDbContextTransaction transaction = await identityDbContext.Database.BeginTransactionAsync(cancellationToken);
-//             applicationDbContext.Database.SetDbConnection(identityDbContext.Database.GetDbConnection());
-//             await applicationDbContext.Database.UseTransactionAsync(transaction.GetDbTransaction(), cancellationToken);
-
-//             IdentityUser identityUser = new()
-//             {
-//                 UserName = registerRequest.Username,
-//                 Email = registerRequest.Email,
-//             };
-
-//             IdentityResult identityResult = await userManager.CreateAsync(identityUser, registerRequest.Password);
-//             if (!identityResult.Succeeded)
-//             {
-//                 return IdentityProblem("Unable to register user, please try again!", identityResult.Errors);
-//             }
-
-//             identityResult = await userManager.AddToRoleAsync(identityUser, Role.Member);
-//             if (!identityResult.Succeeded)
-//             {
-//                 return IdentityProblem("Unable to register user, please try again!", identityResult.Errors);
-//             }
-
-//             User user = registerRequest.ToEntity();
-//             user.IdentityId = identityUser.Id;
-
-//             await applicationDbContext.Users.AddAsync(user, cancellationToken);
-//             await applicationDbContext.SaveChangesAsync(cancellationToken);
-
-//             await identityDbContext.SaveChangesAsync(cancellationToken);
-
-//             await transaction.CommitAsync(cancellationToken);
-
-//             string code = await userManager.GenerateEmailConfirmationTokenAsync(identityUser);
-//             code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
-//             string callbackUrl = $"{_frontendOptions.HostName}{_frontendOptions.ConfirmEmail}?userId={identityUser.Id}&code={code}";
-//             string encodedcallbackUrl = HtmlEncoder.Default.Encode(callbackUrl);
-
-//             string message = @$"Hello {user.FirstName},<br/><br/>
-// Thank you for registering with the Accountability Information System with username:<strong>{user.Username}</strong>.<br/>
-// Please confirm your email address by clicking the following <strong><a href='{encodedcallbackUrl}'>link</a></strong><br/><br/>
-// If you did not create this account, you can safely ignore this email.<br/><br/>Regards,<br/>
-// The AIS Team";
-//             await emailSender.SendEmailAsync(identityUser.Email!, "AIS Registration confirmation", message);
-//             return Created();
-//         });
-
-//         return registerResult ?? Problem(
-//             detail: "Unable to register user, please try again!",
-//             statusCode: StatusCodes.Status400BadRequest
-//         );
     }
 
     [HttpPost("login")]
@@ -257,7 +196,6 @@ public sealed class AuthController(
         }
 
         await userManager.SetTwoFactorEnabledAsync(identityUser, true);
-           // Generate recovery codes (shown once — user must save them)
         IEnumerable<string>? recoveryCodes =
             await userManager.GenerateNewTwoFactorRecoveryCodesAsync(identityUser, 10);
 
