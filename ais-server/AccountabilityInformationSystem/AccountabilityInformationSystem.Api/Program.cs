@@ -17,10 +17,7 @@ builder
     .AddAuthenticationServices()
     .AddCorsPolicy()
     .AddMapster()
-    .UseWolverine(opts =>
-    {
-        opts.Durability.Mode = DurabilityMode.MediatorOnly;
-    });
+    .AddWolverine();
 
 WebApplication app = builder.Build();
 

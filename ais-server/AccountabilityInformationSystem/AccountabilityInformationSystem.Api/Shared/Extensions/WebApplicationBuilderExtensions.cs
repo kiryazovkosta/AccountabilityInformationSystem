@@ -47,6 +47,7 @@ using OpenTelemetry;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
+using Wolverine;
 
 namespace AccountabilityInformationSystem.Api.Shared.Extensions;
 
@@ -337,6 +338,17 @@ public static class WebApplicationBuilderExtensions
     {
         TypeAdapterConfig config = TypeAdapterConfig.GlobalSettings;
         config.Scan(Assembly.GetExecutingAssembly());
+        return builder;
+    }
+
+    public static WebApplicationBuilder AddWolverine(this WebApplicationBuilder builder)
+    {
+        builder
+            .UseWolverine(opts =>
+             {
+                 opts.Durability.Mode = DurabilityMode.MediatorOnly;
+                 opts.InvokeTracing = InvokeTracingMode.Full;
+             });
         return builder;
     }
 }
