@@ -3,7 +3,6 @@ using System.Text;
 using System.Text.Encodings.Web;
 using AccountabilityInformationSystem.Api.Domain.Entities.Abstraction;
 using AccountabilityInformationSystem.Api.Domain.Entities.Identity;
-using AccountabilityInformationSystem.Api.Features.Identity.Auth.Register;
 using AccountabilityInformationSystem.Api.Features.Identity.Users.Shared;
 using AccountabilityInformationSystem.Api.Infrastructure.Data;
 using AccountabilityInformationSystem.Api.Settings;
@@ -15,7 +14,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Options;
 
-namespace AccountabilityInformationSystem.Api.Features.Auth.Register;
+namespace AccountabilityInformationSystem.Api.Features.Identity.Auth.Register;
 
 public sealed class RegisterUserRequestHandler(
     ApplicationDbContext applicationDbContext,

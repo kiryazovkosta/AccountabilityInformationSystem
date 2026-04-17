@@ -11,7 +11,8 @@ using AccountabilityInformationSystem.Api.Features.Identity.Auth.Login;
 using AccountabilityInformationSystem.Api.Features.Identity.Auth.Refresh;
 using AccountabilityInformationSystem.Api.Features.Identity.Auth.Register;
 using AccountabilityInformationSystem.Api.Features.Identity.Auth.Shared;
-using AccountabilityInformationSystem.Api.Features.Identity.Auth.TwoFactor;
+using AccountabilityInformationSystem.Api.Features.Identity.Auth.TwoFactor.SetupTwoFactor;
+using AccountabilityInformationSystem.Api.Features.Identity.Auth.TwoFactor.VerifyTwoFactor;
 using AccountabilityInformationSystem.Api.Features.Identity.Users.Shared;
 using AccountabilityInformationSystem.Api.Infrastructure.Data;
 using AccountabilityInformationSystem.Api.Settings;
@@ -39,14 +40,10 @@ namespace AccountabilityInformationSystem.Api.Features.Identity.Auth;
 
 [Route("api/identity/auth")]
 public sealed class AuthController(
-    UserManager<IdentityUser> userManager,
     ApplicationIdentityDbContext identityDbContext,
     IAntiforgery antiforgery,
-    IDataProtectionProvider dataProtectionProvider,
     IMessageBus bus) : ApiController
 {
-    private readonly ITimeLimitedDataProtector _setupProtector =
-        dataProtectionProvider.CreateProtector("TwoFactorSetupToken").ToTimeLimitedDataProtector();
 
     [HttpPost("register")]
     [AllowAnonymous]
@@ -65,12 +62,9 @@ public sealed class AuthController(
     public async Task<IActionResult> Login(LoginUserRequest request, CancellationToken cancellationToken)
     {
         Result<LoginUserResponse> result = await bus.InvokeAsync<Result<LoginUserResponse>>(request, cancellationToken);
-        if (result.IsSuccessWith(ResultSuccessType.Ok))
+        if (result.IsSuccessWith(ResultSuccessType.Ok) && result.Value is not null)
         {
-            SetTokensInsideCookies(
-                new AccessTokenResponse(result.Value!.AccessToken!, result.Value.RefreshToken!),
-                HttpContext);
-            SetAntiforgeryToken();
+            SetCookies(result.Value.AccessToken!, result.Value.RefreshToken!);
         }
 
         return result.ToActionResult();
@@ -94,10 +88,7 @@ public sealed class AuthController(
         Result<AccessTokenResponse> result = await bus.InvokeAsync<Result<AccessTokenResponse>>(request, cancellationToken);
         if (result.IsSuccessWith(ResultSuccessType.Ok))
         {
-            SetTokensInsideCookies(
-                new AccessTokenResponse(result.Value!.AccessToken!, result.Value.RefreshToken!),
-                HttpContext);
-            SetAntiforgeryToken();
+            SetCookies(result.Value!.AccessToken!, result.Value.RefreshToken!);
         }
 
         return result.ToActionResult();
@@ -119,42 +110,8 @@ public sealed class AuthController(
     public async Task<IActionResult> SetupTwoFactor(
         SetupTwoFactorRequest request)
     {
-        string userId = _setupProtector.Unprotect(request.SetupToken);
-
-        IdentityUser? identityUser = await userManager.FindByIdAsync(userId);
-        if (identityUser is null)
-        {
-            return Problem(
-                detail: "User not found.",
-                statusCode: StatusCodes.Status404NotFound);
-        }
-
-        if (identityUser.TwoFactorEnabled)
-        {
-            return Problem(
-                detail: "Two-factor authentication is already configured.",
-                statusCode: StatusCodes.Status409Conflict);
-        }
-
-        await userManager.ResetAuthenticatorKeyAsync(identityUser);
-        string? key = await userManager.GetAuthenticatorKeyAsync(identityUser);
-        if (string.IsNullOrEmpty(key))
-        {
-            return Problem(
-                detail: "Failed to return authentication key for the user",
-                statusCode: StatusCodes.Status400BadRequest);
-        }
-
-        string otpauthUri =
-            $"otpauth://totp/AIS:{identityUser.Email}?secret={key}&issuer=AIS&digits=6&algorithm=SHA1&period=30";
-
-        using QRCodeGenerator qrGenerator = new();
-        QRCodeData qrCodeData = qrGenerator.CreateQrCode(otpauthUri, QRCodeGenerator.ECCLevel.Q);
-        using PngByteQRCode qrCode = new(qrCodeData);
-        byte[] qrCodeBytes = qrCode.GetGraphic(20);
-        string qrCodeBase64 = $"data:image/png;base64,{Convert.ToBase64String(qrCodeBytes)}";
-
-        return Ok(new SetupTwoFactorResponse(qrCodeBase64, key));
+        Result<SetupTwoFactorResponse> result = await bus.InvokeAsync<Result<SetupTwoFactorResponse>>(request);
+        return result.ToActionResult();
     }
 
     [HttpPost("2fa/verify")]
@@ -163,43 +120,8 @@ public sealed class AuthController(
     public async Task<IActionResult> VerifyTwoFactor(
         VerifyTwoFactorRequest request)
     {
-        string userId;
-        try
-        {
-            userId = _setupProtector.Unprotect(request.SetupToken);
-        }
-        catch
-        {
-            return Problem(
-                detail: "Invalid or expired setup token.",
-                statusCode: StatusCodes.Status400BadRequest);
-        }
-
-        IdentityUser? identityUser = await userManager.FindByIdAsync(userId);
-        if (identityUser is null)
-        {
-            return Problem(
-                detail: "User not found.",
-                statusCode: StatusCodes.Status404NotFound);
-        }
-
-        bool isValid = await userManager.VerifyTwoFactorTokenAsync(
-            identityUser,
-            userManager.Options.Tokens.AuthenticatorTokenProvider,
-            request.Code);
-
-        if (!isValid)
-        {
-            return Problem(
-                detail: "Invalid authenticator code.",
-                statusCode: StatusCodes.Status400BadRequest);
-        }
-
-        await userManager.SetTwoFactorEnabledAsync(identityUser, true);
-        IEnumerable<string>? recoveryCodes =
-            await userManager.GenerateNewTwoFactorRecoveryCodesAsync(identityUser, 10);
-
-        return Ok(new { recoveryCodes });
+        Result<VerifyTwoFactorResponse> result = await bus.InvokeAsync<Result<VerifyTwoFactorResponse>>(request);
+        return result.ToActionResult() ;
     }
 
 
@@ -233,6 +155,12 @@ public sealed class AuthController(
         SetAccessTokenCookie("XSRF-TOKEN", string.Empty, -1440, HttpContext);
 
         return Ok(new { message = "Successfully logged out!" });
+    }
+
+    private void SetCookies(string accessToken, string refreshToken)
+    {
+        SetTokensInsideCookies(new AccessTokenResponse(accessToken, refreshToken), HttpContext);
+        SetAntiforgeryToken();
     }
 
     private void SetTokensInsideCookies(AccessTokenResponse token, HttpContext context)

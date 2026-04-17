@@ -1,4 +1,4 @@
-namespace AccountabilityInformationSystem.Api.Features.Identity.Auth.TwoFactor;
+namespace AccountabilityInformationSystem.Api.Features.Identity.Auth.TwoFactor.VerifyTwoFactor;
 
 public sealed record VerifyTwoFactorRequest
 {
