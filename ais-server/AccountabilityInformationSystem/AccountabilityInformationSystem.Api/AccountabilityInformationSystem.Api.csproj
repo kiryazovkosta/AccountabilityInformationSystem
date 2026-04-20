@@ -38,11 +38,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Services\UserContexting\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <InternalsVisibleTo Include="AccountabilityInformationSystem.UnitTests" />
+    <InternalsVisibleTo Include="AccountabilityInformationSystem.IntegrationTests" />
   </ItemGroup>
 
   <ItemGroup>
