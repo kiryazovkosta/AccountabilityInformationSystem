@@ -1,4 +1,4 @@
-namespace AccountabilityInformationSystem.Api.Features.Warehouses.CreateWarehouse;
+namespace AccountabilityInformationSystem.Api.Features.Warehouses.Create;
 
 public sealed record CreateWarehouseRequest
 {

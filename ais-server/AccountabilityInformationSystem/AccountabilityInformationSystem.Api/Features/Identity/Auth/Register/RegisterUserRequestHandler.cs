@@ -43,18 +43,16 @@ public sealed class RegisterUserRequestHandler(
             IdentityResult identityResult = await userManager.CreateAsync(identityUser, request.Password);
             if (!identityResult.Succeeded)
             {
-                IReadOnlyList<Error> errors = identityResult.Errors
-                    .Select(e => new Error(e.Code, e.Description))
-                    .ToList();
+                IReadOnlyList<Error> errors = [..identityResult.Errors
+                    .Select(e => new Error(e.Code, e.Description))];
                 return Result.Failure(errors, ResultFailureType.BadRequest);
             }
 
             identityResult = await userManager.AddToRoleAsync(identityUser, Role.Member);
             if (!identityResult.Succeeded)
             {
-                IReadOnlyList<Error> errors = identityResult.Errors
-                    .Select(e => new Error(e.Code, e.Description))
-                    .ToList();
+                IReadOnlyList<Error> errors = [..identityResult.Errors
+                    .Select(e => new Error(e.Code, e.Description))] ;
                 return Result.Failure(errors, ResultFailureType.BadRequest);
             }
 

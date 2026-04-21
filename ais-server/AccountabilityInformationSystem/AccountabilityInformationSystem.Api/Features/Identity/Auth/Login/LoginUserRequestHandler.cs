@@ -17,7 +17,8 @@ public class LoginUserRequestHandler(
     UserManager<IdentityUser> userManager,
     TokenProvider tokenProvider,
     IOptions<JwtAuthOptions> options,
-    IDataProtectionProvider dataProtectionProvider)
+    IDataProtectionProvider dataProtectionProvider,
+    TimeProvider timeProvider)
 {
     private readonly JwtAuthOptions _jwtAuthOptions = options.Value;
     private readonly ITimeLimitedDataProtector _setupProtector =
@@ -87,7 +88,7 @@ public class LoginUserRequestHandler(
             Id = $"rt_{Guid.CreateVersion7()}",
             UserId = identityUser.Id,
             Token = response.RefreshToken,
-            ExpiresAt = DateTime.UtcNow.AddDays(_jwtAuthOptions.RefreshTokenExpirationDays)
+            ExpiresAt = timeProvider.GetUtcNow().UtcDateTime.AddDays(_jwtAuthOptions.RefreshTokenExpirationDays)
         };
 
         await identityDbContext.RefreshTokens.AddAsync(refreshToken, cancellationToken);

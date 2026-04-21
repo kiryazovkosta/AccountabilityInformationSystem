@@ -9,7 +9,7 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace AccountabilityInformationSystem.Api.Shared.Services.Tokenizing;
 
-public sealed class TokenProvider(IOptionsSnapshot<JwtAuthOptions> options)
+public sealed class TokenProvider(IOptions<JwtAuthOptions> options, TimeProvider timeProvider)
 {
     private readonly JwtAuthOptions _jwtAuthOptions = options.Value;
 
@@ -36,7 +36,7 @@ public sealed class TokenProvider(IOptionsSnapshot<JwtAuthOptions> options)
         SecurityTokenDescriptor tokenDescriptor = new()
         {
             Subject = new ClaimsIdentity(claims),
-            Expires = DateTime.UtcNow.AddMinutes(_jwtAuthOptions.ExpirationInMinutes),
+            Expires = timeProvider.GetUtcNow().UtcDateTime.AddMinutes(_jwtAuthOptions.ExpirationInMinutes),
             SigningCredentials = credentials,
             Issuer = _jwtAuthOptions.Issuer,
             Audience = _jwtAuthOptions.Audience

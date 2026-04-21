@@ -1,6 +1,6 @@
 using AccountabilityInformationSystem.Api.Domain.Entities.Flow;
-using AccountabilityInformationSystem.Api.Features.Warehouses.CreateWarehouse;
-using AccountabilityInformationSystem.Api.Features.Warehouses.UpdateWarehouse;
+using AccountabilityInformationSystem.Api.Features.Warehouses.Create;
+using AccountabilityInformationSystem.Api.Features.Warehouses.Update;
 using AccountabilityInformationSystem.Api.Shared.Services.Sorting;
 
 namespace AccountabilityInformationSystem.Api.Features.Warehouses.Shared;

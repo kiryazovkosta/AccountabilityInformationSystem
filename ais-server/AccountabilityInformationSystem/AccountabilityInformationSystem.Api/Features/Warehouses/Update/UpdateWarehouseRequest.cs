@@ -1,4 +1,4 @@
-namespace AccountabilityInformationSystem.Api.Features.Warehouses.UpdateWarehouse;
+namespace AccountabilityInformationSystem.Api.Features.Warehouses.Update;
 
 public sealed record UpdateWarehouseRequest
 {

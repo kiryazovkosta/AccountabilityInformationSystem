@@ -1,12 +1,12 @@
 using AccountabilityInformationSystem.Api.Domain.Entities.Flow;
-using AccountabilityInformationSystem.Api.Features.Warehouses.CreateWarehouse;
-using AccountabilityInformationSystem.Api.Features.Warehouses.Shared;
-using AccountabilityInformationSystem.Api.Features.Warehouses.UpdateWarehouse;
+using AccountabilityInformationSystem.Api.Domain.Entities.Identity;
+using AccountabilityInformationSystem.Api.Features.Warehouses.Create;
+using AccountabilityInformationSystem.Api.Features.Warehouses.Update;
 using AccountabilityInformationSystem.Api.Infrastructure.Data;
 using AccountabilityInformationSystem.Api.Shared.Services.UserContexting;
 using Microsoft.EntityFrameworkCore;
 
-namespace AccountabilityInformationSystem.Api.Features.Warehouses;
+namespace AccountabilityInformationSystem.Api.Features.Warehouses.Shared;
 
 public sealed class WarehousesService(
     ApplicationDbContext db,
@@ -19,7 +19,7 @@ public sealed class WarehousesService(
         CreateWarehouseRequest request,
         CancellationToken cancellationToken)
     {
-        var user = await userContext.GetUserAsync(cancellationToken);
+        User? user = await userContext.GetUserAsync(cancellationToken);
         if (user is null)
         {
             throw new UnauthorizedAccessException("Unauthorized");
@@ -45,7 +45,7 @@ public sealed class WarehousesService(
         UpdateWarehouseRequest request,
         CancellationToken cancellationToken)
     {
-        var user = await userContext.GetUserAsync(cancellationToken);
+        User? user = await userContext.GetUserAsync(cancellationToken);
         if (user is null)
         {
             throw new UnauthorizedAccessException("Unauthorized");

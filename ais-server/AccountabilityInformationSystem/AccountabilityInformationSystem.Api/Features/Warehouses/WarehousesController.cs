@@ -1,19 +1,21 @@
 using System.Dynamic;
-using AccountabilityInformationSystem.Api.Infrastructure.Data;
+using AccountabilityInformationSystem.Api.Domain.Entities.Abstraction;
 using AccountabilityInformationSystem.Api.Domain.Entities.Flow;
-using AccountabilityInformationSystem.Api.Domain.Entities.Identity;
+using AccountabilityInformationSystem.Api.Features.Warehouses.Shared;
+using AccountabilityInformationSystem.Api.Features.Warehouses.Delete;
+using AccountabilityInformationSystem.Api.Features.Warehouses.Update;
+using AccountabilityInformationSystem.Api.Infrastructure.Data;
+using AccountabilityInformationSystem.Api.Shared;
 using AccountabilityInformationSystem.Api.Shared.Extensions;
 using AccountabilityInformationSystem.Api.Shared.Models;
-using AccountabilityInformationSystem.Api.Features.Warehouses.Shared;
-using AccountabilityInformationSystem.Api.Features.Warehouses.CreateWarehouse;
-using AccountabilityInformationSystem.Api.Features.Warehouses.UpdateWarehouse;
 using AccountabilityInformationSystem.Api.Shared.Services.DataShaping;
 using AccountabilityInformationSystem.Api.Shared.Services.Sorting;
-using AccountabilityInformationSystem.Api.Shared.Services.UserContexting;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Wolverine;
+using AccountabilityInformationSystem.Api.Features.Warehouses.Create;
 
 namespace AccountabilityInformationSystem.Api.Features.Warehouses;
 
@@ -22,7 +24,7 @@ namespace AccountabilityInformationSystem.Api.Features.Warehouses;
 [Authorize]
 public sealed class WarehousesController(
     ApplicationDbContext dbContext,
-    UserContext userContext) : ControllerBase
+    IMessageBus bus) : ApiController
 {
     [HttpGet]
     public async Task<IActionResult> GetWarehouses(
@@ -107,96 +109,37 @@ public sealed class WarehousesController(
     }
 
     [HttpPost]
-    public async Task<ActionResult<WarehouseResponse>> CreateWarehouse(
+    public async Task<IActionResult> CreateWarehouse(
         [FromBody] CreateWarehouseRequest request,
         IValidator<CreateWarehouseRequest> validator,
         CancellationToken cancellationToken)
     {
         await validator.ValidateAndThrowAsync(request, cancellationToken);
-
-        User? user = await userContext.GetUserAsync(cancellationToken);
-        if (user is null)
+        Result<WarehouseResponse> result = await bus.InvokeAsync<Result<WarehouseResponse>>(request, cancellationToken);
+        if (result.IsFailure)
         {
-            return Problem(statusCode: StatusCodes.Status401Unauthorized, detail: "Unauthorized");
+            return result.ToActionResult();
         }
 
-        if (await dbContext.Warehouses.AnyAsync(w => w.ExciseNumber == request.ExciseNumber, cancellationToken))
-        {
-            return Problem(
-                detail: "Warehouse with the same name or excise number already exists!",
-                statusCode: StatusCodes.Status409Conflict);
-        }
-
-        Warehouse warehouse = request.ToEntity(user.Email);
-        await dbContext.Warehouses.AddAsync(warehouse, cancellationToken);
-        await dbContext.SaveChangesAsync(cancellationToken);
-        WarehouseResponse warehouseResponse = warehouse.ToResponse();
-        return CreatedAtAction(nameof(GetWarehouseById), new { id = warehouse.Id }, warehouseResponse);
+        return CreatedAtAction(nameof(GetWarehouseById), new { id = result.Value!.Id }, result.Value);
     }
 
     [HttpPut("{id}")]
-    public async Task<ActionResult> UpdateWarehouse(
+    public async Task<IActionResult> UpdateWarehouse(
         string id,
         [FromBody] UpdateWarehouseRequest request,
         IValidator<UpdateWarehouseRequest> validator,
         CancellationToken cancellationToken)
     {
-        User? user = await userContext.GetUserAsync(cancellationToken);
-        if (user is null)
-        {
-            return Problem(statusCode: StatusCodes.Status401Unauthorized, detail: "Unauthorized");
-        }
-
         await validator.ValidateAndThrowAsync(request, cancellationToken);
-
-        bool exciseNumberExists = await dbContext
-            .Warehouses
-            .AnyAsync(w => w.ExciseNumber == request.ExciseNumber && w.Id != id, cancellationToken);
-        if (exciseNumberExists)
-        {
-            return Problem(
-                detail: "Warehouse with the same excise number already exists!",
-                statusCode: StatusCodes.Status409Conflict);
-        }
-
-        Warehouse? warehouse = await dbContext
-            .Warehouses
-            .FirstOrDefaultAsync(warehouse => warehouse.Id == id, cancellationToken);
-        if (warehouse is null)
-        {
-            return Problem(
-                detail: "Warehouse with specific id does not exists!",
-                statusCode: StatusCodes.Status400BadRequest);
-        }
-
-        warehouse.UpdateFromRequest(request, user.Email);
-        await dbContext.SaveChangesAsync(cancellationToken);
-
-        return NoContent();
+        Result result = await bus.InvokeAsync<Result>(new UpdateWarehouseCommand(id, request), cancellationToken);
+        return result.ToActionResult();
     }
 
     [HttpDelete("{id}")]
-    public async Task<ActionResult> DeleteWarehouse(string id, CancellationToken cancellationToken)
+    public async Task<IActionResult> DeleteWarehouse(string id, CancellationToken cancellationToken)
     {
-        Warehouse? warehouse = await dbContext
-            .Warehouses
-            .Include(warehouse => warehouse.Ikunks)
-            .FirstOrDefaultAsync(warehouse => warehouse.Id == id, cancellationToken);
-        if (warehouse is null)
-        {
-            return Problem(
-                detail: "Warehouse with specific id does not exists!",
-                statusCode: StatusCodes.Status400BadRequest);
-        }
-
-        if (warehouse.Ikunks.Count > 0)
-        {
-            return Problem(
-                detail: "Cannot delete warehouse with associated ikunks!",
-                statusCode: StatusCodes.Status400BadRequest);
-        }
-
-        await dbContext.SaveChangesAsync(cancellationToken);
-        return NoContent();
+        Result result = await bus.InvokeAsync<Result>(new DeleteWarehouseRequest(id), cancellationToken);
+        return result.ToActionResult();
     }
 }

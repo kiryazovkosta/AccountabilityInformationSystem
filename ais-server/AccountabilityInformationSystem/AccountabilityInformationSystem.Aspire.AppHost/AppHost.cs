@@ -29,7 +29,7 @@ builder.Eventing.Subscribe<BeforeStartEvent>(async (ev, ct) =>
 
     if (!File.Exists(certPath))
     {
-        ProcessStartInfo psi = new ProcessStartInfo
+        ProcessStartInfo psi = new()
         {
             FileName = "dotnet",
             Arguments = $"dev-certs https --export-path \"{certPath}\" --format Pem --no-password",

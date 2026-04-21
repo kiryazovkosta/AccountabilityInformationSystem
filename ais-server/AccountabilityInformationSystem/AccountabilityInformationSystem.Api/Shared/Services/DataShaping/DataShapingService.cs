@@ -112,9 +112,4 @@ public sealed class DataShapingService
 
         return fields;
     }
-
-    internal List<ExpandoObject> ShapeCollectionData(List<MeasurementPointDataListResponse> measurementPointDataListResponses, string? fields, object value)
-    {
-        throw new NotImplementedException();
-    }
 }

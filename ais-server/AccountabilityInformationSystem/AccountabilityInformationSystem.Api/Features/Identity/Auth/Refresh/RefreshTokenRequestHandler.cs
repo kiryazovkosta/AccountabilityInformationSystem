@@ -16,8 +16,8 @@ public class RefreshTokenRequestHandler(
     UserManager<IdentityUser> userManager,
     ApplicationIdentityDbContext identityDbContext,
     TokenProvider tokenProvider,
-    IOptions<JwtAuthOptions> options
-    )
+    IOptions<JwtAuthOptions> options,
+    TimeProvider timeProvider)
 {
     private readonly JwtAuthOptions _jwtAuthOptions = options.Value;
 
@@ -27,7 +27,7 @@ public class RefreshTokenRequestHandler(
             .Include(rt => rt.User)
             .FirstOrDefaultAsync(rt => rt.Token == request.RefreshToken, cancellationToken);
 
-        if (storedToken == null || storedToken.ExpiresAt < DateTime.UtcNow)
+        if (storedToken == null || storedToken.ExpiresAt < timeProvider.GetUtcNow().UtcDateTime)
         {
             return Result<AccessTokenResponse>.Failure(
                 new Error("Unauthorized", "Token expired or invalid."),
@@ -43,7 +43,7 @@ public class RefreshTokenRequestHandler(
         AccessTokenResponse response = tokenProvider.Create(accessTokenRequest);
 
         storedToken.Token = response.RefreshToken;
-        storedToken.ExpiresAt = DateTime.UtcNow.AddDays(_jwtAuthOptions.RefreshTokenExpirationDays);
+        storedToken.ExpiresAt = timeProvider.GetUtcNow().UtcDateTime.AddDays(_jwtAuthOptions.RefreshTokenExpirationDays);
         identityDbContext.RefreshTokens.Update(storedToken);
         await identityDbContext.SaveChangesAsync(cancellationToken);
 

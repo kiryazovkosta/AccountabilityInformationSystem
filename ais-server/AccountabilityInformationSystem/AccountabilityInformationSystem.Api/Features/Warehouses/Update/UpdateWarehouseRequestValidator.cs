@@ -1,7 +1,7 @@
 using AccountabilityInformationSystem.Api.Shared.Constants;
 using FluentValidation;
 
-namespace AccountabilityInformationSystem.Api.Features.Warehouses.UpdateWarehouse;
+namespace AccountabilityInformationSystem.Api.Features.Warehouses.Update;
 
 internal sealed class UpdateWarehouseRequestValidator : AbstractValidator<UpdateWarehouseRequest>
 {

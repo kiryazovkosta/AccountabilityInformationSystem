@@ -1,7 +1,8 @@
+using AccountabilityInformationSystem.Api.Features.Warehouses.Create;
 using AccountabilityInformationSystem.Api.Shared.Constants;
 using FluentValidation;
 
-namespace AccountabilityInformationSystem.Api.Features.Warehouses.CreateWarehouse;
+namespace AccountabilityInformationSystem.Api.Features.Warehouses.Create;
 
 internal sealed class CreateWarehouseRequestValidator : AbstractValidator<CreateWarehouseRequest>
 {

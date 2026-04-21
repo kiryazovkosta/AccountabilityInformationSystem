@@ -234,6 +234,7 @@ public static class WebApplicationBuilderExtensions
         builder.Services.AddHttpContextAccessor();
         builder.Services.AddTransient<LinkService>();
 
+        builder.Services.AddSingleton(TimeProvider.System);
         builder.Services.AddTransient<TokenProvider>();
 
         builder.Services.AddMemoryCache();
