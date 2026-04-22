@@ -5,8 +5,8 @@ using AccountabilityInformationSystem.IntegrationTests.Infrastructure;
 
 namespace AccountabilityInformationSystem.IntegrationTests.Features.Identity.Auth;
 
-[Collection(AisIntegrationTestCollection.Name)]
-public sealed class RegisterUserTests(AisWebApplicationFactory factory)
+[Collection(AisAuthIntegrationTestCollection.Name)]
+public sealed class RegisterUserTests(AisAuthWebApplicationFactory factory)
 {
     private readonly HttpClient _client = factory.CreateClient();
 
@@ -28,8 +28,10 @@ public sealed class RegisterUserTests(AisWebApplicationFactory factory)
 
         // Act
         HttpResponseMessage response = await _client.PostAsJsonAsync(
-            "/api/identity/auth/register", request,
+            Routes.Auth.Register, 
+            request,
             TestContext.Current.CancellationToken);
+        response.EnsureSuccessStatusCode();
 
         // Assert
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
@@ -50,7 +52,8 @@ public sealed class RegisterUserTests(AisWebApplicationFactory factory)
         };
 
         HttpResponseMessage response = await _client.PostAsJsonAsync(
-            "/api/identity/auth/register", request,
+            Routes.Auth.Register, 
+            request,
             TestContext.Current.CancellationToken);
 
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
@@ -71,11 +74,13 @@ public sealed class RegisterUserTests(AisWebApplicationFactory factory)
         };
 
         await _client.PostAsJsonAsync(
-            "/api/identity/auth/register", request,
+            Routes.Auth.Register, 
+            request,
             TestContext.Current.CancellationToken);
 
         HttpResponseMessage response = await _client.PostAsJsonAsync(
-            "/api/identity/auth/register", request,
+            Routes.Auth.Register, 
+            request,
             TestContext.Current.CancellationToken);
 
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);

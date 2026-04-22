@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿namespace AccountabilityInformationSystem.IntegrationTests.Infrastructure;
 
-namespace AccountabilityInformationSystem.IntegrationTests.Infrastructure;
-
-public abstract class AisIntegrationTestFixture(AisWebApplicationFactory factory) 
-    : IClassFixture<AisWebApplicationFactory>
+public abstract class AisIntegrationTestFixture(AisAuthWebApplicationFactory factory)
+    : IClassFixture<AisAuthWebApplicationFactory>
 {
     public HttpClient CreateClient() => factory.CreateClient();
 }
