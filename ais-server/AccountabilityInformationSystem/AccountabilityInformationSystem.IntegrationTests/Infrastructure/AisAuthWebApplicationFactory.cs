@@ -58,7 +58,7 @@ public class AisAuthWebApplicationFactory : WebApplicationFactory<Program>, IAsy
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
-        builder.UseEnvironment("Testing");
+        builder.UseEnvironment("Development");
 
         builder.UseSetting(
             "ConnectionStrings:AccountabilityInformationSystemDb",
