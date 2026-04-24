@@ -1,0 +1,15 @@
+{
+  "$schema": "https://aka.ms/azure/static-web-apps-cli/schema",
+  "configurations": {
+    "ais-ui-client": {
+      "appLocation": ".",
+      "outputLocation": "dist/ais-client/browser",
+      "appBuildCommand": "npm run build",
+      "run": "npm start",
+      "appDevserverUrl": "http://localhost:4200",
+      "navigationFallback": {
+        "rewrite": "/index.html"
+      }
+    }
+  }
+}

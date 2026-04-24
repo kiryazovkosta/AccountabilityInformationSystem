@@ -22,11 +22,10 @@ builder
 WebApplication app = builder.Build();
 
 app.MapDefaultEndpoints();
+app.MapOpenApi();
+app.MapScalarApiReference();
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
-    app.MapScalarApiReference();
-
     await app.ApplyMigrationAsync();
 }
 

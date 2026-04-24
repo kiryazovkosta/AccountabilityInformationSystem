@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiBaseUrl: 'https://api.ais.com/',
+  apiBaseUrl: 'https://ais-api-ctexecaagrhfepdf.westeurope-01.azurewebsites.net/',
 };
