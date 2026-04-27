@@ -11,7 +11,7 @@ export class ToastService {
     const id = crypto.randomUUID();
     this.toasts.update((toast) => [...toast, {id, message, type}]);
 
-    setTimeout(() => this.remove(id), 8000);
+    setTimeout(() => this.remove(id), 5000);
   }
 
   remove(id: string) {

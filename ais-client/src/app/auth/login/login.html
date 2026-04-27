@@ -2,8 +2,8 @@
   <div class="app-auth-card max-w-md">
     <h1 class="app-header-1">Login</h1>
     <h3 class="app-header-3">Use this form to login if you have account</h3>
-    @if (loginError()) {
-      <div class=error-summary>{{loginError()}}</div>
+    @if (httpErrorService.errorDetail()) {
+      <div class=error-summary>{{httpErrorService.errorDetail()}}</div>
     }
     <form class="app-form">
       <label class="app-form-label">
@@ -44,6 +44,15 @@
       <button type="button" class="app-primary-button" (click)="onSubmit()" [disabled]="loginForm().submitting()">
         Log In
       </button>
+
+      <div>
+        <p>
+          You can register from <a class="link" routerLink="{{ Paths.REGISTER }}">here</a>
+        </p>
+        <p>
+          Resend confirmation email from <a class="link" routerLink="{{ Paths.RESEND_CONFIRMATION }}">here</a>
+        </p>
+      </div>
     </form>
   </div>
 </div>

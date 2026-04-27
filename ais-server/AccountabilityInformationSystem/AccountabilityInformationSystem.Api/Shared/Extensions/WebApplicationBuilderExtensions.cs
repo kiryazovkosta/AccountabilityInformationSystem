@@ -27,6 +27,7 @@ using AccountabilityInformationSystem.Api.Shared.Services.Seeding;
 using AccountabilityInformationSystem.Api.Shared.Services.Sorting;
 using AccountabilityInformationSystem.Api.Shared.Services.Tokenizing;
 using AccountabilityInformationSystem.Api.Features.Identity.Auth.Login;
+using AccountabilityInformationSystem.Api.Features.Identity.Auth.Shared;
 using AccountabilityInformationSystem.Api.Shared.Services.UserContexting;
 using Asp.Versioning;
 using FluentValidation;
@@ -246,9 +247,17 @@ public static class WebApplicationBuilderExtensions
         builder.Services.AddHostedService<RoleSeedingService>();
 
         builder.Services.Configure<SmtpOptions>(builder.Configuration.GetSection(SmtpOptions.SectionName));
-        builder.Services.AddScoped<IEmailSender, MailKitEmailSender>();
+        if (builder.Environment.IsProduction())
+        {
+            builder.Services.AddScoped<IEmailSender, BrevoSmtpEmailSender>();
+        }
+        else
+        {
+            builder.Services.AddScoped<IEmailSender, MailKitEmailSender>();
+        }
 
         builder.Services.Configure<FrontendOptions>(builder.Configuration.GetSection(FrontendOptions.SectionName));
+        builder.Services.AddTransient<EmailConfirmationService>();
 
         return builder;
     }

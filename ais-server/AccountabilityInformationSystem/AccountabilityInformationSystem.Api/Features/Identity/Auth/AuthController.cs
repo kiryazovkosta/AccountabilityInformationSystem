@@ -10,6 +10,7 @@ using AccountabilityInformationSystem.Api.Features.Identity.Auth.ConfirmEmail;
 using AccountabilityInformationSystem.Api.Features.Identity.Auth.Login;
 using AccountabilityInformationSystem.Api.Features.Identity.Auth.Refresh;
 using AccountabilityInformationSystem.Api.Features.Identity.Auth.Register;
+using AccountabilityInformationSystem.Api.Features.Identity.Auth.ResendEmailConfirmation;
 using AccountabilityInformationSystem.Api.Features.Identity.Auth.Shared;
 using AccountabilityInformationSystem.Api.Features.Identity.Auth.TwoFactor.SetupTwoFactor;
 using AccountabilityInformationSystem.Api.Features.Identity.Auth.TwoFactor.VerifyTwoFactor;
@@ -122,6 +123,16 @@ public sealed class AuthController(
     {
         Result<VerifyTwoFactorResponse> result = await bus.InvokeAsync<Result<VerifyTwoFactorResponse>>(request);
         return result.ToActionResult() ;
+    }
+
+    [HttpGet("resend-email-confirmation", Name = "ResendEmailConfirmationRoute")]
+    [AllowAnonymous]
+    [IgnoreAntiforgeryToken]
+    public async Task<IActionResult> ResendEmailConfirmation(string email, CancellationToken cancellationToken)
+    {
+        ResendEmailConfirmationRequest request = new(email);
+        Result result = await bus.InvokeAsync<Result>(request, cancellationToken);
+        return result.ToActionResult();
     }
 
 

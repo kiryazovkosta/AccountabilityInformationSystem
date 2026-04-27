@@ -11,4 +11,10 @@ input[type='checkbox'] {
   accent-color: #ee1431;
 }
 
+.link {
+  text-decoration: none;
+  font-weight: 600;
+  color: blue;
+}
+
 

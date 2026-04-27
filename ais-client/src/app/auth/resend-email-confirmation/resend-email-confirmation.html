@@ -1,0 +1,24 @@
+<div class="app-auth-page">
+  <div class="app-auth-card max-w-md">
+    <h1 class="app-header-1">ResendEmailConfirmation</h1>
+    <h3 class="app-header-3">Use this form to resend a confirmation email</h3>
+
+    <form class="app-form" [formRoot]="resendForm">
+      <label class="app-form-label">
+        Email:
+        <input type="email" class="app-form-input" [formField]="resendForm.email" autocomplete="email" />
+        <app-form-error [fieldRef]="resendForm.email" />
+      </label>
+
+      <button type="submit" class="app-primary-button" 
+        [disabled]="resendForm().submitting()" 
+        [aria-busy]="resendForm().submitting()">
+        @if ( resendForm().submitting()) {
+        Resending ...
+        } @else {
+        Resend
+        }
+    </button>
+    </form>
+  </div>
+</div>

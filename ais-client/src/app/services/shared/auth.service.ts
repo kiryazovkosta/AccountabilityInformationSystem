@@ -1,5 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable, signal } from '@angular/core';
+import { rxResource } from '@angular/core/rxjs-interop';
 import { LoginUserRequest } from '../../auth/login/login-user.request';
 import { Observable, of } from 'rxjs';
 import { catchError, map, tap } from 'rxjs/operators';
@@ -7,6 +8,7 @@ import { LogoutResponse } from '../../auth/logout/logout.response';
 import { RegisterUserRequest } from '../../auth/register-user/register-user.request';
 import { environment } from '../../../environments/environment';
 import { Endpoints } from '../../common/endpoints-config';
+import { ResendEmailConfirmationRequest } from '../../auth/resend-email-confirmation/resend-email-confirmation-request';
 
 export interface ConfirmEmailResponse {
   requiresTwoFactorSetup: boolean;
@@ -39,6 +41,17 @@ export class AuthService {
 
     public isLoggedIn = this._isLoggedIn.asReadonly();
 
+    private resendPayload = signal<ResendEmailConfirmationRequest | undefined>(undefined);
+
+    readonly resendEmailConfirmation = rxResource({
+        params: () => this.resendPayload(),
+        stream: ({ params }) =>
+            this.httpClient.get(
+                `${environment.apiBaseUrl}${Endpoints.resendConfirmationEmail}`,
+                { params: { ...params }, withCredentials: true }
+            )
+    });
+
     register(request: RegisterUserRequest): Observable<boolean> {
         return this.httpClient.post(`${environment.apiBaseUrl}${Endpoints.register}`,
             request, { observe: 'response', withCredentials: true })
@@ -52,6 +65,10 @@ export class AuthService {
             `${environment.apiBaseUrl}${Endpoints.confirmEmail}`,
             { params: { userId, code }, withCredentials: true }
         );
+    }
+
+    resendEmail(request: ResendEmailConfirmationRequest) {
+        this.resendPayload.set(request);
     }
 
     setup2fa(setupToken: string): Observable<Setup2faResponse> {

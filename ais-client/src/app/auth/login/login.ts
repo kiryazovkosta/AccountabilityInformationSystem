@@ -1,14 +1,15 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
-import { form, FormField, required, email, submit } from '@angular/forms/signals'
-import { Router } from '@angular/router';
+import { form, FormField, required, submit } from '@angular/forms/signals'
+import { Router, RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { LoginUserRequest } from './login-user.request';
 import { AuthService } from '../../services/shared/auth.service';
+import { HttpErrorService } from '../../services/shared/http-error.service';
 import { APP_ROUTES } from '../../common/app-routes';
 
 @Component({
   selector: 'app-login',
-  imports: [FormField],
+  imports: [FormField, RouterLink],
   templateUrl: './login.html',
   styleUrl: './login.css',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -16,15 +17,15 @@ import { APP_ROUTES } from '../../common/app-routes';
 export class Login {
   private readonly authService: AuthService = inject(AuthService);
   private readonly router: Router = inject(Router);
+  protected readonly httpErrorService = inject(HttpErrorService);
 
   loginRequest = signal<LoginUserRequest>({
     username: '',
     password: '',
-    remember: false, 
+    remember: false,
     code: ''
   });
 
-  loginError = signal<string | null>(null);
   loading = signal<boolean>(false);
 
   loginForm = form(this.loginRequest, (schemaPath) => {
@@ -32,10 +33,12 @@ export class Login {
     required(schemaPath.password, {message: 'Password is required'});
   });
 
+  readonly Paths = APP_ROUTES;
+
   async onSubmit() {
+    this.httpErrorService.clear();
     await submit(this.loginForm, async () => {
       this.loading.set(true);
-      this.loginError.set(null);
       try {
         const loginResult = await firstValueFrom(this.authService.login(this.loginRequest()));
         if ('success' in loginResult) {
@@ -44,7 +47,7 @@ export class Login {
           this.router.navigate([APP_ROUTES.SETUP_2FA], { state: { setupToken: loginResult.setupToken } });
         }
       } catch {
-        this.loginError.set('Invalid email or password.');
+        // interceptor already handled the error and showed a toast
       } finally {
         this.loading.set(false);
       }
