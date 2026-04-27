@@ -36,7 +36,7 @@ jobs:
       working-directory: ais-server/AccountabilityInformationSystem
 
     - name: Test
-      run: dotnet test AccountabilityInformationSystem.sln --configuration Release --no-restore --no-build --verbosity normail
+      run: dotnet test AccountabilityInformationSystem.sln --configuration Release --no-restore --no-build --verbosity normal
       working-directory: ais-server/AccountabilityInformationSystem
 
     - name: Publish
