@@ -1,5 +1,5 @@
 using AccountabilityInformationSystem.Api.Domain.Entities;
-using AccountabilityInformationSystem.Api.Features.ProductTypes.CreateProductType;
+using AccountabilityInformationSystem.Api.Features.ProductTypes.Create;
 using AccountabilityInformationSystem.Api.Shared.Services.Sorting;
 
 namespace AccountabilityInformationSystem.Api.Features.ProductTypes.Shared;
@@ -32,11 +32,11 @@ internal static class ProductTypeMappings
             Id = productType.Id,
             Name = productType.Name,
             FullName = productType.FullName,
-            Products = productType.Products.Select(p => new ProductTypeProductResponse()
+            Products = [..productType.Products.Select(p => new ProductTypeProductResponse()
             {
                 Id = p.Id,
                 Code = p.Code,
                 FullName = p.FullName,
-            }).ToList()
+            })]
         };
 }

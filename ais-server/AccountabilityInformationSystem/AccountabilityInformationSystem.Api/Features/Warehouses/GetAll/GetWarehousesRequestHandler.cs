@@ -36,6 +36,8 @@ public sealed class GetWarehousesRequestHandler(
 
         IQueryable<WarehouseResponse> warehousesQuery = dbContext
             .Warehouses
+            .Include(w => w.Ikunks)
+            .ThenInclude(i => i.MeasurementPoints)
             .Where(mp =>
                 request.Search == null ||
                 EF.Functions.Like(mp.Name, $"%{request.Search}%") ||

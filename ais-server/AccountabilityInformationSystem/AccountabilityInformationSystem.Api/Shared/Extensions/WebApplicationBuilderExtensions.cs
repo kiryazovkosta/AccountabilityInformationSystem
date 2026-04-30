@@ -3,12 +3,10 @@ using System.Text;
 using AccountabilityInformationSystem.Api.Domain.Entities;
 using AccountabilityInformationSystem.Api.Domain.Entities.Excise;
 using AccountabilityInformationSystem.Api.Domain.Entities.Flow;
-using AccountabilityInformationSystem.Api.Features.ExciseNomenclatures.ApCodes.CreateApCode;
-using AccountabilityInformationSystem.Api.Features.ExciseNomenclatures.BrandNames.CreateBrandName;
-using AccountabilityInformationSystem.Api.Features.ExciseNomenclatures.CnCodes.CreateCnCode;
+using AccountabilityInformationSystem.Api.Features.ExciseNomenclatures.ApCodes.Create;
+using AccountabilityInformationSystem.Api.Features.ExciseNomenclatures.BrandNames.Create;
+using AccountabilityInformationSystem.Api.Features.ExciseNomenclatures.CnCodes.Create;
 using AccountabilityInformationSystem.Api.Features.ExciseNomenclatures.Shared;
-using AccountabilityInformationSystem.Api.Features.ExciseNomenclatures.Shared.CreateExciseNomenclature;
-using AccountabilityInformationSystem.Api.Features.ExciseNomenclatures.Shared.CreateExciseNomenclatureBatch;
 using AccountabilityInformationSystem.Api.Features.Flow.Ikunks.Shared;
 using AccountabilityInformationSystem.Api.Features.Flow.MeasurementPoints.Shared;
 using AccountabilityInformationSystem.Api.Features.Flow.MeasurementPointsData.Shared;
@@ -49,6 +47,8 @@ using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using Wolverine;
+using AccountabilityInformationSystem.Api.Features.ExciseNomenclatures.Shared.Create;
+using AccountabilityInformationSystem.Api.Features.ExciseNomenclatures.Shared.CreateBatch;
 
 namespace AccountabilityInformationSystem.Api.Shared.Extensions;
 
@@ -234,6 +234,7 @@ public static class WebApplicationBuilderExtensions
 
         builder.Services.AddHttpContextAccessor();
         builder.Services.AddTransient<LinkService>();
+        builder.Services.AddTransient<MeasuringPointLinkService>();
 
         builder.Services.AddSingleton(TimeProvider.System);
         builder.Services.AddTransient<TokenProvider>();

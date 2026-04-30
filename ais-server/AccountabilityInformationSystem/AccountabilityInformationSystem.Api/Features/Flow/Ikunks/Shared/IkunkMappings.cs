@@ -1,6 +1,6 @@
 using AccountabilityInformationSystem.Api.Domain.Entities.Flow;
-using AccountabilityInformationSystem.Api.Features.Flow.Ikunks.CreateIkunk;
-using AccountabilityInformationSystem.Api.Features.Flow.Ikunks.UpdateIkunk;
+using AccountabilityInformationSystem.Api.Features.Flow.Ikunks.Create;
+using AccountabilityInformationSystem.Api.Features.Flow.Ikunks.Update;
 using AccountabilityInformationSystem.Api.Shared.Services.Sorting;
 
 namespace AccountabilityInformationSystem.Api.Features.Flow.Ikunks.Shared;

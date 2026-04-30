@@ -1,0 +1,15 @@
+namespace AccountabilityInformationSystem.Api.Features.ExciseNomenclatures.Shared.Create;
+
+public record CreateExciseNomenclatureRequest
+{
+    public string Code { get; set; }
+    public string BgDescription { get; set; }
+    public string? DescriptionEn { get; set; }
+    public bool IsUsed { get; set; }
+}
+
+public sealed record CreateExciseNomenclatureBatchRequest<TCreateRequest>
+    where TCreateRequest : CreateExciseNomenclatureRequest
+{
+    public required List<TCreateRequest> Entries { get; init; }
+}

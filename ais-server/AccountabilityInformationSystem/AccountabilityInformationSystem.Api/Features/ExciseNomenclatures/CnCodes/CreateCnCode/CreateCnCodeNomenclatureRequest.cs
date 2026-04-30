@@ -1,5 +1,0 @@
-using AccountabilityInformationSystem.Api.Features.ExciseNomenclatures.Shared.CreateExciseNomenclature;
-
-namespace AccountabilityInformationSystem.Api.Features.ExciseNomenclatures.CnCodes.CreateCnCode;
-
-public sealed record CreateCnCodeNomenclatureRequest : CreateExciseNomenclatureRequest;

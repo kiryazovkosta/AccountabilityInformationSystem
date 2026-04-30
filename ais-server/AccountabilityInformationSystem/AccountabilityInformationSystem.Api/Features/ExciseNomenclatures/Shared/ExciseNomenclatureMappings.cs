@@ -1,7 +1,7 @@
 using AccountabilityInformationSystem.Api.Domain.Entities.Abstraction;
 using AccountabilityInformationSystem.Api.Domain.Entities.Excise;
-using AccountabilityInformationSystem.Api.Features.ExciseNomenclatures.Shared.CreateExciseNomenclature;
-using AccountabilityInformationSystem.Api.Features.ExciseNomenclatures.Shared.UpdateExciseNomenclature;
+using AccountabilityInformationSystem.Api.Features.ExciseNomenclatures.Shared.Create;
+using AccountabilityInformationSystem.Api.Features.ExciseNomenclatures.Shared.Update;
 using AccountabilityInformationSystem.Api.Shared.Services.Sorting;
 
 namespace AccountabilityInformationSystem.Api.Features.ExciseNomenclatures.Shared;
@@ -75,7 +75,7 @@ public static class ExciseNomenclatureMappings
     {
         entity.Code = request.Code ?? entity.Code;
         entity.BgDescription = request.BgDescription ?? entity.BgDescription;
-        entity.DescriptionEn = request.DescriptionEn ?? entity.BgDescription;
+        entity.DescriptionEn = request.DescriptionEn ?? entity.DescriptionEn;
         entity.IsUsed = request.IsUsed ?? entity.IsUsed;
         entity.ModifiedBy = userName;
         entity.ModifiedAt = DateTime.UtcNow;

@@ -1,4 +1,4 @@
-﻿using AccountabilityInformationSystem.Api.Features.ExciseNomenclatures.CnCodes.CreateCnCode;
+﻿using AccountabilityInformationSystem.Api.Features.ExciseNomenclatures.CnCodes.Create;
 using AccountabilityInformationSystem.Api.Shared.Constants;
 using FluentValidation.Results;
 using System.Linq;

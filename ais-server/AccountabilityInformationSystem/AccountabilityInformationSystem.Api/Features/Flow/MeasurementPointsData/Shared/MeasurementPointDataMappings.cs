@@ -1,5 +1,5 @@
 using AccountabilityInformationSystem.Api.Domain.Entities.Flow;
-using AccountabilityInformationSystem.Api.Features.Flow.MeasurementPointsData.CreateMeasurementPointData;
+using AccountabilityInformationSystem.Api.Features.Flow.MeasurementPointsData.Create;
 using AccountabilityInformationSystem.Api.Shared.Extensions;
 using AccountabilityInformationSystem.Api.Shared.Models;
 using AccountabilityInformationSystem.Api.Shared.Services.Sorting;

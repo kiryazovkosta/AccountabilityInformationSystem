@@ -1,0 +1,5 @@
+using AccountabilityInformationSystem.Api.Features.ExciseNomenclatures.Shared.Create;
+
+namespace AccountabilityInformationSystem.Api.Features.ExciseNomenclatures.ApCodes.Create;
+
+public sealed record CreateApCodeNomenclatureRequest : CreateExciseNomenclatureRequest;

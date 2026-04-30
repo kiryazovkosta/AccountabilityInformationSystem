@@ -1,6 +1,4 @@
-using AccountabilityInformationSystem.Api.Domain.Entities.Abstraction;
-
-namespace AccountabilityInformationSystem.Api;
+namespace AccountabilityInformationSystem.Api.Domain.Entities.Abstraction;
 
 public sealed record ErrorData(int Status, string Title, string Type)
 {

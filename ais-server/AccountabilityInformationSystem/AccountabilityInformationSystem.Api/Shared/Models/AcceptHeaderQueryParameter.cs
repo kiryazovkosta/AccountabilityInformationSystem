@@ -4,7 +4,7 @@ using Microsoft.Net.Http.Headers;
 
 namespace AccountabilityInformationSystem.Api.Shared.Models;
 
-public record AcceptHeaderQueryParameter
+public record AcceptHeaderQueryParameter    
 {
     [FromHeader(Name = "Accept")]
     public string? Accept { get; init; }

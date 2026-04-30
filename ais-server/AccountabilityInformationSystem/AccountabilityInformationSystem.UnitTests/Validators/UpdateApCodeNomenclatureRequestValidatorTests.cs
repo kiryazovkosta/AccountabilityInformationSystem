@@ -1,5 +1,5 @@
-using AccountabilityInformationSystem.Api.Features.ExciseNomenclatures.ApCodes.UpdateApCode;
-using AccountabilityInformationSystem.Api.Features.ExciseNomenclatures.Shared.UpdateExciseNomenclature;
+using AccountabilityInformationSystem.Api.Features.ExciseNomenclatures.ApCodes.Update;
+using AccountabilityInformationSystem.Api.Features.ExciseNomenclatures.Shared.Update;
 using AccountabilityInformationSystem.Api.Shared.Constants;
 using FluentValidation.Results;
 using System.Linq;

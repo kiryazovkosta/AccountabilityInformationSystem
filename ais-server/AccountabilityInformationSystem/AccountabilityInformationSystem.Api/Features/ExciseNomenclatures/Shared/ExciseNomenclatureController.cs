@@ -1,230 +1,121 @@
 using System.Dynamic;
-using AccountabilityInformationSystem.Api.Infrastructure.Data;
 using AccountabilityInformationSystem.Api.Domain.Entities.Abstraction;
-using AccountabilityInformationSystem.Api.Domain.Entities.Identity;
+using AccountabilityInformationSystem.Api.Features.ExciseNomenclatures.Shared.Create;
+using AccountabilityInformationSystem.Api.Features.ExciseNomenclatures.Shared.GetAll;
+using AccountabilityInformationSystem.Api.Features.ExciseNomenclatures.Shared.GetById;
+using AccountabilityInformationSystem.Api.Features.ExciseNomenclatures.Shared.ToggleStatus;
+using AccountabilityInformationSystem.Api.Features.ExciseNomenclatures.Shared.Update;
 using AccountabilityInformationSystem.Api.Shared.Extensions;
 using AccountabilityInformationSystem.Api.Shared.Models;
-using AccountabilityInformationSystem.Api.Shared.Services.DataShaping;
-using AccountabilityInformationSystem.Api.Shared.Services.Sorting;
-using AccountabilityInformationSystem.Api.Shared.Services.UserContexting;
-using AccountabilityInformationSystem.Api.Features.ExciseNomenclatures.Shared.CreateExciseNomenclature;
-using AccountabilityInformationSystem.Api.Features.ExciseNomenclatures.Shared.UpdateExciseNomenclature;
-using AccountabilityInformationSystem.Api.Features.ExciseNomenclatures.Shared.GetExciseNomenclatures;
+using Wolverine;
 using Asp.Versioning;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace AccountabilityInformationSystem.Api.Features.ExciseNomenclatures.Shared;
 
 [ResponseCache(Duration = 120)]
 [Authorize]
 [ApiController]
+[ApiVersion(1.0)]
 public abstract class ExciseNomenclatureController<TEntity, TCreateRequest, TUpdateRequest> : ControllerBase
     where TEntity : AuditableEntity, IEntity, IExciseEntity, new()
-    where TCreateRequest: CreateExciseNomenclatureRequest
+    where TCreateRequest : CreateExciseNomenclatureRequest
     where TUpdateRequest : UpdateExciseNomenclatureRequest
 {
-    protected readonly ApplicationDbContext DbContext;
     protected abstract string EntityIdPrefix { get; }
-
-    protected ExciseNomenclatureController(ApplicationDbContext dbContext)
-    {
-        ArgumentNullException.ThrowIfNull(dbContext);
-        DbContext = dbContext;
-    }
 
     [HttpGet]
     [MapToApiVersion(1.0)]
     public async Task<IActionResult> GetAll(
         [FromQuery] ExciseNomenclatureQueryParameters query,
-        [FromServices] SortMappingProvider sortMappingProvider,
-        [FromServices] DataShapingService dataShapingService,
+        [FromServices] IMessageBus bus,
         CancellationToken cancellationToken)
     {
-        if (!sortMappingProvider.ValidateMappings<ExciseNomenclatureResponse, TEntity>(query.Sort))
-        {
-            return Problem(
-                statusCode: StatusCodes.Status400BadRequest,
-                detail: $"Invalid sort parameter. {query.Sort}");
-        }
-
-        if (!dataShapingService.Validate<ExciseNomenclatureResponse>(query.Fields))
-        {
-            return Problem(
-                statusCode: StatusCodes.Status400BadRequest,
-                detail: $"Invalid fields parameter. {query.Fields}");
-        }
-
-        query.Search = query.Search?.Trim().ToLower();
-
-        SortMapping[] sortMappings = sortMappingProvider.GetMappings<ExciseNomenclatureResponse, TEntity>();
-
-        IQueryable<ExciseNomenclatureResponse> queryable = DbContext
-            .Set<TEntity>()
-            .Where(pt =>
-                query.Search == null ||
-                EF.Functions.Like(pt.BgDescription, $"%{query.Search}%") ||
-                EF.Functions.Like(pt.DescriptionEn, $"%{query.Search}%")
-            )
-            .Where(en => query.IsUsed == null || en.IsUsed == query.IsUsed)
-            .ApplySort(query.Sort, sortMappings)
-            .AsNoTracking()
-            .Select(ExciseNomenclatureQueries.ProjectToResponse<TEntity>());
-
-        PaginationResponse<ExpandoObject> response = new()
-        {
-            Page = query.Page,
-            PageSize = query.PageSize,
-            TotalCount = await queryable.CountAsync(cancellationToken),
-            Items = dataShapingService.ShapeCollectionData(
-                await queryable
-                    .Skip((query.Page - 1) * query.PageSize)
-                    .Take(query.PageSize)
-                    .ToListAsync(cancellationToken),
-                query.Fields)
-        };
-
-        return Ok(response);
+        Result<PaginationResponse<ExpandoObject>> result = await bus.InvokeAsync<Result<PaginationResponse<ExpandoObject>>>(
+            new GetAllExciseNomenclaturesRequest<TEntity>(query), cancellationToken);
+        return result.ToActionResult();
     }
 
-
     [HttpGet("{id}")]
+    [MapToApiVersion(1.0)]
     public async Task<IActionResult> GetById(
         string id,
         [FromQuery] FieldsOnlyQueryParameters query,
-        [FromServices] DataShapingService dataShapingService,
+        [FromServices] IMessageBus bus,
         CancellationToken cancellationToken)
     {
-        if (!dataShapingService.Validate<ExciseNomenclatureResponse>(query.Fields))
-        {
-            return Problem(
-                statusCode: StatusCodes.Status400BadRequest,
-                detail: $"Invalid fields parameter. {query.Fields}");
-        }
-
-        ExciseNomenclatureResponse? exciseNomenclatureResponse = await DbContext
-            .Set<TEntity>()
-            .AsNoTracking()
-            .Select(ExciseNomenclatureQueries.ProjectToResponse<TEntity>())
-            .FirstOrDefaultAsync(mp => mp.Id == id, cancellationToken);
-        if (exciseNomenclatureResponse is null)
-        {
-            return NotFound();
-        }
-
-        ExpandoObject shapedResponse = dataShapingService.ShapeData(exciseNomenclatureResponse, query.Fields);
-        return Ok(shapedResponse);
+        Result<ExpandoObject> result = await bus.InvokeAsync<Result<ExpandoObject>>(
+            new GetExciseNomenclatureByIdRequest<TEntity>(id, query), cancellationToken);
+        return result.ToActionResult();
     }
 
     [HttpPost]
-    public async Task<ActionResult<ExciseNomenclatureResponse>> Create(
+    [MapToApiVersion(1.0)]
+    public async Task<IActionResult> Create(
         [FromBody] TCreateRequest request,
         [FromServices] IValidator<TCreateRequest> validator,
-        [FromServices] UserContext userContext,
+        [FromServices] IMessageBus bus,
         CancellationToken cancellationToken)
     {
-        User? user = await userContext.GetUserAsync(cancellationToken);
-        if (user is null)
-        {
-            return Problem(statusCode: StatusCodes.Status401Unauthorized, detail: "Unauthorized");
-        }
-
         await validator.ValidateAndThrowAsync(request, cancellationToken);
 
-        if (await DbContext.Set<TEntity>().AnyAsync(en => en.Code == request.Code, cancellationToken))
-        {
-            return Problem(
-                detail: $"{typeof(TEntity)} with specific code already exists!",
-                statusCode: StatusCodes.Status409Conflict);
-        }
+        Result<ExciseNomenclatureResponse> result = await bus.InvokeAsync<Result<ExciseNomenclatureResponse>>(
+            new CreateExciseNomenclatureCommand<TEntity, TCreateRequest>(request, EntityIdPrefix),
+            cancellationToken);
 
-        TEntity entity = request.ToEntity<TEntity>(user.Email, EntityIdPrefix);
-        await DbContext.Set<TEntity>().AddAsync(entity, cancellationToken);
-        await DbContext.SaveChangesAsync(cancellationToken);
-        ExciseNomenclatureResponse response = entity.ToResponse();
+        if (!result.IsSuccess)
+        {
+            return result.ToActionResult();
+        }
 
         return CreatedAtAction(
             actionName: nameof(GetById),
-            routeValues: new { id = response.Id },
-            value: response);
+            routeValues: new { id = result.Value!.Id },
+            value: result.Value);
     }
 
     [HttpPost("batch")]
-    public async Task<ActionResult<List<ExciseNomenclatureResponse>>> CreateBatch(
+    [MapToApiVersion(1.0)]
+    public async Task<IActionResult> CreateBatch(
         [FromBody] CreateExciseNomenclatureBatchRequest<TCreateRequest> request,
         [FromServices] IValidator<CreateExciseNomenclatureBatchRequest<TCreateRequest>> validator,
-        [FromServices] UserContext userContext,
+        [FromServices] IMessageBus bus,
         CancellationToken cancellationToken)
     {
-        User? user = await userContext.GetUserAsync(cancellationToken);
-        if (user is null)
-        {
-            return Problem(statusCode: StatusCodes.Status401Unauthorized, detail: "Unauthorized");
-        }
-
         await validator.ValidateAndThrowAsync(request, cancellationToken);
 
-        HashSet<string> createdCodes = [.. request.Entries.Select(e => e.Code)];
-        if (createdCodes.Count != request.Entries.Count)
-        {
-            return Problem(statusCode: StatusCodes.Status400BadRequest, detail: "Invalid number of unique codes");
-        }
-
-        bool alreadyExists = await DbContext.Set<TEntity>().AnyAsync(e => createdCodes.Contains(e.Code), cancellationToken);
-        if (alreadyExists)
-        {
-            return Problem(statusCode: StatusCodes.Status409Conflict, detail: "One or more entities with provided codes already exists");
-        }
-
-        List<TEntity> entities = [.. request.Entries.Select(en => en.ToEntity<TEntity>(user.Email, EntityIdPrefix))];
-        await DbContext.Set<TEntity>().AddRangeAsync(entities, cancellationToken);
-        await DbContext.SaveChangesAsync(cancellationToken);
-
-        return CreatedAtAction(nameof(GetAll), null);
+        Result result = await bus.InvokeAsync<Result>(
+            new CreateExciseNomenclatureBatchCommand<TEntity, TCreateRequest>(request.Entries, EntityIdPrefix),
+            cancellationToken);
+        return result.ToActionResult();
     }
 
-    [HttpPut]
-    public async Task<ActionResult> Update(
+    [HttpPut("{id}")]
+    [MapToApiVersion(1.0)]
+    public async Task<IActionResult> Update(
         string id,
         [FromBody] TUpdateRequest request,
         [FromServices] IValidator<TUpdateRequest> validator,
-        [FromServices] UserContext userContext,
+        [FromServices] IMessageBus bus,
         CancellationToken cancellationToken)
     {
-        User? user = await userContext.GetUserAsync(cancellationToken);
-        if (user is null)
-        {
-            return Problem(
-                statusCode: StatusCodes.Status401Unauthorized,
-                detail: "Unauthorized");
-        }
-
         await validator.ValidateAndThrowAsync(request, cancellationToken);
+        Result result = await bus.InvokeAsync<Result>(
+            new UpdateExciseNomenclatureCommand<TEntity>(id, request), cancellationToken);
+        return result.ToActionResult();
+    }
 
-        TEntity? entity = await DbContext
-            .Set<TEntity>()
-            .FirstOrDefaultAsync(en => en.Id == id, cancellationToken);
-        if (entity is null)
-        {
-            return Problem(
-                detail: $"{nameof(TEntity)} with specific id does not exists!",
-                statusCode: StatusCodes.Status404NotFound);
-        }
-
-        bool codeExists = await DbContext
-            .Set<TEntity>()
-            .AnyAsync(en => en.Code == request.Code && en.Id != entity.Id, cancellationToken);
-        if (codeExists)
-        {
-            return Problem(
-                detail: $"{nameof(TEntity)} with specific name already exists!",
-                statusCode: StatusCodes.Status409Conflict);
-        }
-
-        entity.UpdateFromRequest(request, user.Email);
-        await DbContext.SaveChangesAsync(cancellationToken);
-        return NoContent();
+    [HttpPatch("{id}/toggle-status")]
+    [MapToApiVersion(1.0)]
+    public async Task<IActionResult> ToggleStatus(
+        string id,
+        [FromServices] IMessageBus bus,
+        CancellationToken cancellationToken)
+    {
+        Result result = await bus.InvokeAsync<Result>(
+            new ToggleExciseNomenclatureStatusCommand<TEntity>(id), cancellationToken);
+        return result.ToActionResult();
     }
 }

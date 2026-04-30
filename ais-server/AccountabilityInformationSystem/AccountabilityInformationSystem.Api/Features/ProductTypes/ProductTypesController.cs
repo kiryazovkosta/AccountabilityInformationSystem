@@ -1,19 +1,19 @@
 using System.Dynamic;
+using AccountabilityInformationSystem.Api.Domain.Entities.Abstraction;
+using AccountabilityInformationSystem.Api.Features.ProductTypes.Create;
+using AccountabilityInformationSystem.Api.Features.ProductTypes.GetAll;
+using AccountabilityInformationSystem.Api.Features.ProductTypes.GetById;
+using AccountabilityInformationSystem.Api.Features.ProductTypes.Shared;
 using AccountabilityInformationSystem.Api.Infrastructure.Data;
-using AccountabilityInformationSystem.Api.Domain.Entities;
-using AccountabilityInformationSystem.Api.Domain.Entities.Identity;
 using AccountabilityInformationSystem.Api.Shared.Extensions;
 using AccountabilityInformationSystem.Api.Shared.Models;
-using AccountabilityInformationSystem.Api.Features.ProductTypes.Shared;
-using AccountabilityInformationSystem.Api.Features.ProductTypes.CreateProductType;
 using AccountabilityInformationSystem.Api.Shared.Services.DataShaping;
-using AccountabilityInformationSystem.Api.Shared.Services.Sorting;
-using AccountabilityInformationSystem.Api.Shared.Services.UserContexting;
 using Asp.Versioning;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Wolverine;
 
 namespace AccountabilityInformationSystem.Api.Features.ProductTypes;
 
@@ -21,61 +21,18 @@ namespace AccountabilityInformationSystem.Api.Features.ProductTypes;
 [Route("api/product-types")]
 [Authorize]
 public sealed class ProductTypesController(
-    ApplicationDbContext dbContext,
-    UserContext userContext) : ControllerBase
+    IMessageBus bus) : ControllerBase
 {
     [HttpGet]
     [MapToApiVersion(1.0)]
     [Produces(typeof(PaginationResponse<ProductTypeResponse>))]
     public async Task<IActionResult> GetProductTypes(
-        [FromQuery] QueryParameters query,
-        SortMappingProvider sortMappingProvider,
-        DataShapingService dataShapingService,
+        [FromQuery] GetProductTypesRequest request,
         CancellationToken cancellationToken)
     {
-        if (!sortMappingProvider.ValidateMappings<ProductTypeResponse, ProductType>(query.Sort))
-        {
-            return Problem(
-                statusCode: StatusCodes.Status400BadRequest,
-                detail: $"Invalid sort parameter. {query.Sort}");
-        }
-
-        if (!dataShapingService.Validate<ProductTypeResponse>(query.Fields))
-        {
-            return Problem(
-                statusCode: StatusCodes.Status400BadRequest,
-                detail: $"Invalid fields parameter. {query.Fields}");
-        }
-
-        query.Search = query.Search?.Trim().ToLower();
-
-        SortMapping[] sortMappings = sortMappingProvider.GetMappings<ProductTypeResponse, ProductType>();
-
-        IQueryable<ProductTypeResponse> productTypeQuery = dbContext
-            .ProductTypes
-            .Where(pt =>
-                query.Search == null ||
-                EF.Functions.Like(pt.Name, $"%{query.Search}%") ||
-                EF.Functions.Like(pt.FullName, $"%{query.Search}%")
-            )
-            .ApplySort(query.Sort, sortMappings)
-            .AsNoTracking()
-            .Select(ProductTypeQueries.ProjectToResponse());
-
-        PaginationResponse<ExpandoObject> response = new()
-        {
-            Page = query.Page,
-            PageSize = query.PageSize,
-            TotalCount = await productTypeQuery.CountAsync(cancellationToken),
-            Items = dataShapingService.ShapeCollectionData(
-                await productTypeQuery
-                    .Skip((query.Page - 1) * query.PageSize)
-                    .Take(query.PageSize)
-                    .ToListAsync(cancellationToken),
-                query.Fields)
-        };
-
-        return Ok(response);
+        Result<PaginationResponse<ExpandoObject>> response =
+            await bus.InvokeAsync<Result<PaginationResponse<ExpandoObject>>>(request, cancellationToken);
+        return response.ToActionResult();
     }
 
 
@@ -83,59 +40,26 @@ public sealed class ProductTypesController(
     public async Task<IActionResult> GetProductType(
     string id,
     [FromQuery] FieldsOnlyQueryParameters query,
-    DataShapingService dataShapingService,
     CancellationToken cancellationToken)
     {
-        if (!dataShapingService.Validate<ProductTypeResponse>(query.Fields))
-        {
-            return Problem(
-                statusCode: StatusCodes.Status400BadRequest,
-                detail: $"Invalid fields parameter. {query.Fields}");
-        }
-
-        ProductTypeResponse? productTypeResponse = await dbContext
-            .ProductTypes
-            .AsNoTracking()
-            .Select(ProductTypeQueries.ProjectToResponse())
-            .FirstOrDefaultAsync(mp => mp.Id == id, cancellationToken);
-        if (productTypeResponse is null)
-        {
-            return NotFound();
-        }
-
-        ExpandoObject shapedResponse = dataShapingService.ShapeData(productTypeResponse, query.Fields);
-        return Ok(shapedResponse);
+        GetProductTypeByIdRequest request = new(id, query.Fields);
+        Result<ExpandoObject> result = await bus.InvokeAsync<Result<ExpandoObject>>(request, cancellationToken);
+        return result.ToActionResult();
     }
 
     [HttpPost]
-    public async Task<ActionResult<ProductTypeResponse>> CreateProductType(
+    public async Task<IActionResult> CreateProductType(
         [FromBody] CreateProductTypeRequest request,
         IValidator<CreateProductTypeRequest> validator,
         CancellationToken cancellationToken)
     {
-        User? user = await userContext.GetUserAsync(cancellationToken);
-        if (user is null)
-        {
-            return Problem(statusCode: StatusCodes.Status401Unauthorized, detail: "Unauthorized");
-        }
-
         await validator.ValidateAndThrowAsync(request, cancellationToken);
-
-        if (await dbContext.ProductTypes.AnyAsync(mp => mp.Name == request.Name, cancellationToken))
+        Result<ProductTypeResponse> result = await bus.InvokeAsync<Result<ProductTypeResponse>>(request, cancellationToken);
+        if (result.IsFailure)
         {
-            return Problem(
-                detail: "Product type with specific name already exists!",
-                statusCode: StatusCodes.Status409Conflict);
+            return result.ToActionResult();
         }
 
-        ProductType productType = request.ToEntity(user.Email);
-        await dbContext.ProductTypes.AddAsync(productType, cancellationToken);
-        await dbContext.SaveChangesAsync(cancellationToken);
-        ProductTypeResponse productTypeResponse = productType.ToResponse();
-
-        return CreatedAtAction(
-            actionName: nameof(GetProductType),
-            routeValues: new { id = productType.Id },
-            value: productTypeResponse);
+        return CreatedAtAction(nameof(GetProductType), new { id = result.Value }, result.Value);
     }
 }
