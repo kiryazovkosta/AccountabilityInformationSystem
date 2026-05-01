@@ -195,6 +195,10 @@ public static class WebApplicationBuilderExtensions
         //    options.IncludeScopes = true;
         //    options.IncludeFormattedMessage = true;
         //});
+        if (builder.Envirnoment.IsProduction())
+        {
+            builder.Services.AddOpenTelemetry().UseAzureMonitor();
+        }
 
         return builder;
     }
