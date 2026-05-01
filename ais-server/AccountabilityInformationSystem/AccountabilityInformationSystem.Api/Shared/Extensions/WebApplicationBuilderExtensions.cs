@@ -364,6 +364,9 @@ public static class WebApplicationBuilderExtensions
              {
                  opts.Durability.Mode = DurabilityMode.MediatorOnly;
                  opts.InvokeTracing = InvokeTracingMode.Full;
+                 opts.Discovery
+                     .DisableConventionalDiscovery()
+                     .IncludeAssembly(typeof(Program).Assembly);
              });
         return builder;
     }
