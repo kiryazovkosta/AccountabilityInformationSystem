@@ -49,6 +49,7 @@ using OpenTelemetry.Trace;
 using Wolverine;
 using AccountabilityInformationSystem.Api.Features.ExciseNomenclatures.Shared.Create;
 using AccountabilityInformationSystem.Api.Features.ExciseNomenclatures.Shared.CreateBatch;
+using Azure.Monitor.OpenTelemetry.AspNetCore;
 
 namespace AccountabilityInformationSystem.Api.Shared.Extensions;
 
@@ -195,7 +196,7 @@ public static class WebApplicationBuilderExtensions
         //    options.IncludeScopes = true;
         //    options.IncludeFormattedMessage = true;
         //});
-        if (builder.Envirnoment.IsProduction())
+        if (builder.Environment.IsProduction())
         {
             builder.Services.AddOpenTelemetry().UseAzureMonitor();
         }
