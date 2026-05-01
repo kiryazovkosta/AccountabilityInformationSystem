@@ -11,37 +11,50 @@ env:
   DOTNET_VERSION: '10.0.x'
   DOTNET_CLI_TELEMETRY_OPTOUT: 'true'
   DOTNET_NOLOGO: 'true'
+  AZURE_WEBAPP_NAME: ais-api
+  AZURE_WEBAPP_PACKAGE_PATH: "./ais-server/AccountabilityInformationSystem/AccountabilityInformationSystem.Api/publish"
+  WORKING_DIRECTORY: ais-server/AccountabilityInformationSystem
+  SOLUTION_PATH: "AccountabilityInformationSystem.sln"
+  API_PROJECT_PATH: "AccountabilityInformationSystem.Api"
+  PUBLISH_DIR: "./publish"
+  CONNECTIONSTRINGS__DATABASE: "<Replaced by Bundle>"
 
 jobs:
-  backend-build:
-    name: Build .NET API
-    runs-on: ubuntu-latest
+    build-and-test:
+        name: Build and Test
+        runs-on: ubuntu-latest
 
-    steps:
-    - uses: actions/checkout@v4
+        defaults:
+            run:
+                working-directory: ${{ env.WORKING_DIRECTORY }}
 
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v5
-      with:
-        dotnet-version: ${{ env.DOTNET_VERSION }}
-        cache: true
-        cache-dependency-path: ais-server/AccountabilityInformationSystem/Directory.Packages.props
+        steps:
+            - uses: actions/checkout@v4
 
-    - name: Restore dependencies
-      run: dotnet restore AccountabilityInformationSystem.sln
-      working-directory: ais-server/AccountabilityInformationSystem
+            - name: Setup .NET
+              uses: actions/setup-dotnet@v5
+              with:
+                dotnet-version: ${{ env.DOTNET_VERSION }}
+                cache: true
+                cache-dependency-path: ${{ env.WORKING_DIRECTORY }}/Directory.Packages.props
 
-    - name: Build
-      run: dotnet build AccountabilityInformationSystem.sln --configuration Release --no-restore
-      working-directory: ais-server/AccountabilityInformationSystem
+            - name: Restore
+              run: dotnet restore ${{ env.SOLUTION_PATH }}
 
-    - name: Test
-      run: dotnet test AccountabilityInformationSystem.sln --configuration Release --no-restore --no-build --verbosity normal
-      working-directory: ais-server/AccountabilityInformationSystem
-      env:
-        Jwt__Key: ${{ secrets.JWT_KEY }}
-        Encryption__Key: ${{ secrets.ENCRYPTION_KEY }}
+            - name: Build
+              run: dotnet build ${{ env.SOLUTION_PATH }} --configuration Release --no-restore
 
-    - name: Publish
-      run: dotnet publish AccountabilityInformationSystem.sln --configuration Release --no-restore --no-build
-      working-directory: ais-server/AccountabilityInformationSystem
+            - name: Test
+              run: dotnet test ${{ env.SOLUTION_PATH }} --configuration Release --no-restore --no-build --verbosity normal
+              env:
+                Jwt__Key: ${{ secrets.JWT_KEY }}
+                Encryption__Key: ${{ secrets.ENCRYPTION_KEY }}
+
+            - name: Publish
+              run: dotnet publish ${{ env.API_PROJECT_PATH }} --configuration Release --no-restore --no-build --property:PublishDir=${{ env.PUBLISH_DIR }}
+
+            - name: Upload Artifacts
+              uses: actions/upload-artifact@v4
+              with:
+                name: webapp
+                path: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
