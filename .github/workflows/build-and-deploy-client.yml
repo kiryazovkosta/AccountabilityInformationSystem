@@ -1,7 +1,10 @@
 name: Client CI
 
 on:
-    workflow_dispatch:
+    workflow_run:
+        workflows: ["CI - Backend"]
+        types:
+            - completed
     push:
         branches:
             - main
@@ -12,6 +15,7 @@ jobs:
     build-and-deploy:
         name: Build
         runs-on: ubuntu-latest
+        if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'push' }}
 
         defaults:
             run:
