@@ -46,5 +46,5 @@ jobs:
             - name: Deploy to Azure Static Web Apps
               env:
                 AZURE_STATIC_WEB_APPS_API_TOKEN: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
-              run: swa deploy --env production --deployment-token $AZURE_STATIC_WEB_APPS_API_TOKEN --output-location dist/ais-client/browser --no-build
+              run: swa deploy --env production --deployment-token $AZURE_STATIC_WEB_APPS_API_TOKEN --output-location dist/ais-client/browser
             
