@@ -17,8 +17,8 @@ public sealed class CreateExciseNomenclatureValidator<TCreateRequest> : Abstract
             .WithMessage($"DescriptionBg must not exceed {descriptionMaxLength} characters.");
 
         RuleFor(x => x.DescriptionEn)
+            .NotEmpty()
             .MaximumLength(descriptionMaxLength)
-            .When(x => !string.IsNullOrEmpty(x.DescriptionEn))
             .WithMessage($"DescriptionEn must not exceed {descriptionMaxLength} characters.");
     }
 }

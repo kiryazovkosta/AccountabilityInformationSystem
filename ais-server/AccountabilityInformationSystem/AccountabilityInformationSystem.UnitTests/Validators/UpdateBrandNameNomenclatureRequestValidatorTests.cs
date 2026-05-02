@@ -16,7 +16,7 @@ public class UpdateBrandNameNomenclatureRequestValidatorTests
     public async Task Validate_ShouldSuccess_WhenInputRequestIsValid()
     {
         //Arrange
-        UpdateBrandNameNomenclatureRequest request = new() { Code = "A12345", BgDescription = "Описание на български език", DescriptionEn = null, IsUsed = false };
+        UpdateBrandNameNomenclatureRequest request = new() { Code = "A12345", DescriptionBg = "Описание на български език", DescriptionEn = null, IsUsed = false };
 
         // Act
         ValidationResult validationResult = await _validator.ValidateAsync(request, CancellationToken.None);
@@ -30,7 +30,7 @@ public class UpdateBrandNameNomenclatureRequestValidatorTests
     public async Task Validate_ShouldSuccess_WhenInputRequestHasNullCode()
     {
         //Arrange
-        UpdateBrandNameNomenclatureRequest request = new() { Code = null, BgDescription = "Описание на български език", DescriptionEn = null, IsUsed = false };
+        UpdateBrandNameNomenclatureRequest request = new() { Code = null, DescriptionBg = "Описание на български език", DescriptionEn = null, IsUsed = false };
 
         // Act
         ValidationResult validationResult = await _validator.ValidateAsync(request, CancellationToken.None);
@@ -44,7 +44,7 @@ public class UpdateBrandNameNomenclatureRequestValidatorTests
     public async Task Validate_ShouldSuccess_WhenInputRequestHasEmptyCode()
     {
         //Arrange
-        UpdateBrandNameNomenclatureRequest request = new() { Code = "", BgDescription = "Описание на български език", DescriptionEn = null, IsUsed = false };
+        UpdateBrandNameNomenclatureRequest request = new() { Code = "", DescriptionBg = "Описание на български език", DescriptionEn = null, IsUsed = false };
 
         // Act
         ValidationResult validationResult = await _validator.ValidateAsync(request, CancellationToken.None);
@@ -55,10 +55,10 @@ public class UpdateBrandNameNomenclatureRequestValidatorTests
     }
 
     [Fact]
-    public async Task Validate_ShouldSuccess_WhenInputRequestHasNullBgDescription()
+    public async Task Validate_ShouldSuccess_WhenInputRequestHasNullDescriptionBg()
     {
         //Arrange
-        UpdateBrandNameNomenclatureRequest request = new() { Code = "A12345", BgDescription = null, DescriptionEn = null, IsUsed = false };
+        UpdateBrandNameNomenclatureRequest request = new() { Code = "A12345", DescriptionBg = null, DescriptionEn = null, IsUsed = false };
 
         // Act
         ValidationResult validationResult = await _validator.ValidateAsync(request, CancellationToken.None);
@@ -69,10 +69,10 @@ public class UpdateBrandNameNomenclatureRequestValidatorTests
     }
 
     [Fact]
-    public async Task Validate_ShouldSuccess_WhenInputRequestHasEmptyBgDescription()
+    public async Task Validate_ShouldSuccess_WhenInputRequestHasEmptyDescriptionBg()
     {
         //Arrange
-        UpdateBrandNameNomenclatureRequest request = new() { Code = "A12345", BgDescription = "", DescriptionEn = null, IsUsed = false };
+        UpdateBrandNameNomenclatureRequest request = new() { Code = "A12345", DescriptionBg = "", DescriptionEn = null, IsUsed = false };
 
         // Act
         ValidationResult validationResult = await _validator.ValidateAsync(request, CancellationToken.None);
@@ -95,7 +95,7 @@ public class UpdateBrandNameNomenclatureRequestValidatorTests
     public async Task Validate_ShouldFailed_WhenInputRequestHasInvalidCode(string code)
     {
         //Arrange
-        UpdateBrandNameNomenclatureRequest request = new() { Code = code, BgDescription = "Описание на български език", DescriptionEn = null, IsUsed = false };
+        UpdateBrandNameNomenclatureRequest request = new() { Code = code, DescriptionBg = "Описание на български език", DescriptionEn = null, IsUsed = false };
 
         // Act
         ValidationResult validationResult = await _validator.ValidateAsync(request, CancellationToken.None);
@@ -106,18 +106,18 @@ public class UpdateBrandNameNomenclatureRequestValidatorTests
     }
 
     [Fact]
-    public async Task Validate_ShouldFailed_WhenInputRequestIncreaseMaximumLengthBgDescription()
+    public async Task Validate_ShouldFailed_WhenInputRequestIncreaseMaximumLengthDescriptionBg()
     {
         //Arrange
         string description = new('a', EntitiesConstants.BrandNameConstants.DescriptionMaxlength + 1);
-        UpdateBrandNameNomenclatureRequest request = new() { Code = "A12345", BgDescription = description, DescriptionEn = null, IsUsed = false };
+        UpdateBrandNameNomenclatureRequest request = new() { Code = "A12345", DescriptionBg = description, DescriptionEn = null, IsUsed = false };
 
         // Act
         ValidationResult validationResult = await _validator.ValidateAsync(request, CancellationToken.None);
 
         // Assert
         Assert.False(validationResult.IsValid);
-        Assert.Contains(nameof(UpdateBrandNameNomenclatureRequest.BgDescription), validationResult.Errors.Select(e => e.PropertyName).ToList());
+        Assert.Contains(nameof(UpdateBrandNameNomenclatureRequest.DescriptionBg), validationResult.Errors.Select(e => e.PropertyName).ToList());
     }
 
     [Fact]
@@ -125,7 +125,7 @@ public class UpdateBrandNameNomenclatureRequestValidatorTests
     {
         //Arrange
         string description = new('a', EntitiesConstants.BrandNameConstants.DescriptionMaxlength + 1);
-        UpdateBrandNameNomenclatureRequest request = new() { Code = "A12345", BgDescription = "Some description", DescriptionEn = description, IsUsed = false };
+        UpdateBrandNameNomenclatureRequest request = new() { Code = "A12345", DescriptionBg = "Some description", DescriptionEn = description, IsUsed = false };
 
         // Act
         ValidationResult validationResult = await _validator.ValidateAsync(request, CancellationToken.None);
