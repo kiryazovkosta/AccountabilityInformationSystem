@@ -39,7 +39,7 @@ public class GetAllExciseNomenclaturesRequestHandler<TEntity>(
             .Set<TEntity>()
             .Where(pt =>
                 request.Query.Search == null ||
-                EF.Functions.Like(pt.BgDescription, $"%{request.Query.Search}%") ||
+                EF.Functions.Like(pt.DescriptionBg, $"%{request.Query.Search}%") ||
                 EF.Functions.Like(pt.DescriptionEn, $"%{request.Query.Search}%")
             )
             .Where(en => request.Query.IsUsed == null || en.IsUsed == request.Query.IsUsed)

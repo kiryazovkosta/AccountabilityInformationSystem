@@ -359,7 +359,7 @@ public static class WebApplicationBuilderExtensions
 
     public static WebApplicationBuilder AddWolverine(this WebApplicationBuilder builder)
     {
-        builder
+        builder.Host
             .UseWolverine(opts =>
              {
                  opts.Durability.Mode = DurabilityMode.MediatorOnly;
@@ -367,7 +367,7 @@ public static class WebApplicationBuilderExtensions
                  opts.Discovery
                      .DisableConventionalDiscovery()
                      .IncludeAssembly(typeof(Program).Assembly);
-             });
+             }, ExtensionDiscovery.ManualOnly);
         return builder;
     }
 }

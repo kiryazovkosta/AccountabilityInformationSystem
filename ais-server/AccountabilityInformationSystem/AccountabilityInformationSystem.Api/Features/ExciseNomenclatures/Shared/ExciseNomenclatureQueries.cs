@@ -12,7 +12,7 @@ internal sealed class ExciseNomenclatureQueries
         {
             Id = exciseNomenclature.Id,
             Code = exciseNomenclature.Code,
-            BgDescription = exciseNomenclature.BgDescription,
+            DescriptionBg = exciseNomenclature.DescriptionBg,
             DescriptionEn = exciseNomenclature.DescriptionEn,
             IsUsed = exciseNomenclature.IsUsed
         };
