@@ -102,3 +102,23 @@ jobs:
                 Jwt__Key: ${{ secrets.JWT_KEY }}
                 Encryption__Key: ${{ secrets.ENCRYPTION_KEY }}
                 ConnectionStrings__AccountabilityInformationSystemDb: ${{ secrets.DATABASE_CONNECTION_STRING }}
+
+    deploy:
+        name: Deploy to Azure
+        runs-on: ubuntu-latest
+        needs: apply-migrations
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+
+        steps:
+            - name: Download artifact from build job
+              uses: actions/download-artifact@v4
+              with:
+                name: webapp
+                path: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+
+            - name: Deploy
+              uses: azure/webapps-deploy@v3
+              with:
+                app-name: ${{ env.AZURE_WEBAPP_NAME }}
+                publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+                package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
