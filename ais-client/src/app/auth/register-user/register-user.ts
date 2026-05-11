@@ -76,7 +76,7 @@ export class RegisterUser {
     maxLength(schemaPath.lastName, 32, {message: 'LastName must be at maximum 32 characters'});
 
     required(schemaPath.password, {message: 'Password is required'});
-    minLength(schemaPath.password, 6, {message: 'Password must be at least 8 characters'});
+    minLength(schemaPath.password, 8, {message: 'Password must be at least 8 characters'});
 
     required(schemaPath.confirmPassword, {message: 'Confirm password is required'});
     validate(schemaPath.confirmPassword, ({value, valueOf}) => {

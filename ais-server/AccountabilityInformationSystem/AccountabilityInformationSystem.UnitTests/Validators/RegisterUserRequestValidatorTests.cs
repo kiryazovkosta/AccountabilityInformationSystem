@@ -76,7 +76,9 @@ public sealed class RegisterUserRequestValidatorTests
         ValidationResult result = await _validator.ValidateAsync(request, CancellationToken.None);
 
         Assert.False(result.IsValid);
-        Assert.Contains(nameof(RegisterUserRequest.Email), result.Errors.Select(e => e.PropertyName));
+        Assert.Contains(result.Errors, e =>
+            e.PropertyName == nameof(RegisterUserRequest.Email) &&
+            e.ErrorMessage == "A valid email address is required.");
     }
 
     [Fact]

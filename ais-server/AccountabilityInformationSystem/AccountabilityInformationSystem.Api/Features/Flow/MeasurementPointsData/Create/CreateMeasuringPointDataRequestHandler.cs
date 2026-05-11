@@ -29,7 +29,7 @@ public sealed class CreateMeasuringPointDataRequestHandler(
         if (!await dbContext.MeasurementPoints.AnyAsync(i => i.Id == request.MeasurementPointId, cancellationToken))
         {
             return Result<MeasurementPointDataResponse>.Failure(
-                new Error("мeasurementPointId", "MeasurementPoint with specific id does not exists!"));
+                new Error("measurementPointId", "MeasurementPoint with specific id does not exists!"));
         }
 
         if (!await dbContext.Products.AnyAsync(i => i.Id == request.ProductId, cancellationToken))

@@ -11,6 +11,7 @@ env:
   DOTNET_VERSION: '10.0.x'
   DOTNET_CLI_TELEMETRY_OPTOUT: 'true'
   DOTNET_NOLOGO: 'true'
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
   AZURE_WEBAPP_NAME: ais-api
   AZURE_WEBAPP_PACKAGE_PATH: "./ais-server/AccountabilityInformationSystem/AccountabilityInformationSystem.Api/publish"
   WORKING_DIRECTORY: ais-server/AccountabilityInformationSystem

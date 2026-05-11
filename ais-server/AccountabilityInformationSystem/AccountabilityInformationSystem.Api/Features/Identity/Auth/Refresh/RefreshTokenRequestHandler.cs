@@ -37,7 +37,7 @@ public class RefreshTokenRequestHandler(
         IList<string> roles = await userManager.GetRolesAsync(storedToken.User);
         AccessTokenRequest accessTokenRequest = new(
             storedToken.User.Id,
-            storedToken.User.Email ?? string.Empty,
+            storedToken.User.UserName ?? string.Empty,
             roles);
 
         AccessTokenResponse response = tokenProvider.Create(accessTokenRequest);

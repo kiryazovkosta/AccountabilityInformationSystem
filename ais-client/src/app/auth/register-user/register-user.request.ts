@@ -33,7 +33,7 @@ export function toRegisterUserFormRequest(request: RegisterUserRequest) {
 export function toRegisterUserRequest(required: RegisterUserFormRequest) {
     return {
         ...required,
-        middlename: required.middleName ? undefined : required.middleName,
-        image: required.image ? undefined : required.image
+        middleName: required.middleName || undefined,
+        image: required.image || undefined
     };
 }

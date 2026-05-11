@@ -2,29 +2,27 @@ using AccountabilityInformationSystem.Api.Domain.Entities.Identity;
 using AccountabilityInformationSystem.Api.Features.Identity.Users.Shared;
 using AccountabilityInformationSystem.Api.Shared.Services.UserContexting;
 using AccountabilityInformationSystem.Api.Shared;
+using AccountabilityInformationSystem.Api.Infrastructure.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace AccountabilityInformationSystem.Api.Features.Identity.Users;
 
 [Route("api/identity/users")]
 [Authorize]
-public sealed class UsersController(UserContext userContext) : ApiController
+public sealed class UsersController(UserContext userContext, ApplicationDbContext dbContext) : ApiController
 {
     [HttpGet("{id}")]
     [Authorize(Roles = $"{Role.Admin}")]
     public async Task<ActionResult<UserResponse>> GetUserById(
         string id, CancellationToken cancellationToken)
     {
-        User? user = await userContext.GetUserAsync(cancellationToken);
+        User? user = await dbContext.Users
+            .FirstOrDefaultAsync(u => u.Id == id, cancellationToken);
         if (user is null)
         {
-            return Problem(statusCode: StatusCodes.Status401Unauthorized, detail: "Unauthorized");
-        }
-
-        if (user.Id != id)
-        {
-            return Problem(statusCode: StatusCodes.Status403Forbidden, detail: "Access to this resource is forbidden");
+            return Problem(statusCode: StatusCodes.Status404NotFound, detail: "User not found");
         }
 
         UserResponse userResponse = user.ToResponse();
