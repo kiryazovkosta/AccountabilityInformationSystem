@@ -7,6 +7,7 @@ using System.Text.Encodings.Web;
 using AccountabilityInformationSystem.Api.Domain.Entities.Abstraction;
 using AccountabilityInformationSystem.Api.Domain.Entities.Identity;
 using AccountabilityInformationSystem.Api.Features.Identity.Auth.ConfirmEmail;
+using FluentValidation;
 using AccountabilityInformationSystem.Api.Features.Identity.Auth.ForgotPassword;
 using AccountabilityInformationSystem.Api.Features.Identity.Auth.Login;
 using AccountabilityInformationSystem.Api.Features.Identity.Auth.Refresh;
@@ -53,8 +54,10 @@ public sealed class AuthController(
     [IgnoreAntiforgeryToken]
     public async Task<IActionResult> Register(
         RegisterUserRequest registerRequest,
+        IValidator<RegisterUserRequest> validator,
         CancellationToken cancellationToken)
     {
+        await validator.ValidateAndThrowAsync(registerRequest, cancellationToken);
         Result result = await bus.InvokeAsync<Result>(registerRequest, cancellationToken);
         return result.ToActionResult();
     }
@@ -62,8 +65,12 @@ public sealed class AuthController(
     [HttpPost("login")]
     [AllowAnonymous]
     [IgnoreAntiforgeryToken]
-    public async Task<IActionResult> Login(LoginUserRequest request, CancellationToken cancellationToken)
+    public async Task<IActionResult> Login(
+        LoginUserRequest request,
+        IValidator<LoginUserRequest> validator,
+        CancellationToken cancellationToken)
     {
+        await validator.ValidateAndThrowAsync(request, cancellationToken);
         Result<LoginUserResponse> result = await bus.InvokeAsync<Result<LoginUserResponse>>(request, cancellationToken);
         if (result.IsSuccessWith(ResultSuccessType.Ok) && result.Value is not null)
         {
@@ -111,9 +118,12 @@ public sealed class AuthController(
     [AllowAnonymous]
     [IgnoreAntiforgeryToken]
     public async Task<IActionResult> SetupTwoFactor(
-        SetupTwoFactorRequest request)
+        SetupTwoFactorRequest request,
+        IValidator<SetupTwoFactorRequest> validator,
+        CancellationToken cancellationToken)
     {
-        Result<SetupTwoFactorResponse> result = await bus.InvokeAsync<Result<SetupTwoFactorResponse>>(request);
+        await validator.ValidateAndThrowAsync(request, cancellationToken);
+        Result<SetupTwoFactorResponse> result = await bus.InvokeAsync<Result<SetupTwoFactorResponse>>(request, cancellationToken);
         return result.ToActionResult();
     }
 
@@ -121,17 +131,24 @@ public sealed class AuthController(
     [AllowAnonymous]
     [IgnoreAntiforgeryToken]
     public async Task<IActionResult> VerifyTwoFactor(
-        VerifyTwoFactorRequest request)
+        VerifyTwoFactorRequest request,
+        IValidator<VerifyTwoFactorRequest> validator,
+        CancellationToken cancellationToken)
     {
-        Result<VerifyTwoFactorResponse> result = await bus.InvokeAsync<Result<VerifyTwoFactorResponse>>(request);
-        return result.ToActionResult() ;
+        await validator.ValidateAndThrowAsync(request, cancellationToken);
+        Result<VerifyTwoFactorResponse> result = await bus.InvokeAsync<Result<VerifyTwoFactorResponse>>(request, cancellationToken);
+        return result.ToActionResult();
     }
 
     [HttpPost("forgot-password")]
     [AllowAnonymous]
     [IgnoreAntiforgeryToken]
-    public async Task<IActionResult> ForgotPassword(ForgotPasswordRequest request, CancellationToken cancellationToken)
+    public async Task<IActionResult> ForgotPassword(
+        ForgotPasswordRequest request,
+        IValidator<ForgotPasswordRequest> validator,
+        CancellationToken cancellationToken)
     {
+        await validator.ValidateAndThrowAsync(request, cancellationToken);
         Result result = await bus.InvokeAsync<Result>(request, cancellationToken);
         return result.ToActionResult();
     }
@@ -139,8 +156,12 @@ public sealed class AuthController(
     [HttpPost("reset-password")]
     [AllowAnonymous]
     [IgnoreAntiforgeryToken]
-    public async Task<IActionResult> ResetPassword(ResetPasswordRequest request, CancellationToken cancellationToken)
+    public async Task<IActionResult> ResetPassword(
+        ResetPasswordRequest request,
+        IValidator<ResetPasswordRequest> validator,
+        CancellationToken cancellationToken)
     {
+        await validator.ValidateAndThrowAsync(request, cancellationToken);
         Result result = await bus.InvokeAsync<Result>(request, cancellationToken);
         return result.ToActionResult();
     }
