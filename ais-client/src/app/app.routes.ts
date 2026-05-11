@@ -16,7 +16,9 @@ export const routes: Routes = [
             { path: 'setup-2fa', loadComponent: () => import('./auth/setup-two-factor/setup-two-factor').then(m => m.SetupTwoFactor) },
             { path: 'login', loadComponent: () => import('./auth/login/login').then(l => l.Login) },
             { path: 'user-profile', loadComponent: () => import('./auth/user-profile/user-profile').then(l => l.UserProfile), canActivate: [authGuard] },
-            { path: 'logout', loadComponent: () => import('./auth/logout/logout').then(l => l.Logout) }
+            { path: 'logout', loadComponent: () => import('./auth/logout/logout').then(l => l.Logout) },
+            { path: 'forgot-password', loadComponent: () => import('./auth/forgot-password/forgot-password').then(m => m.ForgotPassword) },
+            { path: 'reset-password', loadComponent: () => import('./auth/reset-password/reset-password').then(m => m.ResetPassword) }
         ]
     }
 ];

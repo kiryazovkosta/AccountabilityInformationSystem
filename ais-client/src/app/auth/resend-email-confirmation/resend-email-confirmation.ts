@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { ResendEmailConfirmationRequest } from './resend-email-confirmation-request';
 import { email, form, FormField, FormRoot, required, schema } from '@angular/forms/signals';
 import { FormError } from "../../shared/form-error/form-error";
@@ -18,6 +18,7 @@ export const resendSchema = schema<ResendEmailConfirmationRequest>((path) => {
   imports: [FormField, FormRoot, FormError],
   templateUrl: './resend-email-confirmation.html',
   styleUrl: './resend-email-confirmation.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ResendEmailConfirmation {
 

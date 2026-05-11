@@ -1,10 +1,11 @@
-import { Component, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 
 @Component({
   selector: 'app-footer',
   imports: [],
   templateUrl: './footer.html',
-  styleUrl: './footer.css'
+  styleUrl: './footer.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Footer {
   currentYear = signal<number>(new Date().getUTCFullYear());

@@ -18,9 +18,9 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(
       withInterceptors(
         [
-          csrfInterceptor, 
+          csrfInterceptor,
+          httpErrorResponseInterceptor,
           authInterceptor,
-          httpErrorResponseInterceptor
         ]
       )
     ),

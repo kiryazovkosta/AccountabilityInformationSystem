@@ -264,6 +264,7 @@ public static class WebApplicationBuilderExtensions
 
         builder.Services.Configure<FrontendOptions>(builder.Configuration.GetSection(FrontendOptions.SectionName));
         builder.Services.AddTransient<EmailConfirmationService>();
+        builder.Services.AddTransient<PasswordResetEmailService>();
 
         return builder;
     }

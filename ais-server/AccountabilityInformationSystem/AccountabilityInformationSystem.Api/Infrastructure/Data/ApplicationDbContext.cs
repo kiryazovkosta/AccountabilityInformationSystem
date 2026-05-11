@@ -20,8 +20,8 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
     public DbSet<MeasurementPointData> MeasurementPointsData { get; set; }
 
     public DbSet<ApCode> ApCodes { get; set; }
-    public DbSet<ApCode> BrandNames { get; set; }
-    public DbSet<ApCode> CnCodes { get; set; }
+    public DbSet<BrandName> BrandNames { get; set; }
+    public DbSet<CnCode> CnCodes { get; set; }
 
     public DbSet<User> Users { get; set; }
 

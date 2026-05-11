@@ -1,6 +1,6 @@
 import { rxResource } from '@angular/core/rxjs-interop';
 import { AuthService } from './../../services/shared/auth.service';
-import { Component, effect, inject, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, effect, inject, input } from '@angular/core';
 import { Router } from '@angular/router';
 import { APP_ROUTES } from '../../common/app-routes';
 
@@ -9,6 +9,7 @@ import { APP_ROUTES } from '../../common/app-routes';
   imports: [],
   templateUrl: './confirm-email.html',
   styleUrl: './confirm-email.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ConfirmEmail {
   private readonly authService: AuthService = inject(AuthService);

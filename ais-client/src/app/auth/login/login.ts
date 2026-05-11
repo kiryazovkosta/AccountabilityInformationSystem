@@ -42,7 +42,7 @@ export class Login {
       try {
         const loginResult = await firstValueFrom(this.authService.login(this.loginRequest()));
         if ('success' in loginResult) {
-          this.router.navigate(['/home']);
+          this.router.navigate([APP_ROUTES.HOME]);
         } else if ('requiresTwoFactorSetup' in loginResult) {
           this.router.navigate([APP_ROUTES.SETUP_2FA], { state: { setupToken: loginResult.setupToken } });
         }

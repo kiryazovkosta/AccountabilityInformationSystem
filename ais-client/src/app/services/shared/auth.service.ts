@@ -9,6 +9,7 @@ import { RegisterUserRequest } from '../../auth/register-user/register-user.requ
 import { environment } from '../../../environments/environment';
 import { Endpoints } from '../../common/endpoints-config';
 import { ResendEmailConfirmationRequest } from '../../auth/resend-email-confirmation/resend-email-confirmation-request';
+import { ResetPasswordRequest } from '../../auth/reset-password/reset-password.request';
 
 export interface ConfirmEmailResponse {
   requiresTwoFactorSetup: boolean;
@@ -46,9 +47,10 @@ export class AuthService {
     readonly resendEmailConfirmation = rxResource({
         params: () => this.resendPayload(),
         stream: ({ params }) =>
-            this.httpClient.get(
+            this.httpClient.post(
                 `${environment.apiBaseUrl}${Endpoints.resendConfirmationEmail}`,
-                { params: { ...params }, withCredentials: true }
+                params,
+                { withCredentials: true }
             )
     });
 
@@ -111,12 +113,10 @@ export class AuthService {
             .pipe(
                 map(() => true),
                 tap(() => this._isLoggedIn.set(false)),
-                catchError(
-                    err => {
-                        this._isLoggedIn.set(false);
-                        return of(false);
-                    }
-                )
+                catchError(() => {
+                    this._isLoggedIn.set(false);
+                    return of(false);
+                })
             );
     }
 
@@ -126,7 +126,26 @@ export class AuthService {
         ).pipe(
             map(response => response.ok),
             tap(valid => this._isLoggedIn.set(valid)),
-            catchError(() => of(false))
+            catchError(() => {
+                this._isLoggedIn.set(false);
+                return of(false);
+            })
+        );
+    }
+
+    forgotPassword(username: string): Observable<void> {
+        return this.httpClient.post<void>(
+            `${environment.apiBaseUrl}${Endpoints.forgotPassword}`,
+            { username },
+            { withCredentials: true }
+        );
+    }
+
+    resetPassword(request: ResetPasswordRequest): Observable<void> {
+        return this.httpClient.post<void>(
+            `${environment.apiBaseUrl}${Endpoints.resetPassword}`,
+            request,
+            { withCredentials: true }
         );
     }
 

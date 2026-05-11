@@ -8,4 +8,6 @@ export const Endpoints = {
   setup2fa: 'api/identity/auth/2fa/setup',
   verify2fa: 'api/identity/auth/2fa/verify',
   resendConfirmationEmail: 'api/identity/auth/resend-email-confirmation',
+  forgotPassword: 'api/identity/auth/forgot-password',
+  resetPassword: 'api/identity/auth/reset-password',
 } as const;

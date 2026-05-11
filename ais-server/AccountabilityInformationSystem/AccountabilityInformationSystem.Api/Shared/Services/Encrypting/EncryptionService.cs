@@ -19,16 +19,18 @@ public sealed class EncryptionService(IOptionsSnapshot<EncryptionOptions> option
             aes.Key = _masterKey;
             aes.IV = RandomNumberGenerator.GetBytes(IvSize);
 
-            using MemoryStream memeoryStream = new MemoryStream();
-            memeoryStream.Write(aes.IV, 0, IvSize);
+            using MemoryStream memoryStream = new MemoryStream();
+            memoryStream.Write(aes.IV, 0, IvSize);
 
             using ICryptoTransform encryptor = aes.CreateEncryptor();
-            using CryptoStream cryptoStream = new CryptoStream(memeoryStream, encryptor, CryptoStreamMode.Write);
+            using CryptoStream cryptoStream = new CryptoStream(memoryStream, encryptor, CryptoStreamMode.Write);
             using StreamWriter writer = new StreamWriter(cryptoStream);
 
             writer.Write(plainText);
+            writer.Flush();
+            cryptoStream.FlushFinalBlock();
 
-            return Convert.ToBase64String(memeoryStream.ToArray());
+            return Convert.ToBase64String(memoryStream.ToArray());
         }
         catch ( CryptographicException exception)
         {
@@ -58,9 +60,9 @@ public sealed class EncryptionService(IOptionsSnapshot<EncryptionOptions> option
             aes.Key = _masterKey;
             aes.IV = iv;
 
-            using MemoryStream memeoryStream = new();
+            using MemoryStream memoryStream = new(encryptedData);
             using ICryptoTransform decryptor = aes.CreateDecryptor();
-            using CryptoStream cryptoStream = new(memeoryStream, decryptor, CryptoStreamMode.Read);
+            using CryptoStream cryptoStream = new(memoryStream, decryptor, CryptoStreamMode.Read);
             using StreamReader reader = new(cryptoStream);
 
             return reader.ReadToEnd();

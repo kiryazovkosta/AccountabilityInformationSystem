@@ -1,5 +1,5 @@
-import { AfterViewInit, ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
-import { RouterLink, RouterLinkActive, Router } from '@angular/router';
+import { ChangeDetectionStrategy, Component, HostListener, inject, signal } from '@angular/core';
+import { RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../services/shared/auth.service';
 
 @Component({
@@ -9,90 +9,46 @@ import { AuthService } from '../../services/shared/auth.service';
   styleUrl: './header.css',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class Header implements AfterViewInit {
-  private readonly authService: AuthService = inject(AuthService);
-  private readonly router: Router = inject(Router);
+export class Header {
+  private readonly authService = inject(AuthService);
 
-  // Authentication state properties
-  isLoggedIn = this.authService.isLoggedIn;
-  userName = signal<string|null>('Ivan Ivanov');
+  readonly isLoggedIn = this.authService.isLoggedIn;
+  readonly userName = signal<string | null>(null);
+  readonly isMenuOpen = signal(false);
+  readonly isSubmenuOpen = signal(false);
 
-  // logout() {
-  //   this.router.navigate(['/auth/logout']);
-  // }
-
-  ngAfterViewInit() {
-    this.initMobileMenu();
-  }
-
-  closeSubmenu(event: Event) {
-    event.preventDefault();
-    event.stopPropagation();
-    // Hide the submenu panel
-    const submenuPanel = (event.target as HTMLElement).closest('.submenu-panel') as HTMLElement;
-    if (submenuPanel) {
-      submenuPanel.style.display = 'none';
-      // Reset hover state
-      setTimeout(() => {
-        submenuPanel.style.display = '';
-      }, 100);
+  toggleMenu(): void {
+    const opening = !this.isMenuOpen();
+    this.isMenuOpen.set(opening);
+    if (!opening) {
+      this.isSubmenuOpen.set(false);
     }
   }
 
-  private initMobileMenu() {
-    const hamburger = document.querySelector('.hamburger') as HTMLElement;
-    const navMenu = document.querySelector('.nav-menu') as HTMLElement;
+  closeMenu(): void {
+    this.isMenuOpen.set(false);
+    this.isSubmenuOpen.set(false);
+  }
 
-    if (hamburger && navMenu) {
-      hamburger.addEventListener('click', () => {
-        navMenu.classList.toggle('active');
-        // Close any open submenus when closing nav
-        if (!navMenu.classList.contains('active')) {
-          document.querySelectorAll('.has-submenu.show-submenu').forEach(sub => sub.classList.remove('show-submenu'));
-        }
-      });
+  toggleSubmenu(event: Event): void {
+    if (window.innerWidth <= 700 && this.isMenuOpen()) {
+      event.preventDefault();
+      this.isSubmenuOpen.update(v => !v);
+    }
+  }
 
-      // Close menu when clicking a link (except submenu toggles)
-      const navLinks = document.querySelectorAll('.nav-menu a:not(.profile-btn)');
-      navLinks.forEach(link => {
-        link.addEventListener('click', () => {
-          navMenu.classList.remove('active');
-          // Also close submenus
-          document.querySelectorAll('.has-submenu.show-submenu').forEach(sub => sub.classList.remove('show-submenu'));
-        });
-      });
+  closeSubmenu(event: Event): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isSubmenuOpen.set(false);
+  }
 
-      // Submenu toggle for mobile
-      const submenuToggles = document.querySelectorAll('.profile-btn');
-      submenuToggles.forEach(toggle => {
-        toggle.addEventListener('click', (e) => {
-          if (window.innerWidth <= 700 && navMenu.classList.contains('active')) {
-            e.preventDefault();
-            const parent = toggle.closest('.has-submenu') as HTMLElement;
-            if (parent) {
-              parent.classList.toggle('show-submenu');
-            }
-          }
-        });
-      });
-
-      // Close submenu when clicking outside (desktop only)
-      document.addEventListener('click', (e) => {
-        if (window.innerWidth > 700) {
-          const target = e.target as HTMLElement;
-          const submenu = target.closest('.has-submenu');
-          if (!submenu) {
-            // Hide all submenu panels
-            const panels = document.querySelectorAll('.submenu-panel') as NodeListOf<HTMLElement>;
-            panels.forEach(panel => {
-              panel.style.display = 'none';
-              setTimeout(() => {
-                panel.style.display = '';
-              }, 100);
-            });
-          }
-        }
-      });
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    if (window.innerWidth > 700) {
+      if (!(event.target as HTMLElement).closest('.has-submenu')) {
+        this.isSubmenuOpen.set(false);
+      }
     }
   }
 }

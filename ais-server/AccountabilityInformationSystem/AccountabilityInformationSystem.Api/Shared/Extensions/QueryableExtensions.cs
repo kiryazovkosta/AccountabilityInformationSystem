@@ -26,8 +26,13 @@ internal static class QueryableExtensions
         {
             (string sortField, bool isDescending) = ParseSortField(field);
 
-            SortMapping mapping = mappings.First(m =>
+            SortMapping? mapping = mappings.FirstOrDefault(m =>
                 m.SortField.Equals(sortField, StringComparison.OrdinalIgnoreCase));
+
+            if (mapping is null)
+            {
+                continue;
+            }
 
             string direction = isDescending ^ mapping.Reverse ? "DESC" : "ASC";
             orderByParts.Add($"{mapping.PropertyName} {direction}");

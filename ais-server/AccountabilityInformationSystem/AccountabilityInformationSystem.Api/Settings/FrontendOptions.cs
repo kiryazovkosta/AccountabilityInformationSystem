@@ -6,4 +6,6 @@ public class FrontendOptions
     public string HostName { get; init; }
 
     public string ConfirmEmail { get; init; }
+
+    public string ResetPassword { get; init; }
 }

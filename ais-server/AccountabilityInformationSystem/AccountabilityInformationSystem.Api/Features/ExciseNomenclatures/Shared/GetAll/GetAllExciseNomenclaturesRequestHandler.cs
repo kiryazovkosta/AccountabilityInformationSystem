@@ -22,13 +22,13 @@ public class GetAllExciseNomenclaturesRequestHandler<TEntity>(
         if (!sortMappingProvider.ValidateMappings<ExciseNomenclatureResponse, TEntity>(request.Query.Sort))
         {
             return Result<PaginationResponse<ExpandoObject>>.Failure(
-                new Error("", $"Invalid sort parameter. {request.Query.Sort}"));
+                new Error("InvalidSort", $"Invalid sort parameter: {request.Query.Sort}"));
         }
 
         if (!dataShapingService.Validate<ExciseNomenclatureResponse>(request.Query.Fields))
         {
             return Result<PaginationResponse<ExpandoObject>>.Failure(
-                new Error("", $"Invalid fields parameter. {request.Query.Fields}"));
+                new Error("InvalidFields", $"Invalid fields parameter: {request.Query.Fields}"));
         }
 
         request.Query.Search = request.Query.Search?.Trim().ToLower();

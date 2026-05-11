@@ -1,17 +1,17 @@
 <header>
     <img src="logo.png" alt="Logo">
-    <nav class="nav-menu">
+    <nav class="nav-menu" [class.active]="isMenuOpen()">
         <ul class="main-nav">
-            <li><a routerLink="/home" routerLinkActive="active" >Home</a></li>
-            <li><a routerLink="/ikunks" routerLinkActive="active">Ikunks</a></li>
-            <li><a routerLink="/pricing" routerLinkActive="active">Pricing</a></li>
-            <li><a routerLink="/contact" routerLinkActive="active">Contact</a></li>
+            <li><a routerLink="/home" routerLinkActive="active" (click)="closeMenu()">Home</a></li>
+            <li><a routerLink="/ikunks" routerLinkActive="active" (click)="closeMenu()">Ikunks</a></li>
+            <li><a routerLink="/pricing" routerLinkActive="active" (click)="closeMenu()">Pricing</a></li>
+            <li><a routerLink="/contact" routerLinkActive="active" (click)="closeMenu()">Contact</a></li>
         </ul>
         <ul class="user-nav">
             <li>
                 @if (isLoggedIn()) {
-                    <div class="has-submenu">
-                        <a href="#" class="profile-btn">{{ userName()|| 'User' }}</a>
+                    <div class="has-submenu" [class.show-submenu]="isSubmenuOpen()">
+                        <a href="#" class="profile-btn" (click)="toggleSubmenu($event)">{{ userName() || 'User' }}</a>
                         <div class="submenu-panel">
                             <div class="panel-header">
                                 <span class="panel-title"></span>
@@ -21,21 +21,21 @@
                             </div>
                             <div class="panel-body">
                                 <ul class="submenu">
-                                    <li><a routerLink="/auth/user-profile" routerLinkActive="active">Profile</a></li>
-                                    <li><a routerLink="/auth/logout" class="logout-btn">Logout</a></li>
+                                    <li><a routerLink="/auth/user-profile" routerLinkActive="active" (click)="closeMenu()">Profile</a></li>
+                                    <li><a routerLink="/auth/logout" class="logout-btn" (click)="closeMenu()">Logout</a></li>
                                 </ul>
                             </div>
                         </div>
                     </div>
-                    
+
                 } @else {
-                    <a routerLink="/auth/login" routerLinkActive="active" class="login-btn">Login</a>
-                    <a routerLink="/auth/register" routerLinkActive="active" class="register-btn">Register</a>
+                    <a routerLink="/auth/login" routerLinkActive="active" class="login-btn" (click)="closeMenu()">Login</a>
+                    <a routerLink="/auth/register" routerLinkActive="active" class="register-btn" (click)="closeMenu()">Register</a>
                 }
             </li>
         </ul>
     </nav>
-    <button type="button" class="hamburger" aria-label="Toggle navigation">
+    <button type="button" class="hamburger" aria-label="Toggle navigation" (click)="toggleMenu()">
         <span></span>
         <span></span>
         <span></span>
