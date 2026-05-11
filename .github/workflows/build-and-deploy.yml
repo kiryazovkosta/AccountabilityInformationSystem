@@ -1,4 +1,4 @@
-name: CI - Backend
+name: CI - Full Stack
 
 on:
   workflow_dispatch:
@@ -21,7 +21,7 @@ env:
 
 jobs:
     build-and-test:
-        name: Build and Test
+        name: "Backend: Build and Test"
         runs-on: ubuntu-latest
 
         defaults:
@@ -61,7 +61,7 @@ jobs:
                 path: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
     
     apply-migrations:
-        name: Apply Database Migrations
+        name: "Database: Apply Migrations"
         needs: build-and-test
         runs-on: ubuntu-latest
         if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
@@ -104,7 +104,7 @@ jobs:
                 ConnectionStrings__AccountabilityInformationSystemDb: ${{ secrets.DATABASE_CONNECTION_STRING }}
 
     deploy:
-        name: Deploy to Azure
+        name: "Backend: Deploy to Azure"
         runs-on: ubuntu-latest
         needs: apply-migrations
         if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
@@ -122,3 +122,41 @@ jobs:
                 app-name: ${{ env.AZURE_WEBAPP_NAME }}
                 publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
                 package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+
+    build-and-deploy-client:
+        name: "Frontend: Build and Deploy"
+        runs-on: ubuntu-latest
+        needs: deploy
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+
+        defaults:
+            run:
+                working-directory: ./ais-client
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+              with:
+                submodules: true
+                lfs: true
+
+            - name: Set up Node.js
+              uses: actions/setup-node@v4
+              with:
+                node-version: '22'
+                cache: 'npm'
+                cache-dependency-path: ./ais-client/package-lock.json
+
+            - name: Install dependencies
+              run: npm ci
+
+            - name: Build
+              run: npm run build
+
+            - name: Install SWA CLI
+              run: npm install -g @azure/static-web-apps-cli
+
+            - name: Deploy to Azure Static Web Apps
+              env:
+                AZURE_STATIC_WEB_APPS_API_TOKEN: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
+              run: swa deploy --env production --deployment-token $AZURE_STATIC_WEB_APPS_API_TOKEN --output-location dist/ais-client/browser
