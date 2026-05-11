@@ -20,8 +20,6 @@ public class MappingProfile : IRegister
 
         foreach (Type type in types)
         {
-            Console.WriteLine(type.Name);
-
             // IMapFrom<>
             var mapFromInterface = type.GetInterface(typeof(IMapFrom<>).Name);
             if (mapFromInterface is not null)

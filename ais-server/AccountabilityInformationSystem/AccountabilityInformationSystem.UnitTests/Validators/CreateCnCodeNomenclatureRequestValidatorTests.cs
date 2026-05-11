@@ -1,4 +1,4 @@
-﻿using AccountabilityInformationSystem.Api.Features.ExciseNomenclatures.CnCodes.Create;
+using AccountabilityInformationSystem.Api.Features.ExciseNomenclatures.CnCodes.Create;
 using AccountabilityInformationSystem.Api.Shared.Constants;
 using FluentValidation.Results;
 using System.Linq;
@@ -15,7 +15,7 @@ public class CreateCnCodeNomenclatureRequestValidatorTests
     public async Task Validate_ShouldSuccess_WhenInputRequestIsValid()
     {
         //Arrange
-        CreateCnCodeNomenclatureRequest request = new(){ Code = "12345678", BgDescription = "Описание на български език", DescriptionEn = null, IsUsed = false };
+        CreateCnCodeNomenclatureRequest request = new(){ Code = "12345678", DescriptionBg = "Описание на български език", DescriptionEn = "English description", IsUsed = false };
 
         // Act
         ValidationResult validationResult = await _validator.ValidateAsync(request, CancellationToken.None);
@@ -39,7 +39,7 @@ public class CreateCnCodeNomenclatureRequestValidatorTests
     public async Task Validate_ShouldFailed_WhenInputRequestHasInvalidCode(string code)
     {
         //Arrange
-        CreateCnCodeNomenclatureRequest request = new() { Code = code, BgDescription = "Описание на български език", DescriptionEn = null, IsUsed = false };
+        CreateCnCodeNomenclatureRequest request = new() { Code = code, DescriptionBg = "Описание на български език", DescriptionEn = "English description", IsUsed = false };
 
         // Act
         ValidationResult validationResult = await _validator.ValidateAsync(request, CancellationToken.None);
@@ -50,32 +50,46 @@ public class CreateCnCodeNomenclatureRequestValidatorTests
     }
 
     [Fact]
-    public async Task Validate_ShouldFailed_WhenInputRequestHasEmptyBgDescription()
+    public async Task Validate_ShouldFailed_WhenInputRequestHasEmptyDescriptionBg()
     {
         //Arrange
-        CreateCnCodeNomenclatureRequest request = new() { Code = "12345678", BgDescription = "", DescriptionEn = null, IsUsed = false };
+        CreateCnCodeNomenclatureRequest request = new() { Code = "12345678", DescriptionBg = "", DescriptionEn = "English description", IsUsed = false };
 
         // Act
         ValidationResult validationResult = await _validator.ValidateAsync(request, CancellationToken.None);
 
         // Assert
         Assert.False(validationResult.IsValid);
-        Assert.Contains(nameof(CreateCnCodeNomenclatureRequest.BgDescription), validationResult.Errors.Select(e => e.PropertyName).ToList());
+        Assert.Contains(nameof(CreateCnCodeNomenclatureRequest.DescriptionBg), validationResult.Errors.Select(e => e.PropertyName).ToList());
     }
 
     [Fact]
-    public async Task Validate_ShouldFailed_WhenInputRequestIncreaseMaximumLengthBgDescription()
+    public async Task Validate_ShouldFailed_WhenInputRequestIncreaseMaximumLengthDescriptionBg()
     {
         //Arrange
         string description = new('a', EntitiesConstants.CnCodeConstants.DescriptionMaxlength + 1);
-        CreateCnCodeNomenclatureRequest request = new() { Code = "12345678", BgDescription = description, DescriptionEn = null, IsUsed = false };
+        CreateCnCodeNomenclatureRequest request = new() { Code = "12345678", DescriptionBg = description, DescriptionEn = "English description", IsUsed = false };
 
         // Act
         ValidationResult validationResult = await _validator.ValidateAsync(request, CancellationToken.None);
 
         // Assert
         Assert.False(validationResult.IsValid);
-        Assert.Contains(nameof(CreateCnCodeNomenclatureRequest.BgDescription), validationResult.Errors.Select(e => e.PropertyName).ToList());
+        Assert.Contains(nameof(CreateCnCodeNomenclatureRequest.DescriptionBg), validationResult.Errors.Select(e => e.PropertyName).ToList());
+    }
+
+    [Fact]
+    public async Task Validate_ShouldFailed_WhenInputRequestHasEmptyDescriptionEn()
+    {
+        //Arrange
+        CreateCnCodeNomenclatureRequest request = new() { Code = "12345678", DescriptionBg = "Some description", DescriptionEn = "", IsUsed = false };
+
+        // Act
+        ValidationResult validationResult = await _validator.ValidateAsync(request, CancellationToken.None);
+
+        // Assert
+        Assert.False(validationResult.IsValid);
+        Assert.Contains(nameof(CreateCnCodeNomenclatureRequest.DescriptionEn), validationResult.Errors.Select(e => e.PropertyName).ToList());
     }
 
     [Fact]
@@ -83,7 +97,7 @@ public class CreateCnCodeNomenclatureRequestValidatorTests
     {
         //Arrange
         string description = new('a', EntitiesConstants.CnCodeConstants.DescriptionMaxlength + 1);
-        CreateCnCodeNomenclatureRequest request = new() { Code = "12345678", BgDescription = "Some description", DescriptionEn = description, IsUsed = false };
+        CreateCnCodeNomenclatureRequest request = new() { Code = "12345678", DescriptionBg = "Some description", DescriptionEn = description, IsUsed = false };
 
         // Act
         ValidationResult validationResult = await _validator.ValidateAsync(request, CancellationToken.None);

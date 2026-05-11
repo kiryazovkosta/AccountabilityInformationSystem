@@ -17,10 +17,10 @@ public sealed class UpdateExciseNomenclatureValidator<TUpdateRequest> : Abstract
             .When(x => !string.IsNullOrEmpty(x.Code))
             .WithMessage($"Code must to be into {codePattern} format.");
 
-        RuleFor(x => x.BgDescription)
+        RuleFor(x => x.DescriptionBg)
             .MaximumLength(descriptionMaxLength)
-            .When(x => !string.IsNullOrEmpty(x.BgDescription))
-            .WithMessage($"BgDescription must not exceed {descriptionMaxLength} characters.");
+            .When(x => !string.IsNullOrEmpty(x.DescriptionBg))
+            .WithMessage($"DescriptionBg must not exceed {descriptionMaxLength} characters.");
 
         RuleFor(x => x.DescriptionEn)
             .MaximumLength(descriptionMaxLength)

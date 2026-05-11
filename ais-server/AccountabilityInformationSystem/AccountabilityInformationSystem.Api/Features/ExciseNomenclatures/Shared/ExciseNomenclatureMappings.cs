@@ -15,7 +15,7 @@ public static class ExciseNomenclatureMappings
             new SortMapping(nameof(ExciseNomenclatureResponse.Id), nameof(ApCode.Id)),
             new SortMapping(nameof(ExciseNomenclatureResponse.Code), nameof(ApCode.Code)),
             new SortMapping(nameof(ExciseNomenclatureResponse.DescriptionEn), nameof(ApCode.DescriptionEn)),
-            new SortMapping(nameof(ExciseNomenclatureResponse.BgDescription), nameof(ApCode.BgDescription)),
+            new SortMapping(nameof(ExciseNomenclatureResponse.DescriptionBg), nameof(ApCode.DescriptionBg)),
             new SortMapping(nameof(ExciseNomenclatureResponse.IsUsed), nameof(ApCode.IsUsed))
         ]
     };
@@ -27,7 +27,7 @@ public static class ExciseNomenclatureMappings
             new SortMapping(nameof(ExciseNomenclatureResponse.Id), nameof(BrandName.Id)),
             new SortMapping(nameof(ExciseNomenclatureResponse.Code), nameof(BrandName.Code)),
             new SortMapping(nameof(ExciseNomenclatureResponse.DescriptionEn), nameof(BrandName.DescriptionEn)),
-            new SortMapping(nameof(ExciseNomenclatureResponse.BgDescription), nameof(BrandName.BgDescription)),
+            new SortMapping(nameof(ExciseNomenclatureResponse.DescriptionBg), nameof(BrandName.DescriptionBg)),
             new SortMapping(nameof(ExciseNomenclatureResponse.IsUsed), nameof(BrandName.IsUsed))
         ]
     };
@@ -39,7 +39,7 @@ public static class ExciseNomenclatureMappings
             new SortMapping(nameof(ExciseNomenclatureResponse.Id), nameof(CnCode.Id)),
                 new SortMapping(nameof(ExciseNomenclatureResponse.Code), nameof(CnCode.Code)),
                 new SortMapping(nameof(ExciseNomenclatureResponse.DescriptionEn), nameof(CnCode.DescriptionEn)),
-                new SortMapping(nameof(ExciseNomenclatureResponse.BgDescription), nameof(CnCode.BgDescription)),
+                new SortMapping(nameof(ExciseNomenclatureResponse.DescriptionBg), nameof(CnCode.DescriptionBg)),
                 new SortMapping(nameof(ExciseNomenclatureResponse.IsUsed), nameof(CnCode.IsUsed))
         ]
     };
@@ -51,7 +51,7 @@ public static class ExciseNomenclatureMappings
         {
             Id = $"{prefix}_{Guid.CreateVersion7()}",
             Code = request.Code,
-            BgDescription = request.BgDescription,
+            DescriptionBg = request.DescriptionBg,
             DescriptionEn = request.DescriptionEn,
             IsUsed = request.IsUsed,
             CreatedBy = userName,
@@ -64,7 +64,7 @@ public static class ExciseNomenclatureMappings
         {
             Id = exciseEntity.Id,
             Code = exciseEntity.Code,
-            BgDescription = exciseEntity.BgDescription,
+            DescriptionBg = exciseEntity.DescriptionBg,
             DescriptionEn = exciseEntity.DescriptionEn,
             IsUsed = exciseEntity.IsUsed
         };
@@ -74,7 +74,7 @@ public static class ExciseNomenclatureMappings
         where TUpdateRequest : UpdateExciseNomenclatureRequest
     {
         entity.Code = request.Code ?? entity.Code;
-        entity.BgDescription = request.BgDescription ?? entity.BgDescription;
+        entity.DescriptionBg = request.DescriptionBg ?? entity.DescriptionBg;
         entity.DescriptionEn = request.DescriptionEn ?? entity.DescriptionEn;
         entity.IsUsed = request.IsUsed ?? entity.IsUsed;
         entity.ModifiedBy = userName;

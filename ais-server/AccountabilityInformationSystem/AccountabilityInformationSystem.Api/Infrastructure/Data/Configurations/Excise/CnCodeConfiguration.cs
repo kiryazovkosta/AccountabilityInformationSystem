@@ -21,12 +21,12 @@ public sealed class CnCodeConfiguration : IEntityTypeConfiguration<CnCode>
             .IsRequired()
             .HasMaxLength(EntitiesConstants.CnCodeConstants.CodeLength);
 
-        builder.Property(e => e.BgDescription)
+        builder.Property(e => e.DescriptionBg)
             .IsRequired()
             .HasMaxLength(EntitiesConstants.ExciseDescriptionMaxLength);
 
         builder.Property(e => e.DescriptionEn)
-            .IsRequired(false)
+            .IsRequired()
             .HasMaxLength(EntitiesConstants.ExciseDescriptionMaxLength);
 
         builder.Property(e => e.CreatedBy)

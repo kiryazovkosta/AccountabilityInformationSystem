@@ -11,14 +11,14 @@ public sealed class CreateExciseNomenclatureValidator<TCreateRequest> : Abstract
             .Matches(codePattern)
             .WithMessage($"Code must to be into {codePattern} format.");
 
-        RuleFor(x => x.BgDescription)
+        RuleFor(x => x.DescriptionBg)
             .NotEmpty()
             .MaximumLength(descriptionMaxLength)
-            .WithMessage($"BgDescription must not exceed {descriptionMaxLength} characters.");
+            .WithMessage($"DescriptionBg must not exceed {descriptionMaxLength} characters.");
 
         RuleFor(x => x.DescriptionEn)
+            .NotEmpty()
             .MaximumLength(descriptionMaxLength)
-            .When(x => !string.IsNullOrEmpty(x.DescriptionEn))
             .WithMessage($"DescriptionEn must not exceed {descriptionMaxLength} characters.");
     }
 }

@@ -1,5 +1,0 @@
-name: UI Client Build
-on:
-  workflow_dispatch:
-jobs:
-  build:

@@ -16,7 +16,7 @@ public class UpdateCnCodeNomenclatureRequestValidatorTests
     public async Task Validate_ShouldSuccess_WhenInputRequestIsValid()
     {
         //Arrange
-        UpdateCnCodeNomenclatureRequest request = new() { Code = "12345678", BgDescription = "Описание на български език", DescriptionEn = null, IsUsed = false };
+        UpdateCnCodeNomenclatureRequest request = new() { Code = "12345678", DescriptionBg = "Описание на български език", DescriptionEn = null, IsUsed = false };
 
         // Act
         ValidationResult validationResult = await _validator.ValidateAsync(request, CancellationToken.None);
@@ -30,7 +30,7 @@ public class UpdateCnCodeNomenclatureRequestValidatorTests
     public async Task Validate_ShouldSuccess_WhenInputRequestHasNullCode()
     {
         //Arrange
-        UpdateCnCodeNomenclatureRequest request = new() { Code = null, BgDescription = "Описание на български език", DescriptionEn = null, IsUsed = false };
+        UpdateCnCodeNomenclatureRequest request = new() { Code = null, DescriptionBg = "Описание на български език", DescriptionEn = null, IsUsed = false };
 
         // Act
         ValidationResult validationResult = await _validator.ValidateAsync(request, CancellationToken.None);
@@ -44,7 +44,7 @@ public class UpdateCnCodeNomenclatureRequestValidatorTests
     public async Task Validate_ShouldSuccess_WhenInputRequestHasEmptyCode()
     {
         //Arrange
-        UpdateCnCodeNomenclatureRequest request = new() { Code = "", BgDescription = "Описание на български език", DescriptionEn = null, IsUsed = false };
+        UpdateCnCodeNomenclatureRequest request = new() { Code = "", DescriptionBg = "Описание на български език", DescriptionEn = null, IsUsed = false };
 
         // Act
         ValidationResult validationResult = await _validator.ValidateAsync(request, CancellationToken.None);
@@ -55,10 +55,10 @@ public class UpdateCnCodeNomenclatureRequestValidatorTests
     }
 
     [Fact]
-    public async Task Validate_ShouldSuccess_WhenInputRequestHasNullBgDescription()
+    public async Task Validate_ShouldSuccess_WhenInputRequestHasNullDescriptionBg()
     {
         //Arrange
-        UpdateCnCodeNomenclatureRequest request = new() { Code = "12345678", BgDescription = null, DescriptionEn = null, IsUsed = false };
+        UpdateCnCodeNomenclatureRequest request = new() { Code = "12345678", DescriptionBg = null, DescriptionEn = null, IsUsed = false };
 
         // Act
         ValidationResult validationResult = await _validator.ValidateAsync(request, CancellationToken.None);
@@ -69,10 +69,10 @@ public class UpdateCnCodeNomenclatureRequestValidatorTests
     }
 
     [Fact]
-    public async Task Validate_ShouldSuccess_WhenInputRequestHasEmptyBgDescription()
+    public async Task Validate_ShouldSuccess_WhenInputRequestHasEmptyDescriptionBg()
     {
         //Arrange
-        UpdateCnCodeNomenclatureRequest request = new() { Code = "12345678", BgDescription = "", DescriptionEn = null, IsUsed = false };
+        UpdateCnCodeNomenclatureRequest request = new() { Code = "12345678", DescriptionBg = "", DescriptionEn = null, IsUsed = false };
 
         // Act
         ValidationResult validationResult = await _validator.ValidateAsync(request, CancellationToken.None);
@@ -95,7 +95,7 @@ public class UpdateCnCodeNomenclatureRequestValidatorTests
     public async Task Validate_ShouldFailed_WhenInputRequestHasInvalidCode(string code)
     {
         //Arrange
-        UpdateCnCodeNomenclatureRequest request = new() { Code = code, BgDescription = "Описание на български език", DescriptionEn = null, IsUsed = false };
+        UpdateCnCodeNomenclatureRequest request = new() { Code = code, DescriptionBg = "Описание на български език", DescriptionEn = null, IsUsed = false };
 
         // Act
         ValidationResult validationResult = await _validator.ValidateAsync(request, CancellationToken.None);
@@ -106,18 +106,18 @@ public class UpdateCnCodeNomenclatureRequestValidatorTests
     }
 
     [Fact]
-    public async Task Validate_ShouldFailed_WhenInputRequestIncreaseMaximumLengthBgDescription()
+    public async Task Validate_ShouldFailed_WhenInputRequestIncreaseMaximumLengthDescriptionBg()
     {
         //Arrange
         string description = new('a', EntitiesConstants.CnCodeConstants.DescriptionMaxlength + 1);
-        UpdateCnCodeNomenclatureRequest request = new() { Code = "12345678", BgDescription = description, DescriptionEn = null, IsUsed = false };
+        UpdateCnCodeNomenclatureRequest request = new() { Code = "12345678", DescriptionBg = description, DescriptionEn = null, IsUsed = false };
 
         // Act
         ValidationResult validationResult = await _validator.ValidateAsync(request, CancellationToken.None);
 
         // Assert
         Assert.False(validationResult.IsValid);
-        Assert.Contains(nameof(UpdateCnCodeNomenclatureRequest.BgDescription), validationResult.Errors.Select(e => e.PropertyName).ToList());
+        Assert.Contains(nameof(UpdateCnCodeNomenclatureRequest.DescriptionBg), validationResult.Errors.Select(e => e.PropertyName).ToList());
     }
 
     [Fact]
@@ -125,7 +125,7 @@ public class UpdateCnCodeNomenclatureRequestValidatorTests
     {
         //Arrange
         string description = new('a', EntitiesConstants.CnCodeConstants.DescriptionMaxlength + 1);
-        UpdateCnCodeNomenclatureRequest request = new() { Code = "12345678", BgDescription = "Some description", DescriptionEn = description, IsUsed = false };
+        UpdateCnCodeNomenclatureRequest request = new() { Code = "12345678", DescriptionBg = "Some description", DescriptionEn = description, IsUsed = false };
 
         // Act
         ValidationResult validationResult = await _validator.ValidateAsync(request, CancellationToken.None);
