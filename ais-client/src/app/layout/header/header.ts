@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, HostListener, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, HostListener, inject, signal } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../services/shared/auth.service';
 
@@ -13,7 +13,7 @@ export class Header {
   private readonly authService = inject(AuthService);
 
   readonly isLoggedIn = this.authService.isLoggedIn;
-  readonly userName = signal<string | null>(null);
+  readonly userName = computed(() => this.authService.currentUser()?.fullName ?? null);
   readonly isMenuOpen = signal(false);
   readonly isSubmenuOpen = signal(false);
 

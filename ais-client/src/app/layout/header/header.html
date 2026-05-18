@@ -11,7 +11,7 @@
             <li>
                 @if (isLoggedIn()) {
                     <div class="has-submenu" [class.show-submenu]="isSubmenuOpen()">
-                        <a href="#" class="profile-btn" (click)="toggleSubmenu($event)">{{ userName() || 'User' }}</a>
+                        <a routerLink="/home" class="profile-btn" (click)="toggleSubmenu($event)">{{ userName() || 'User' }}</a>
                         <div class="submenu-panel">
                             <div class="panel-header">
                                 <span class="panel-title"></span>

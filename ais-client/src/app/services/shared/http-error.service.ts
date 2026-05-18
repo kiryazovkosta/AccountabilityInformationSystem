@@ -21,6 +21,7 @@ export class HttpErrorService {
     });
 
     handle(error: HttpErrorResponse): void {
+        console.error(`HTTP ${error.status} — ${error.url}`, error);
         const problem = error.error as ProblemDetails | null;
         this.currentError.set(problem ?? null);
 

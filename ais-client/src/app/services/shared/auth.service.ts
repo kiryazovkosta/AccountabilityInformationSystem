@@ -3,13 +3,23 @@ import { inject, Injectable, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { LoginUserRequest } from '../../auth/login/login-user.request';
 import { Observable, of } from 'rxjs';
-import { catchError, map, tap } from 'rxjs/operators';
+import { catchError, map, switchMap, tap } from 'rxjs/operators';
 import { LogoutResponse } from '../../auth/logout/logout.response';
 import { RegisterUserRequest } from '../../auth/register-user/register-user.request';
 import { environment } from '../../../environments/environment';
 import { Endpoints } from '../../common/endpoints-config';
 import { ResendEmailConfirmationRequest } from '../../auth/resend-email-confirmation/resend-email-confirmation-request';
 import { ResetPasswordRequest } from '../../auth/reset-password/reset-password.request';
+
+export interface UserResponse {
+  id: string;
+  username: string;
+  email: string;
+  fullName: string;
+  image: string | null;
+  createdAt: string;
+  modifiedAt: string;
+}
 
 export interface ConfirmEmailResponse {
   requiresTwoFactorSetup: boolean;
@@ -39,8 +49,10 @@ export class AuthService {
     private readonly httpClient = inject(HttpClient);
 
     private _isLoggedIn = signal<boolean>(false);
+    private _currentUser = signal<UserResponse | null>(null);
 
     public isLoggedIn = this._isLoggedIn.asReadonly();
+    public currentUser = this._currentUser.asReadonly();
 
     private resendPayload = signal<ResendEmailConfirmationRequest | undefined>(undefined);
 
@@ -92,16 +104,14 @@ export class AuthService {
     login(request: LoginUserRequest): Observable<LoginResult> {
         return this.httpClient.post<LoginTwoFactorSetupRequired>(
             `${environment.apiBaseUrl}${Endpoints.login}`,
-            request, 
+            request,
             { observe: 'response', withCredentials: true }
-        )
-        .pipe(
-            map(response => {
+        ).pipe(
+            switchMap(response => {
                 if (response.status === 202 && response.body?.requiresTwoFactorSetup) {
-                    return { requiresTwoFactorSetup: true, setupToken: response.body.setupToken } as LoginResult;
+                    return of({ requiresTwoFactorSetup: true, setupToken: response.body.setupToken } as LoginResult);
                 }
-                this._isLoggedIn.set(true);
-                return { success: true } as LoginResult;
+                return this.checkAuth().pipe(map(() => ({ success: true } as LoginResult)));
             })
         );
     }
@@ -112,22 +122,35 @@ export class AuthService {
             { withCredentials: true })
             .pipe(
                 map(() => true),
-                tap(() => this._isLoggedIn.set(false)),
+                tap(() => {
+                    this._isLoggedIn.set(false);
+                    this._currentUser.set(null);
+                }),
                 catchError(() => {
                     this._isLoggedIn.set(false);
+                    this._currentUser.set(null);
                     return of(false);
                 })
             );
     }
 
     checkAuth(): Observable<boolean> {
-        return this.httpClient.get(`${environment.apiBaseUrl}${Endpoints.checkAuth}`,
+        return this.httpClient.get<UserResponse>(`${environment.apiBaseUrl}${Endpoints.checkAuth}`,
             { observe: 'response', withCredentials: true }
         ).pipe(
+            tap(response => {
+                if (response.ok && response.body) {
+                    this._currentUser.set(response.body);
+                    this._isLoggedIn.set(true);
+                } else {
+                    this._currentUser.set(null);
+                    this._isLoggedIn.set(false);
+                }
+            }),
             map(response => response.ok),
-            tap(valid => this._isLoggedIn.set(valid)),
             catchError(() => {
                 this._isLoggedIn.set(false);
+                this._currentUser.set(null);
                 return of(false);
             })
         );
@@ -154,9 +177,13 @@ export class AuthService {
             { observe: 'response', withCredentials: true }
         ).pipe(
             map(response => response.ok),
-            tap(success => this._isLoggedIn.set(success)),
+            tap(success => {
+                this._isLoggedIn.set(success);
+                if (!success) this._currentUser.set(null);
+            }),
             catchError(() => {
                 this._isLoggedIn.set(false);
+                this._currentUser.set(null);
                 return of(false);
             })
         );
