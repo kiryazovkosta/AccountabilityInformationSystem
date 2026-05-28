@@ -84,7 +84,7 @@ public sealed class NewDeviceTests(AisWithAutoEmailConfirmWebApplicationFactory 
     }
 
     [Fact]
-    public async Task NewDevice_ShouldReturn200_WhenRecoveryCodeIsValid()
+    public async Task NewDevice_ShouldReturn202_WhenRecoveryCodeIsValid()
     {
         HttpClient client = factory.CreateClient();
 
@@ -126,12 +126,13 @@ public sealed class NewDeviceTests(AisWithAutoEmailConfirmWebApplicationFactory 
             request,
             TestContext.Current.CancellationToken);
 
-        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Equal(HttpStatusCode.Accepted, response.StatusCode);
 
         LoginUserResponse? body = await response.Content.ReadFromJsonAsync<LoginUserResponse>(
             TestContext.Current.CancellationToken);
 
         Assert.NotNull(body);
-        Assert.False(string.IsNullOrEmpty(body.AccessToken));
+        Assert.True(body.RequiresTwoFactorSetup);
+        Assert.False(string.IsNullOrEmpty(body.SetupToken));
     }
 }

@@ -1,27 +1,20 @@
 using AccountabilityInformationSystem.Api.Domain.Entities.Abstraction;
-using AccountabilityInformationSystem.Api.Domain.Entities.Identity;
 using AccountabilityInformationSystem.Api.Features.Identity.Auth.Login;
-using AccountabilityInformationSystem.Api.Features.Identity.Auth.Shared;
-using AccountabilityInformationSystem.Api.Infrastructure.Data;
-using AccountabilityInformationSystem.Api.Settings;
-using AccountabilityInformationSystem.Api.Shared.Services.Tokenizing;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Options;
 
 namespace AccountabilityInformationSystem.Api.Features.Identity.Auth.TwoFactor.NewDevice;
 
 public sealed class NewDeviceRequestHandler(
-    ApplicationIdentityDbContext identityDbContext,
     UserManager<IdentityUser> userManager,
-    TokenProvider tokenProvider,
-    IOptions<JwtAuthOptions> options,
-    TimeProvider timeProvider)
+    IDataProtectionProvider dataProtectionProvider)
 {
-    private readonly JwtAuthOptions _jwtAuthOptions = options.Value;
+    private readonly ITimeLimitedDataProtector _setupProtector =
+        dataProtectionProvider.CreateProtector("TwoFactorSetupToken").ToTimeLimitedDataProtector();
 
-    public async Task<Result<LoginUserResponse>> Handle(NewDeviceRequest request, CancellationToken cancellationToken)
+    public async Task<Result<LoginUserResponse>> Handle(NewDeviceRequest request)
     {
-        IdentityUser identityUser = await userManager.FindByNameAsync(request.Username);
+        IdentityUser? identityUser = await userManager.FindByNameAsync(request.Username);
         if (identityUser is null ||
             !await userManager.CheckPasswordAsync(identityUser, request.Password))
         {
@@ -37,21 +30,6 @@ public sealed class NewDeviceRequestHandler(
                 ResultFailureType.Unauthorized);
         }
 
-        IEnumerable<string> roles = await userManager.GetRolesAsync(identityUser);
-        AccessTokenRequest accessTokenRequest = new(identityUser.Id, identityUser.UserName ?? string.Empty, roles);
-        AccessTokenResponse response = tokenProvider.Create(accessTokenRequest);
-        RefreshToken refreshToken = new()
-        {
-            Id = $"rt_{Guid.CreateVersion7()}",
-            UserId = identityUser.Id,
-            Token = response.RefreshToken,
-            ExpiresAt = timeProvider.GetUtcNow().UtcDateTime.AddDays(_jwtAuthOptions.RefreshTokenExpirationDays)
-        };
-
-        // Stage the refresh token before redemption so Identity's internal SaveChangesAsync
-        // persists both the code removal and the new token atomically.
-        await identityDbContext.RefreshTokens.AddAsync(refreshToken, cancellationToken);
-
         IdentityResult redeemResult = await userManager.RedeemTwoFactorRecoveryCodeAsync(identityUser, request.RecoveryCode);
         if (!redeemResult.Succeeded)
         {
@@ -60,7 +38,11 @@ public sealed class NewDeviceRequestHandler(
                 ResultFailureType.Unauthorized);
         }
 
+        await userManager.SetTwoFactorEnabledAsync(identityUser, false);
+
+        string setupToken = _setupProtector.Protect(identityUser.Id, TimeSpan.FromMinutes(10));
         return Result<LoginUserResponse>.Success(
-            new LoginUserResponse(AccessToken: response.AccessToken, RefreshToken: response.RefreshToken));
+            new LoginUserResponse(RequiresTwoFactorSetup: true, SetupToken: setupToken),
+            ResultSuccessType.Accepted);
     }
 }

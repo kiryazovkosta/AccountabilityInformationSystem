@@ -45,9 +45,13 @@ export class NewDevice {
         action: async () => {
           this.httpErrorService.clear();
           try {
-            await firstValueFrom(this.#authService.loginWithRecoveryCode(this.newDeviceRequest()));
-            this.#toastService.show('Logged in successfully!', 'success');
-            await this.#router.navigate([APP_ROUTES.HOME]);
+            const result = await firstValueFrom(this.#authService.loginWithRecoveryCode(this.newDeviceRequest()));
+            if ('requiresTwoFactorSetup' in result) {
+              await this.#router.navigate([APP_ROUTES.SETUP_2FA], { state: { setupToken: result.setupToken } });
+            } else {
+              this.#toastService.show('Logged in successfully!', 'success');
+              await this.#router.navigate([APP_ROUTES.HOME]);
+            }
           } catch {
             // interceptor handles error display
           }

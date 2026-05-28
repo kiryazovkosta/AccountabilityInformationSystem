@@ -199,13 +199,18 @@ export class AuthService {
         );
     }
 
-    loginWithRecoveryCode(request: NewDeviceRequest): Observable<boolean> {
-        return this.httpClient.post<void>(
+    loginWithRecoveryCode(request: NewDeviceRequest): Observable<LoginResult> {
+        return this.httpClient.post<LoginTwoFactorSetupRequired>(
             `${environment.apiBaseUrl}${Endpoints.newDevice2fa}`,
             request,
-            { withCredentials: true }
+            { observe: 'response', withCredentials: true }
         ).pipe(
-            switchMap(() => this.checkAuth())
+            switchMap(response => {
+                if (response.status === 202 && response.body?.requiresTwoFactorSetup) {
+                    return of({ requiresTwoFactorSetup: true, setupToken: response.body.setupToken } as LoginResult);
+                }
+                return this.checkAuth().pipe(map(() => ({ success: true } as LoginResult)));
+            })
         );
     }
 }
