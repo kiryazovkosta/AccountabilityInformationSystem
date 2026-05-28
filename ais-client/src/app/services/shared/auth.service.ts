@@ -11,6 +11,7 @@ import { Endpoints } from '../../common/endpoints-config';
 import { ResendEmailConfirmationRequest } from '../../auth/resend-email-confirmation/resend-email-confirmation-request';
 import { ResetPasswordRequest } from '../../auth/reset-password/reset-password.request';
 import { ChangePasswordRequest } from '../../auth/change-password/change-password';
+import { NewDeviceRequest } from '../../auth/new-device/new-device.request';
 
 export interface UserResponse {
   id: string;
@@ -195,6 +196,16 @@ export class AuthService {
             `${environment.apiBaseUrl}${Endpoints.changePassword}`,
             request,
             { withCredentials: true }
+        );
+    }
+
+    loginWithRecoveryCode(request: NewDeviceRequest): Observable<boolean> {
+        return this.httpClient.post<void>(
+            `${environment.apiBaseUrl}${Endpoints.newDevice2fa}`,
+            request,
+            { withCredentials: true }
+        ).pipe(
+            switchMap(() => this.checkAuth())
         );
     }
 }

@@ -15,6 +15,13 @@ public static class Routes
         public const string ChangePassword = "/api/identity/auth/change-password";
     }
 
+    public static class TwoFactor
+    {
+        public const string NewDevice = "/api/identity/auth/2fa/new-device";
+        public const string Setup = "/api/identity/auth/2fa/setup";
+        public const string Verify = "/api/identity/auth/2fa/verify";
+    }
+
     public static class Warehouses
     {
         public const string Base = "/api/warehouses";

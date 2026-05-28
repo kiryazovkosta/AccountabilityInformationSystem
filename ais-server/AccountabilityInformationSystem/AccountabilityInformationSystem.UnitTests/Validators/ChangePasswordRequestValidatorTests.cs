@@ -36,7 +36,7 @@ public sealed class ChangePasswordRequestValidatorTests
     [Fact]
     public async Task Validate_ShouldFail_WhenNewPasswordIsEmpty()
     {
-        ChangePasswordRequest request = ValidRequest() with { NewPassword = "", ConfirmPassword = "" };
+        ChangePasswordRequest request = ValidRequest() with { NewPassword = "" };
 
         ValidationResult result = await _validator.ValidateAsync(request, CancellationToken.None);
 

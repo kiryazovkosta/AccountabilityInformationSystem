@@ -11,4 +11,5 @@ export const Endpoints = {
   forgotPassword: 'api/identity/auth/forgot-password',
   resetPassword: 'api/identity/auth/reset-password',
   changePassword: 'api/identity/auth/change-password',
+  newDevice2fa: 'api/identity/auth/2fa/new-device',
 } as const;

@@ -26,14 +26,19 @@ public sealed class ChangePasswordRequestHandler(
 
         if (identityUser.TwoFactorEnabled)
         {
+            if (string.IsNullOrEmpty(request.Code))
+            {
+                return Result.Failure(new Error("user", "2FA code is required!"), ResultFailureType.Unauthorized);
+            }
+
             bool isValid = await userManager.VerifyTwoFactorTokenAsync(
                 identityUser,
                 userManager.Options.Tokens.AuthenticatorTokenProvider,
-                request.Code ?? string.Empty);
+                request.Code);
 
             if (!isValid)
             {
-                return Result.Failure(new Error("user", "2FA code is not provided or is invalid!"), ResultFailureType.Unauthorized);
+                return Result.Failure(new Error("user", "2FA code is invalid!"), ResultFailureType.Unauthorized);
             }
         }
 

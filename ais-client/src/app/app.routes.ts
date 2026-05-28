@@ -19,7 +19,8 @@ export const routes: Routes = [
             { path: 'change-password', loadComponent: () => import('./auth/change-password/change-password').then(cp => cp.ChangePassword), canActivate: [authGuard] },
             { path: 'logout', loadComponent: () => import('./auth/logout/logout').then(l => l.Logout) },
             { path: 'forgot-password', loadComponent: () => import('./auth/forgot-password/forgot-password').then(m => m.ForgotPassword) },
-            { path: 'reset-password', loadComponent: () => import('./auth/reset-password/reset-password').then(m => m.ResetPassword) }
+            { path: 'reset-password', loadComponent: () => import('./auth/reset-password/reset-password').then(m => m.ResetPassword) },
+            { path: 'new-device', loadComponent: () => import('./auth/new-device/new-device').then(m => m.NewDevice) }
         ]
     },
     { path: '**', loadComponent: () => import('./layout/not-found/not-found').then(ng => ng.NotFound) }

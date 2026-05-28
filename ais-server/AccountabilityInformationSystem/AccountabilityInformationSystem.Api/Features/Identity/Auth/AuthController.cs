@@ -16,6 +16,7 @@ using AccountabilityInformationSystem.Api.Features.Identity.Auth.ResendEmailConf
 using AccountabilityInformationSystem.Api.Features.Identity.Auth.ResetPassword;
 using AccountabilityInformationSystem.Api.Features.Identity.Auth.Shared;
 using AccountabilityInformationSystem.Api.Features.Identity.Auth.TwoFactor.SetupTwoFactor;
+using AccountabilityInformationSystem.Api.Features.Identity.Auth.TwoFactor.NewDevice;
 using AccountabilityInformationSystem.Api.Features.Identity.Auth.TwoFactor.VerifyTwoFactor;
 using AccountabilityInformationSystem.Api.Features.Identity.Users.Shared;
 using AccountabilityInformationSystem.Api.Infrastructure.Data;
@@ -138,6 +139,23 @@ public sealed class AuthController(
     {
         await validator.ValidateAndThrowAsync(request, cancellationToken);
         Result<VerifyTwoFactorResponse> result = await bus.InvokeAsync<Result<VerifyTwoFactorResponse>>(request, cancellationToken);
+        return result.ToActionResult();
+    }
+
+    [HttpPost("2fa/new-device")]
+    [AllowAnonymous]
+    [IgnoreAntiforgeryToken]
+    public async Task<IActionResult> NewDevice(
+        NewDeviceRequest request,
+        IValidator<NewDeviceRequest> validator,
+        CancellationToken cancellationToken)
+    {
+        await validator.ValidateAndThrowAsync(request, cancellationToken);
+        Result<LoginUserResponse> result = await bus.InvokeAsync<Result<LoginUserResponse>>(request, cancellationToken);
+        if (result.IsSuccessWith(ResultSuccessType.Ok) && result.Value is not null)
+        {
+            SetCookies(result.Value.AccessToken!, result.Value.RefreshToken!);
+        }
         return result.ToActionResult();
     }
 

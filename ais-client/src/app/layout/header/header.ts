@@ -43,10 +43,8 @@ export class Header {
 
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent): void {
-    if (window.innerWidth > 700) {
-      if (!(event.target as HTMLElement).closest('.has-submenu')) {
-        this.isSubmenuOpen.set(false);
-      }
+    if (!(event.target as HTMLElement).closest('.has-submenu')) {
+      this.isSubmenuOpen.set(false);
     }
   }
 }
