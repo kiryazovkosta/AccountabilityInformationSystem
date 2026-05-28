@@ -1,4 +1,4 @@
-using AccountabilityInformationSystem.Api.Features.ExciseNomenclatures.ApCodes.Create;
+using AccountabilityInformationSystem.Api.Features.ExciseNoms.ApCodes.Create;
 using AccountabilityInformationSystem.Api.Shared.Constants;
 using FluentValidation.Results;
 using System.Linq;

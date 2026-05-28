@@ -1,0 +1,45 @@
+<div class="app-auth-page">
+  <div class="app-auth-card max-w-md">
+    <h1 class="app-header-1">New Device Login</h1>
+    <h3 class="app-header-3">Use a recovery code to log in from a new device</h3>
+    @if (httpErrorService.errorDetail()) {
+      <div class="error-summary">{{ httpErrorService.errorDetail() }}</div>
+    }
+    <form class="app-form" [formRoot]="newDeviceForm">
+      <label class="app-form-label">
+        Username:
+        <input type="text" class="app-form-input"
+          [formField]="newDeviceForm.username"
+          [aria-invalid]="ariaInvalidState(newDeviceForm.username)"
+          autocomplete="username" />
+        <app-form-error [fieldRef]="newDeviceForm.username" />
+      </label>
+      <label class="app-form-label">
+        Password:
+        <input type="password" class="app-form-input"
+          [formField]="newDeviceForm.password"
+          [aria-invalid]="ariaInvalidState(newDeviceForm.password)"
+          autocomplete="current-password" />
+        <app-form-error [fieldRef]="newDeviceForm.password" />
+      </label>
+      <label class="app-form-label">
+        Recovery Code:
+        <input type="text" class="app-form-input"
+          [formField]="newDeviceForm.recoveryCode"
+          [aria-invalid]="ariaInvalidState(newDeviceForm.recoveryCode)"
+          autocomplete="one-time-code" />
+        <app-form-error [fieldRef]="newDeviceForm.recoveryCode" />
+      </label>
+      <button type="submit" class="app-primary-button"
+        [disabled]="newDeviceForm().submitting()"
+        [aria-busy]="newDeviceForm().submitting()">
+        @if (newDeviceForm().submitting()) { Logging in... } @else { Log In }
+      </button>
+      <div>
+        <p>
+          Back to <a class="link" routerLink="{{ Paths.LOGIN }}">Login</a>
+        </p>
+      </div>
+    </form>
+  </div>
+</div>

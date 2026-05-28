@@ -31,10 +31,8 @@ export class Header {
   }
 
   toggleSubmenu(event: Event): void {
-    if (window.innerWidth <= 700 && this.isMenuOpen()) {
-      event.preventDefault();
-      this.isSubmenuOpen.update(v => !v);
-    }
+    event.preventDefault();
+    this.isSubmenuOpen.update(v => !v);
   }
 
   closeSubmenu(event: Event): void {
@@ -45,10 +43,8 @@ export class Header {
 
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent): void {
-    if (window.innerWidth > 700) {
-      if (!(event.target as HTMLElement).closest('.has-submenu')) {
-        this.isSubmenuOpen.set(false);
-      }
+    if (!(event.target as HTMLElement).closest('.has-submenu')) {
+      this.isSubmenuOpen.set(false);
     }
   }
 }

@@ -7,4 +7,5 @@ export const APP_ROUTES = {
     RESEND_CONFIRMATION: '/auth/resend-email-confirmation',
     FORGOT_PASSWORD: '/auth/forgot-password',
     RESET_PASSWORD: '/auth/reset-password',
+    NEW_DEVICE_2FA: '/auth/new-device',
 } as const;

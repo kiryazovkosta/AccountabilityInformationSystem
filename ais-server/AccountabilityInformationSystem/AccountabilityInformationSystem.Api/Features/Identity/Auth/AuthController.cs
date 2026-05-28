@@ -6,8 +6,8 @@ using System.Text;
 using System.Text.Encodings.Web;
 using AccountabilityInformationSystem.Api.Domain.Entities.Abstraction;
 using AccountabilityInformationSystem.Api.Domain.Entities.Identity;
+using AccountabilityInformationSystem.Api.Features.Identity.Auth.ChangePassword;
 using AccountabilityInformationSystem.Api.Features.Identity.Auth.ConfirmEmail;
-using FluentValidation;
 using AccountabilityInformationSystem.Api.Features.Identity.Auth.ForgotPassword;
 using AccountabilityInformationSystem.Api.Features.Identity.Auth.Login;
 using AccountabilityInformationSystem.Api.Features.Identity.Auth.Refresh;
@@ -16,6 +16,7 @@ using AccountabilityInformationSystem.Api.Features.Identity.Auth.ResendEmailConf
 using AccountabilityInformationSystem.Api.Features.Identity.Auth.ResetPassword;
 using AccountabilityInformationSystem.Api.Features.Identity.Auth.Shared;
 using AccountabilityInformationSystem.Api.Features.Identity.Auth.TwoFactor.SetupTwoFactor;
+using AccountabilityInformationSystem.Api.Features.Identity.Auth.TwoFactor.NewDevice;
 using AccountabilityInformationSystem.Api.Features.Identity.Auth.TwoFactor.VerifyTwoFactor;
 using AccountabilityInformationSystem.Api.Features.Identity.Users.Shared;
 using AccountabilityInformationSystem.Api.Infrastructure.Data;
@@ -23,6 +24,7 @@ using AccountabilityInformationSystem.Api.Settings;
 using AccountabilityInformationSystem.Api.Shared;
 using AccountabilityInformationSystem.Api.Shared.Extensions;
 using AccountabilityInformationSystem.Api.Shared.Services.Tokenizing;
+using FluentValidation;
 using Mapster;
 using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Authorization;
@@ -140,6 +142,23 @@ public sealed class AuthController(
         return result.ToActionResult();
     }
 
+    [HttpPost("2fa/new-device")]
+    [AllowAnonymous]
+    [IgnoreAntiforgeryToken]
+    public async Task<IActionResult> NewDevice(
+        NewDeviceRequest request,
+        IValidator<NewDeviceRequest> validator,
+        CancellationToken cancellationToken)
+    {
+        await validator.ValidateAndThrowAsync(request, cancellationToken);
+        Result<LoginUserResponse> result = await bus.InvokeAsync<Result<LoginUserResponse>>(request, cancellationToken);
+        if (result.IsSuccessWith(ResultSuccessType.Ok) && result.Value is not null)
+        {
+            SetCookies(result.Value.AccessToken!, result.Value.RefreshToken!);
+        }
+        return result.ToActionResult();
+    }
+
     [HttpPost("forgot-password")]
     [AllowAnonymous]
     [IgnoreAntiforgeryToken]
@@ -172,6 +191,18 @@ public sealed class AuthController(
     public async Task<IActionResult> ResendEmailConfirmation(string email, CancellationToken cancellationToken)
     {
         ResendEmailConfirmationRequest request = new(email);
+        Result result = await bus.InvokeAsync<Result>(request, cancellationToken);
+        return result.ToActionResult();
+    }
+
+    [HttpPost("change-password")]
+    [Authorize]
+    public async Task<IActionResult> ChangePassword(
+        ChangePasswordRequest request, 
+        IValidator<ChangePasswordRequest> validator, 
+        CancellationToken cancellationToken)
+    {
+        await validator.ValidateAndThrowAsync(request, cancellationToken);
         Result result = await bus.InvokeAsync<Result>(request, cancellationToken);
         return result.ToActionResult();
     }

@@ -205,7 +205,7 @@ nav a.active {
   border-bottom-color: #f0e0d6;
 }
 
-.has-submenu:hover .submenu-panel {
+.has-submenu.show-submenu .submenu-panel {
   display: block;
 }
 
@@ -288,7 +288,6 @@ nav a.active {
   }
   
   .nav-menu.active .submenu-panel {
-    display: block;
     position: static;
     box-shadow: none;
     background: transparent;
@@ -302,7 +301,6 @@ nav a.active {
     display: none;
   }
 
-  .nav-menu.active .has-submenu:hover .submenu-panel,
   .nav-menu.active .has-submenu.show-submenu .submenu-panel {
     display: block;
   }
