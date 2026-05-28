@@ -10,4 +10,5 @@ export const Endpoints = {
   resendConfirmationEmail: 'api/identity/auth/resend-email-confirmation',
   forgotPassword: 'api/identity/auth/forgot-password',
   resetPassword: 'api/identity/auth/reset-password',
+  changePassword: 'api/identity/auth/change-password',
 } as const;

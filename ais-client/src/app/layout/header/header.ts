@@ -31,10 +31,8 @@ export class Header {
   }
 
   toggleSubmenu(event: Event): void {
-    if (window.innerWidth <= 700 && this.isMenuOpen()) {
-      event.preventDefault();
-      this.isSubmenuOpen.update(v => !v);
-    }
+    event.preventDefault();
+    this.isSubmenuOpen.update(v => !v);
   }
 
   closeSubmenu(event: Event): void {

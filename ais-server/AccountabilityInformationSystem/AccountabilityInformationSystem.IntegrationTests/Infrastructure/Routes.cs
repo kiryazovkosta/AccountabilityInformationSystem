@@ -12,6 +12,7 @@ public static class Routes
         public const string Login = "/api/identity/auth/login";
         public const string ForgotPassword = "/api/identity/auth/forgot-password";
         public const string ResetPassword = "/api/identity/auth/reset-password";
+        public const string ChangePassword = "/api/identity/auth/change-password";
     }
 
     public static class Warehouses

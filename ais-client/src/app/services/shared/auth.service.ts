@@ -10,6 +10,7 @@ import { environment } from '../../../environments/environment';
 import { Endpoints } from '../../common/endpoints-config';
 import { ResendEmailConfirmationRequest } from '../../auth/resend-email-confirmation/resend-email-confirmation-request';
 import { ResetPasswordRequest } from '../../auth/reset-password/reset-password.request';
+import { ChangePasswordRequest } from '../../auth/change-password/change-password';
 
 export interface UserResponse {
   id: string;
@@ -186,6 +187,14 @@ export class AuthService {
                 this._currentUser.set(null);
                 return of(false);
             })
+        );
+    }
+
+    changePassword(request: ChangePasswordRequest): Observable<void> {
+        return this.httpClient.post<void>(
+            `${environment.apiBaseUrl}${Endpoints.changePassword}`,
+            request,
+            { withCredentials: true }
         );
     }
 }

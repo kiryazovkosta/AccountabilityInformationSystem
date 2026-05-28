@@ -6,8 +6,8 @@ using System.Text;
 using System.Text.Encodings.Web;
 using AccountabilityInformationSystem.Api.Domain.Entities.Abstraction;
 using AccountabilityInformationSystem.Api.Domain.Entities.Identity;
+using AccountabilityInformationSystem.Api.Features.Identity.Auth.ChangePassword;
 using AccountabilityInformationSystem.Api.Features.Identity.Auth.ConfirmEmail;
-using FluentValidation;
 using AccountabilityInformationSystem.Api.Features.Identity.Auth.ForgotPassword;
 using AccountabilityInformationSystem.Api.Features.Identity.Auth.Login;
 using AccountabilityInformationSystem.Api.Features.Identity.Auth.Refresh;
@@ -23,6 +23,7 @@ using AccountabilityInformationSystem.Api.Settings;
 using AccountabilityInformationSystem.Api.Shared;
 using AccountabilityInformationSystem.Api.Shared.Extensions;
 using AccountabilityInformationSystem.Api.Shared.Services.Tokenizing;
+using FluentValidation;
 using Mapster;
 using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Authorization;
@@ -172,6 +173,18 @@ public sealed class AuthController(
     public async Task<IActionResult> ResendEmailConfirmation(string email, CancellationToken cancellationToken)
     {
         ResendEmailConfirmationRequest request = new(email);
+        Result result = await bus.InvokeAsync<Result>(request, cancellationToken);
+        return result.ToActionResult();
+    }
+
+    [HttpPost("change-password")]
+    [Authorize]
+    public async Task<IActionResult> ChangePassword(
+        ChangePasswordRequest request, 
+        IValidator<ChangePasswordRequest> validator, 
+        CancellationToken cancellationToken)
+    {
+        await validator.ValidateAndThrowAsync(request, cancellationToken);
         Result result = await bus.InvokeAsync<Result>(request, cancellationToken);
         return result.ToActionResult();
     }
