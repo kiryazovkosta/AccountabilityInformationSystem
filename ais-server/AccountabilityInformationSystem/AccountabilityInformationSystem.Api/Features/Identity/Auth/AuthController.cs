@@ -19,7 +19,7 @@ using AccountabilityInformationSystem.Api.Features.Identity.Auth.TwoFactor.Setup
 using AccountabilityInformationSystem.Api.Features.Identity.Auth.TwoFactor.NewDevice;
 using AccountabilityInformationSystem.Api.Features.Identity.Auth.TwoFactor.VerifyTwoFactor;
 using AccountabilityInformationSystem.Api.Features.Identity.Users.Shared;
-using AccountabilityInformationSystem.Api.Infrastructure.Data;
+using AccountabilityInformationSystem.Api.Features.Identity.Auth.Logout;
 using AccountabilityInformationSystem.Api.Settings;
 using AccountabilityInformationSystem.Api.Shared;
 using AccountabilityInformationSystem.Api.Shared.Extensions;
@@ -46,7 +46,6 @@ namespace AccountabilityInformationSystem.Api.Features.Identity.Auth;
 
 [Route("api/identity/auth")]
 public sealed class AuthController(
-    ApplicationIdentityDbContext identityDbContext,
     IAntiforgery antiforgery,
     IMessageBus bus) : ApiController
 {
@@ -219,25 +218,20 @@ public sealed class AuthController(
     [HttpPost("logout")]
     [Authorize]
     [IgnoreAntiforgeryToken]
-    public async Task<ActionResult> Logout(CancellationToken cancellationToken)
+    public async Task<IActionResult> Logout(CancellationToken cancellationToken)
     {
-        if(HttpContext.Request.Cookies.TryGetValue("refreshToken", out string? refreshTokenValue))
+        HttpContext.Request.Cookies.TryGetValue("refreshToken", out string? refreshTokenValue);
+        Result result = await bus.InvokeAsync<Result>(new LogoutCommand(refreshTokenValue), cancellationToken);
+        if (result.IsFailure)
         {
-            RefreshToken? refreshToken = await identityDbContext.RefreshTokens.FirstOrDefaultAsync(rt => rt.Token == refreshTokenValue, cancellationToken);
-            if (refreshToken is null || refreshToken.ExpiresAt < DateTime.UtcNow)
-            {
-                return Problem(statusCode: StatusCodes.Status401Unauthorized, detail: "Unauthorized");
-            }
-
-            identityDbContext.RefreshTokens.Remove(refreshToken);
-            await identityDbContext.SaveChangesAsync(cancellationToken);
+            return result.ToActionResult();
         }
 
         SetAccessTokenCookie("accessToken", string.Empty, -1440, HttpContext);
         SetAccessTokenCookie("refreshToken", string.Empty, -1440, HttpContext);
         SetAccessTokenCookie("XSRF-TOKEN", string.Empty, -1440, HttpContext);
 
-        return Ok(new { message = "Successfully logged out!" });
+        return result.ToActionResult();
     }
 
     private void SetCookies(string accessToken, string refreshToken)

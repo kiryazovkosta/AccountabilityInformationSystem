@@ -4,7 +4,6 @@ import { rxResource } from '@angular/core/rxjs-interop';
 import { LoginUserRequest } from '../../auth/login/login-user.request';
 import { Observable, of } from 'rxjs';
 import { catchError, map, switchMap, tap } from 'rxjs/operators';
-import { LogoutResponse } from '../../auth/logout/logout.response';
 import { RegisterUserRequest } from '../../auth/register-user/register-user.request';
 import { environment } from '../../../environments/environment';
 import { Endpoints } from '../../common/endpoints-config';
@@ -119,7 +118,7 @@ export class AuthService {
     }
 
     logout(): Observable<boolean> {
-        return this.httpClient.post<LogoutResponse>(`${environment.apiBaseUrl}${Endpoints.logout}`,
+        return this.httpClient.post<void>(`${environment.apiBaseUrl}${Endpoints.logout}`,
             {},
             { withCredentials: true })
             .pipe(
