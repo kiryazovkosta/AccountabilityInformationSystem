@@ -250,7 +250,8 @@ public static class WebApplicationBuilderExtensions
         builder.Services.Configure<EncryptionOptions>(builder.Configuration.GetSection("Encryption"));
         builder.Services.AddTransient<EncryptionService>();
 
-        builder.Services.AddHostedService<RoleSeedingService>();
+        builder.Services.Configure<SeedingOptions>(builder.Configuration.GetSection(SeedingOptions.SectionName));
+        builder.Services.AddHostedService<ApplicationSeedingService>();
 
         builder.Services.Configure<SmtpOptions>(builder.Configuration.GetSection(SmtpOptions.SectionName));
         if (builder.Environment.IsProduction())

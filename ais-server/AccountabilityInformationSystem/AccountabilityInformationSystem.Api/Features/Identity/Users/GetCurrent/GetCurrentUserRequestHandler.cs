@@ -1,14 +1,18 @@
 using AccountabilityInformationSystem.Api.Domain.Entities.Abstraction;
+using AccountabilityInformationSystem.Api.Domain.Entities.Identity;
 using AccountabilityInformationSystem.Api.Features.Identity.Users.Shared;
 using AccountabilityInformationSystem.Api.Shared.Services.UserContexting;
+using Microsoft.AspNetCore.Identity;
 
 namespace AccountabilityInformationSystem.Api.Features.Identity.Users.GetCurrent;
 
-public sealed class GetCurrentUserRequestHandler(UserContext userContext)
+public sealed class GetCurrentUserRequestHandler(
+    UserContext userContext,
+    UserManager<IdentityUser> userManager)
 {
     public async Task<Result<UserResponse>> Handle(GetCurrentUserRequest _, CancellationToken cancellationToken)
     {
-        var user = await userContext.GetUserAsync(cancellationToken);
+        User? user = await userContext.GetUserAsync(cancellationToken);
         if (user is null)
         {
             return Result<UserResponse>.Failure(
@@ -16,6 +20,12 @@ public sealed class GetCurrentUserRequestHandler(UserContext userContext)
                 ResultFailureType.Unauthorized);
         }
 
-        return Result<UserResponse>.Success(user.ToResponse());
+        IList<string> roles = [];
+        if (!string.IsNullOrEmpty(user.IdentityId))
+        {
+            roles = await userManager.GetRolesAsync(new IdentityUser { Id = user.IdentityId });
+        }
+
+        return Result<UserResponse>.Success(user.ToResponse(roles));
     }
 }

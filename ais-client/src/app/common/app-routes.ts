@@ -8,4 +8,5 @@ export const APP_ROUTES = {
     FORGOT_PASSWORD: '/auth/forgot-password',
     RESET_PASSWORD: '/auth/reset-password',
     NEW_DEVICE_2FA: '/auth/new-device',
+    ADMIN_USERS: '/admin/users',
 } as const;

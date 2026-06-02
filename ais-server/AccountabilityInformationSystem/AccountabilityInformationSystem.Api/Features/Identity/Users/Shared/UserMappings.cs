@@ -23,7 +23,7 @@ public static class UserMappings
         };
     }
 
-    public static UserResponse ToResponse(this User user)
+    public static UserResponse ToResponse(this User user, IList<string>? roles = null)
     {
         return new UserResponse
         {
@@ -36,7 +36,8 @@ public static class UserMappings
                     : $"{user.FirstName} {user.LastName}",
             Image = user.Image,
             CreatedAt = user.CreatedAt,
-            ModifiedAt = user.ModifiedAt
+            ModifiedAt = user.ModifiedAt,
+            Roles = roles?.AsReadOnly() ?? []
         };
     }
 }

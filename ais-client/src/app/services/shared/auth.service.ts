@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { inject, Injectable, signal } from '@angular/core';
+import { inject, Injectable, signal, computed } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { LoginUserRequest } from '../../auth/login/login-user.request';
 import { Observable, of } from 'rxjs';
@@ -20,6 +20,7 @@ export interface UserResponse {
   image: string | null;
   createdAt: string;
   modifiedAt: string;
+  roles?: string[];
 }
 
 export interface ConfirmEmailResponse {
@@ -54,6 +55,10 @@ export class AuthService {
 
     public isLoggedIn = this._isLoggedIn.asReadonly();
     public currentUser = this._currentUser.asReadonly();
+
+    public isAdministrator = computed(() =>
+        this._currentUser()?.roles?.some(r => r.toLowerCase() === 'admin') ?? false
+    );
 
     private resendPayload = signal<ResendEmailConfirmationRequest | undefined>(undefined);
 

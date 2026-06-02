@@ -9,4 +9,5 @@ public sealed record UserResponse
     public string? Image { get; init; }
     public required DateTime CreatedAt { get; init; }
     public DateTime? ModifiedAt { get; init; }
+    public IReadOnlyList<string> Roles { get; init; } = [];
 }

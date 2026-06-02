@@ -94,4 +94,55 @@ app-root {
     border-color: var(--color-error-border);
     color: var(--color-error-text);
   }
+
+  .app-data-table-container {
+    @apply w-full overflow-x-auto rounded-xl border border-rose-muted;
+    box-shadow: var(--shadow-card);
+  }
+
+  .app-data-table {
+    @apply w-full border-collapse font-sans text-sm text-ink;
+
+    thead tr {
+      background-color: var(--color-brand);
+      color: white;
+    }
+
+    thead th {
+      @apply px-4 py-3 text-left font-semibold text-sm;
+    }
+
+    tbody tr {
+      @apply border-b transition-colors duration-150;
+      border-color: var(--color-rose-muted);
+    }
+
+    tbody tr:last-child {
+      @apply border-b-0;
+    }
+
+    tbody tr:hover {
+      background-color: rgba(240, 224, 214, 0.35);
+    }
+
+    tbody td {
+      @apply px-4 py-3;
+    }
+  }
+
+  .app-badge {
+    @apply inline-block px-2 py-0.5 rounded-full text-xs font-semibold;
+  }
+
+  .app-badge-success {
+    @apply inline-block px-2 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-800;
+  }
+
+  .app-badge-danger {
+    @apply inline-block px-2 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-800;
+  }
+
+  .app-badge-muted {
+    @apply inline-block px-2 py-0.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-500;
+  }
 }

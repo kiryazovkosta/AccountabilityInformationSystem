@@ -23,5 +23,11 @@ export const routes: Routes = [
             { path: 'new-device', loadComponent: () => import('./auth/new-device/new-device').then(m => m.NewDevice) }
         ]
     },
+    {
+        path: 'admin',
+        children: [
+            { path: 'users', loadComponent: () => import('./features/admin/users/users-list/users-list').then(m => m.UsersList), canActivate: [authGuard] },
+        ]
+    },
     { path: '**', loadComponent: () => import('./layout/not-found/not-found').then(ng => ng.NotFound) }
 ];

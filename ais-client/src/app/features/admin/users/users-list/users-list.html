@@ -1,0 +1,39 @@
+<div class="app-main-container">
+  <h1 class="app-header-1">Users</h1>
+  <h3 class="app-header-3">Manage system users</h3>
+
+  @if (usersService.users.isLoading()) {
+    <p class="text-ink/60 font-sans text-sm">Loading...</p>
+  } @else if (usersService.users.error()) {
+    <div class="error-summary">Failed to load users. Please try again.</div>
+  } @else {
+    <div class="app-data-table-container">
+      <table class="app-data-table">
+        <thead>
+          <tr>
+            <th>Username</th>
+            <th>Confirmed</th>
+            <th>Locked</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (user of usersService.users.value(); track user.id) {
+            <tr>
+              <td>{{ user.username }}</td>
+              <td>
+                <span [class]="user.isConfirmed ? 'app-badge-success' : 'app-badge-muted'">
+                  {{ user.isConfirmed ? 'Yes' : 'No' }}
+                </span>
+              </td>
+              <td>
+                <span [class]="user.isLocked ? 'app-badge-danger' : 'app-badge-muted'">
+                  {{ user.isLocked ? 'Yes' : 'No' }}
+                </span>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>
