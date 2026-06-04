@@ -18,26 +18,29 @@ public sealed class GetAllUsersRequestHandler(
 
         List<User> appUsers = await appDbContext.Users.ToListAsync(cancellationToken);
 
-        List<UsersListResponse> responseUsers = [.. await Task.WhenAll(
-            appUsers.Select(async x =>
+        var responseUsers = new List<UsersListResponse>(appUsers.Count);
+        foreach (User x in appUsers)
+        {
+            IdentityUser? identityUser = identityUsers.FirstOrDefault(iu => iu.Id == x.IdentityId);
+            IList<string> roles = identityUser is not null
+                ? await userManager.GetRolesAsync(identityUser)
+                : [];
+            responseUsers.Add(new UsersListResponse
             {
-                IdentityUser? identityUser = identityUsers.FirstOrDefault(iu => iu.Id == x.IdentityId);
-                return new UsersListResponse
-                {
-                    Id = x.Id,
-                    Username = x.Username,
-                    Email = x.Email,
-                    FirstName = x.FirstName,
-                    MiddleName = x.MiddleName,
-                    LastName = x.LastName,
-                    Image = x.Image,
-                    Enable2Fa = x.Enable2Fa,
-                    IdentityId = x.IdentityId,
-                    IsConfirmed = identityUser?.EmailConfirmed ?? false,
-                    IsLocked = identityUser is not null && identityUser.LockoutEnabled && identityUser.LockoutEnd >= DateTimeOffset.UtcNow
-                };
-            })
-        )];
+                Id = x.Id,
+                Username = x.Username,
+                Email = x.Email,
+                FirstName = x.FirstName,
+                MiddleName = x.MiddleName,
+                LastName = x.LastName,
+                Image = x.Image,
+                Enable2Fa = x.Enable2Fa,
+                IdentityId = x.IdentityId,
+                IsConfirmed = identityUser?.EmailConfirmed ?? false,
+                IsLocked = identityUser is not null && identityUser.LockoutEnabled && identityUser.LockoutEnd >= DateTimeOffset.UtcNow,
+                Roles = roles
+            });
+        }
 
         return Result<List<UsersListResponse>>.Success(responseUsers);
     }
@@ -56,4 +59,5 @@ public class UsersListResponse
     public string? IdentityId { get; init; }
     public bool IsConfirmed {  get; init; }
     public bool IsLocked { get; init; }
+    public IList<string> Roles { get; init; }
 }

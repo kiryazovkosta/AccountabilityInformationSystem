@@ -1,7 +1,8 @@
-import { ChangeDetectionStrategy, Component, inject, linkedSignal, signal } from '@angular/core';
+import { Home } from './../../layout/home/home';
+import { ChangeDetectionStrategy, Component, inject, input, linkedSignal, signal } from '@angular/core';
 import { RegisterUserRequest, RegisterUserFormRequest, toRegisterUserFormRequest, toRegisterUserRequest } from './register-user.request';
 import { email, form, maxLength, minLength, required, SchemaPath, validate, submit, FormField } from '@angular/forms/signals';
-import { Router, RouterLink } from '@angular/router';
+import { Router, RouterLink, Routes } from '@angular/router';
 import { AuthService } from '../../services/shared/auth.service';
 import { firstValueFrom } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -24,6 +25,8 @@ export class RegisterUser {
 
   registerError = signal<string | null>(null);
   loading = signal<boolean>(false);
+
+  redirectUrl = input<string>('/home');
 
   registerUser = signal<RegisterUserRequest>({
     username: '',
@@ -50,26 +53,6 @@ export class RegisterUser {
     required(schemaPath.firstName, {message: 'FirstName is required'});
     minLength(schemaPath.firstName, 3, {message: 'FirstName must be at least 3 characters'});
     maxLength(schemaPath.firstName, 32, {message: 'FirstName must be at maximum 32 characters'});
-
-    // validate(schemaPath.middleName as unknown as SchemaPath<string>, ({value}) => {
-    //   const middleName = value();
-    //   if (middleName !== undefined && middleName !== null) {
-    //     if (middleName.length > 32) {
-    //       return {
-    //         kind: 'maxLength',
-    //         message: 'MiddleName must be at maximum 32 characters'
-    //       };
-    //     }
-    //     if (middleName.length < 3) {
-    //       return {
-    //         kind: 'minLength',
-    //         message: 'MiddleName must be at least 3 characters'
-    //       };
-    //     }
-    //     return null;
-    //   }
-    //   return null;
-    // });
 
     required(schemaPath.lastName, {message: 'LastName is required'});
     minLength(schemaPath.lastName, 3, {message: 'LastName must be at least 3 characters'});
@@ -102,8 +85,12 @@ export class RegisterUser {
         const success = await firstValueFrom(
           this.auth.register(toRegisterUserRequest(this.registerForm().value())));
         if (success) {
+          let targetUrl = this.redirectUrl() || APP_ROUTES.HOME;
+          if (targetUrl.startsWith('http://') || targetUrl.startsWith('https://')) {
+              targetUrl = APP_ROUTES.HOME; 
+            }
           this.toaster.show('Successfully register!', 'success');
-          this.router.navigate(['/auth/login']);
+          this.router.navigateByUrl(targetUrl);
         } else {
           this.registerError.set('Registration failed. Please try again.');
         }
