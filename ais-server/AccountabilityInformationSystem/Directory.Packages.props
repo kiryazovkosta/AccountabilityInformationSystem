@@ -44,9 +44,9 @@
     <!-- add if you intend to use xunit.v3 -->
     <PackageVersion Include="xunit.v3" Version="3.2.2" />
     <!-- Aspire -->
-    <PackageVersion Include="Aspire.Hosting.JavaScript" Version="13.3.5" />
-    <PackageVersion Include="Aspire.Hosting.SqlServer" Version="13.3.5" />
-    <PackageVersion Include="Aspire.Microsoft.EntityFrameworkCore.SqlServer" Version="13.3.5" />
+    <PackageVersion Include="Aspire.Hosting.JavaScript" Version="13.4.3" />
+    <PackageVersion Include="Aspire.Hosting.SqlServer" Version="13.4.3" />
+    <PackageVersion Include="Aspire.Microsoft.EntityFrameworkCore.SqlServer" Version="13.4.3" />
     <PackageVersion Include="Microsoft.Extensions.Http.Resilience" Version="10.6.0" />
     <PackageVersion Include="Microsoft.Extensions.ServiceDiscovery" Version="10.6.0" />
   </ItemGroup>

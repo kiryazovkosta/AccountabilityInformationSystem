@@ -1,6 +1,7 @@
 using AccountabilityInformationSystem.Api.Shared.Constants;
 using AccountabilityInformationSystem.Api.Domain.Entities;
 using AccountabilityInformationSystem.Api.Domain.Entities.Excise;
+using AccountabilityInformationSystem.Api.Domain.Entities.Family.Warranty;
 using AccountabilityInformationSystem.Api.Domain.Entities.Flow;
 using AccountabilityInformationSystem.Api.Domain.Entities.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -22,6 +23,9 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
     public DbSet<ApCode> ApCodes { get; set; }
     public DbSet<BrandName> BrandNames { get; set; }
     public DbSet<CnCode> CnCodes { get; set; }
+
+    public DbSet<WarrantyBrand> WarrantyBrands { get; set; }
+    public DbSet<WarrantyRecord> WarrantyRecords { get; set; }
 
     public DbSet<User> Users { get; set; }
 

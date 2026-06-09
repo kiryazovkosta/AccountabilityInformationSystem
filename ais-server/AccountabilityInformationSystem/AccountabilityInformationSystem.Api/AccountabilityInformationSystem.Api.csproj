@@ -51,4 +51,8 @@
     <ProjectReference Include="..\AccountabilityInformationSystem.Aspire.ServiceDefaults\AccountabilityInformationSystem.Aspire.ServiceDefaults.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Features\Family\" />
+  </ItemGroup>
+
 </Project>
