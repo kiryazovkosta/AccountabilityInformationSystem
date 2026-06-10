@@ -5,6 +5,7 @@ import { form, FormField, schema, FormRoot, required, FieldTree } from '@angular
 import { FormError } from '../../../../shared/form-error/form-error';
 import { HttpErrorService } from '../../../../services/shared/http-error.service';
 import { WarrantyRecordsService } from '../services/warranty-records.service';
+import { WarrantyBrandsService } from '../services/warranty-brands.service';
 import { CreateWarrantyRecordRequest } from '../models/create-warranty-record.request';
 
 const initialState: CreateWarrantyRecordRequest = {
@@ -28,11 +29,15 @@ const createWarrantyRecordSchema = schema<CreateWarrantyRecordRequest>((path) =>
   imports: [FormField, FormRoot, FormError],
   templateUrl: './create-warranty-record.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  providers: [WarrantyBrandsService],
 })
 export class CreateWarrantyRecord {
   readonly #service = inject(WarrantyRecordsService);
   readonly #router = inject(Router);
+  readonly #warrantyBrandsService = inject(WarrantyBrandsService);
   protected readonly httpErrorService = inject(HttpErrorService);
+
+  protected readonly warrantyBrands = this.#warrantyBrandsService.warrantyBrands;
 
   protected readonly formData = signal<CreateWarrantyRecordRequest>(initialState);
 
@@ -46,7 +51,7 @@ export class CreateWarrantyRecord {
           try {
             console.log(this.warrantyForm().value());
             await firstValueFrom(this.#service.create(this.warrantyForm().value()));
-            await this.#router.navigate(['/']);
+            await this.#router.navigate(['/family/warranties']);
           } catch {
             // interceptor handles error display
           }

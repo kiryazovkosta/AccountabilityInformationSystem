@@ -11,10 +11,14 @@
 
       <label class="app-form-label">
         Brand:
-        <input type="text" class="app-form-input"
+        <select class="app-form-input"
           [formField]="warrantyForm.warrantyBrandId"
-          [aria-invalid]="ariaInvalidState(warrantyForm.warrantyBrandId)"
-          placeholder="Enter warranty brand ID" />
+          [aria-invalid]="ariaInvalidState(warrantyForm.warrantyBrandId)">
+          <option value="" disabled>Select a brand</option>
+          @for (brand of warrantyBrands.value()?.items; track brand.id) {
+            <option [value]="brand.id">{{ brand.name }}</option>
+          }
+        </select>
         <app-form-error [fieldRef]="warrantyForm.warrantyBrandId" />
       </label>
 

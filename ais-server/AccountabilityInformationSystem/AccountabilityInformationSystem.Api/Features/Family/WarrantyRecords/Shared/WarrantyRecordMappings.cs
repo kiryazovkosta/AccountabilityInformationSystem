@@ -12,9 +12,9 @@ internal static class WarrantyRecordMappings
             WarrantyBrandId = request.WarrantyBrandId,
             Model = request.Model,
             PurchaseDate = request.PurchaseDate,
-            Receipt = request.Receipt?.FileName ?? string.Empty,
-            FrontImage = request.FrontImage?.FileName ?? string.Empty,
-            BackImage = request.BackImage?.FileName ?? string.Empty,
+            Receipt = request.Receipt?.FileName ?? null,
+            FrontImage = request.FrontImage?.FileName ?? null,
+            BackImage = request.BackImage?.FileName ?? null,
             CreatedBy = userName,
             CreatedAt = DateTime.UtcNow,
         };
