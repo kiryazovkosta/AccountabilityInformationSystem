@@ -18,6 +18,7 @@ export class Header {
   readonly isMenuOpen = signal(false);
   readonly isSubmenuOpen = signal(false);
   readonly isAdminSubmenuOpen = signal(false);
+  readonly isFamilySubmenuOpen = signal(false);
 
   toggleMenu(): void {
     const opening = !this.isMenuOpen();
@@ -25,6 +26,7 @@ export class Header {
     if (!opening) {
       this.isSubmenuOpen.set(false);
       this.isAdminSubmenuOpen.set(false);
+      this.isFamilySubmenuOpen.set(false);
     }
   }
 
@@ -32,6 +34,7 @@ export class Header {
     this.isMenuOpen.set(false);
     this.isSubmenuOpen.set(false);
     this.isAdminSubmenuOpen.set(false);
+    this.isFamilySubmenuOpen.set(false);
   }
 
   toggleSubmenu(event: Event): void {
@@ -56,11 +59,23 @@ export class Header {
     this.isAdminSubmenuOpen.set(false);
   }
 
+  toggleFamilySubmenu(event: Event): void {
+    event.preventDefault();
+    this.isFamilySubmenuOpen.update(v => !v);
+  }
+
+  closeFamilySubmenu(event: Event): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isFamilySubmenuOpen.set(false);
+  }
+
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent): void {
     if (!(event.target as HTMLElement).closest('.has-submenu')) {
       this.isSubmenuOpen.set(false);
       this.isAdminSubmenuOpen.set(false);
+      this.isFamilySubmenuOpen.set(false);
     }
   }
 }

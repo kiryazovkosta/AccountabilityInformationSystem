@@ -29,5 +29,12 @@ export const routes: Routes = [
             { path: 'users', loadComponent: () => import('./features/admin/users/users-list/users-list').then(m => m.UsersList), canActivate: [authGuard] },
         ]
     },
+    {
+        path: 'family',
+        children: [
+            { path: 'warranties', loadComponent: () => import('./features/family/warranty-records/warranties-list/warranties-list').then(m => m.WarrantiesList), canActivate: [authGuard] },
+            { path: 'warranty-records/create', loadComponent: () => import('./features/family/warranty-records/create-warranty-record/create-warranty-record').then(m => m.CreateWarrantyRecord), canActivate: [authGuard] },
+        ]
+    },
     { path: '**', loadComponent: () => import('./layout/not-found/not-found').then(ng => ng.NotFound) }
 ];

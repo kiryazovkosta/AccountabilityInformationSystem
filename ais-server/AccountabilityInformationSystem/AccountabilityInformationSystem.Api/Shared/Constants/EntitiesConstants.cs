@@ -61,7 +61,7 @@ public static class EntitiesConstants
     public sealed class WarrantyRecord
     {
         public const int ModelMaxLength = 512;
-        public const int ImageMaxLength = 1024;
+        public const int FileMaxLength = 1024;
     }
 
     public sealed class WarrantyBrand

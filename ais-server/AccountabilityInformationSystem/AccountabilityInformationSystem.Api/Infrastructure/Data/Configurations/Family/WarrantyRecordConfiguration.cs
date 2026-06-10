@@ -21,10 +21,10 @@ public sealed class WarrantyRecordConfiguration : IEntityTypeConfiguration<Warra
 
         builder.Property(e => e.Model).HasMaxLength(EntitiesConstants.WarrantyRecord.ModelMaxLength);
 
-        builder.Property(e => e.Receipt).HasMaxLength(EntitiesConstants.WarrantyRecord.ImageMaxLength).IsRequired(false);
+        builder.Property(e => e.Receipt).HasMaxLength(EntitiesConstants.WarrantyRecord.FileMaxLength).IsRequired(false);
 
-        builder.Property(e => e.FrontImage).HasMaxLength(EntitiesConstants.WarrantyRecord.ImageMaxLength).IsRequired(false);
+        builder.Property(e => e.FrontImage).HasMaxLength(EntitiesConstants.WarrantyRecord.FileMaxLength).IsRequired(false);
 
-        builder.Property(e => e.BackImage).HasMaxLength(EntitiesConstants.WarrantyRecord.ImageMaxLength).IsRequired(false);
+        builder.Property(e => e.BackImage).HasMaxLength(EntitiesConstants.WarrantyRecord.FileMaxLength).IsRequired(false);
     }
 }

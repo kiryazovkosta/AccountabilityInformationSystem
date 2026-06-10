@@ -6,6 +6,24 @@
             <li><a routerLink="/ikunks" routerLinkActive="active" (click)="closeMenu()">Ikunks</a></li>
             <li><a routerLink="/pricing" routerLinkActive="active" (click)="closeMenu()">Pricing</a></li>
             <li><a routerLink="/contact" routerLinkActive="active" (click)="closeMenu()">Contact</a></li>
+            @if (isLoggedIn()) {
+                <li class="has-submenu" [class.show-submenu]="isFamilySubmenuOpen()">
+                    <a (click)="toggleFamilySubmenu($event)">Family</a>
+                    <div class="submenu-panel">
+                        <div class="panel-header">
+                            <span class="panel-title">Family</span>
+                            <button type="button" class="close-btn" (click)="closeFamilySubmenu($event)" aria-label="Close menu">
+                                <span>&times;</span>
+                            </button>
+                        </div>
+                        <div class="panel-body">
+                            <ul class="submenu">
+                                <li><a routerLink="/family/warranties" routerLinkActive="active" (click)="closeMenu()">Warranties</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </li>
+            }
             @if (isLoggedIn() && isAdministrator()) {
                 <li class="has-submenu" [class.show-submenu]="isAdminSubmenuOpen()">
                     <a (click)="toggleAdminSubmenu($event)">Administration</a>

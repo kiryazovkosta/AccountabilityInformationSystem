@@ -1,0 +1,69 @@
+<div class="app-auth-page">
+  <div class="app-auth-card max-w-2xl">
+    <h1 class="app-header-1">Add Warranty Record</h1>
+    <h3 class="app-header-3">Fill in the details to register a new warranty</h3>
+
+    @if (httpErrorService.errorDetail()) {
+      <div class="error-summary">{{ httpErrorService.errorDetail() }}</div>
+    }
+
+    <form class="app-form" [formRoot]="warrantyForm">
+
+      <label class="app-form-label">
+        Brand:
+        <input type="text" class="app-form-input"
+          [formField]="warrantyForm.warrantyBrandId"
+          [aria-invalid]="ariaInvalidState(warrantyForm.warrantyBrandId)"
+          placeholder="Enter warranty brand ID" />
+        <app-form-error [fieldRef]="warrantyForm.warrantyBrandId" />
+      </label>
+
+      <label class="app-form-label">
+        Model:
+        <input type="text" class="app-form-input"
+          [formField]="warrantyForm.model"
+          [aria-invalid]="ariaInvalidState(warrantyForm.model)"
+          placeholder="Enter product model" />
+        <app-form-error [fieldRef]="warrantyForm.model" />
+      </label>
+
+      <label class="app-form-label">
+        Purchase Date:
+        <input type="date" class="app-form-input"
+          [formField]="warrantyForm.purchaseDate"
+          [aria-invalid]="ariaInvalidState(warrantyForm.purchaseDate)" />
+        <app-form-error [fieldRef]="warrantyForm.purchaseDate" />
+      </label>
+
+      <div class="flex gap-4">
+        <label class="app-form-label flex-1">
+          Receipt:
+          <input type="file" class="app-form-input"
+            accept="image/*"
+            (change)="onFileChange($event, 'receipt')" />
+        </label>
+
+        <label class="app-form-label flex-1">
+          Front Image:
+          <input type="file" class="app-form-input"
+            accept="image/*"
+            (change)="onFileChange($event, 'frontImage')" />
+        </label>
+
+        <label class="app-form-label flex-1">
+          Back Image:
+          <input type="file" class="app-form-input"
+            accept="image/*"
+            (change)="onFileChange($event, 'backImage')" />
+        </label>
+      </div>
+
+      <button type="submit" class="app-primary-button"
+        [disabled]="warrantyForm().submitting()"
+        [aria-busy]="warrantyForm().submitting()">
+        @if (warrantyForm().submitting()) { Saving... } @else { Save Warranty }
+      </button>
+
+    </form>
+  </div>
+</div>
