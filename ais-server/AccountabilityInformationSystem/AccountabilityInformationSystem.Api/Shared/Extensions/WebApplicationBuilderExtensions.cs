@@ -34,6 +34,7 @@ using Asp.Versioning;
 using Azure.Monitor.OpenTelemetry.AspNetCore;
 using Azure.Storage.Blobs;
 using FluentValidation;
+using JasperFx.CodeGeneration.Model;
 using Mapster;
 using MapsterMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -368,6 +369,8 @@ public static class WebApplicationBuilderExtensions
              {
                  opts.Durability.Mode = DurabilityMode.MediatorOnly;
                  opts.InvokeTracing = InvokeTracingMode.Full;
+                 opts.UseRuntimeCompilation();
+                 opts.ServiceLocationPolicy = ServiceLocationPolicy.AllowedButWarn;
                  opts.Discovery
                      .IncludeAssembly(typeof(Program).Assembly);
              }, ExtensionDiscovery.ManualOnly);

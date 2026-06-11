@@ -41,6 +41,7 @@
     <PackageReference Include="Scalar.AspNetCore" />
     <PackageReference Include="System.Linq.Dynamic.Core" />
     <PackageReference Include="WolverineFx" />
+    <PackageReference Include="WolverineFx.RuntimeCompilation" />
   </ItemGroup>
 
   <ItemGroup>
