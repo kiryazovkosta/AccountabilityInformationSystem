@@ -1,6 +1,5 @@
 ﻿using AccountabilityInformationSystem.Api.Domain.Entities.Family.Warranty;
 using AccountabilityInformationSystem.Api.Shared.Constants;
-using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -21,10 +20,22 @@ public sealed class WarrantyRecordConfiguration : IEntityTypeConfiguration<Warra
 
         builder.Property(e => e.Model).HasMaxLength(EntitiesConstants.WarrantyRecord.ModelMaxLength);
 
-        builder.Property(e => e.Receipt).HasMaxLength(EntitiesConstants.WarrantyRecord.FileMaxLength).IsRequired(false);
+        builder.Property(e => e.ReceiptId).HasMaxLength(EntitiesConstants.IdMaxLength).IsRequired(false);
 
-        builder.Property(e => e.FrontImage).HasMaxLength(EntitiesConstants.WarrantyRecord.FileMaxLength).IsRequired(false);
+        builder.Property(e => e.FrontImageId).HasMaxLength(EntitiesConstants.IdMaxLength).IsRequired(false);
 
-        builder.Property(e => e.BackImage).HasMaxLength(EntitiesConstants.WarrantyRecord.FileMaxLength).IsRequired(false);
+        builder.Property(e => e.BackImageId).HasMaxLength(EntitiesConstants.IdMaxLength).IsRequired(false);
+
+        builder.HasOne(e => e.Receipt)
+            .WithMany()
+            .HasForeignKey(e => e.ReceiptId);
+
+        builder.HasOne(e => e.FrontImage)
+            .WithMany()
+            .HasForeignKey(e => e.FrontImageId);
+
+        builder.HasOne(e => e.BackImage)
+            .WithMany()
+            .HasForeignKey(e => e.BackImageId);
     }
 }

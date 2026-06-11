@@ -19,12 +19,12 @@ public sealed class EncryptionService(IOptionsSnapshot<EncryptionOptions> option
             aes.Key = _masterKey;
             aes.IV = RandomNumberGenerator.GetBytes(IvSize);
 
-            using MemoryStream memoryStream = new MemoryStream();
+            using MemoryStream memoryStream = new();
             memoryStream.Write(aes.IV, 0, IvSize);
 
             using ICryptoTransform encryptor = aes.CreateEncryptor();
-            using CryptoStream cryptoStream = new CryptoStream(memoryStream, encryptor, CryptoStreamMode.Write);
-            using StreamWriter writer = new StreamWriter(cryptoStream);
+            using CryptoStream cryptoStream = new(memoryStream, encryptor, CryptoStreamMode.Write);
+            using StreamWriter writer = new(cryptoStream);
 
             writer.Write(plainText);
             writer.Flush();

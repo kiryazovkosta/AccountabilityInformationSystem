@@ -3,9 +3,17 @@ using System.Text;
 using AccountabilityInformationSystem.Api.Domain.Entities;
 using AccountabilityInformationSystem.Api.Domain.Entities.Excise;
 using AccountabilityInformationSystem.Api.Domain.Entities.Flow;
+using AccountabilityInformationSystem.Api.Features.ExciseNoms.ApCodes.Create;
+using AccountabilityInformationSystem.Api.Features.ExciseNoms.BrandNames.Create;
+using AccountabilityInformationSystem.Api.Features.ExciseNoms.CnCodes.Create;
+using AccountabilityInformationSystem.Api.Features.ExciseNoms.Shared;
+using AccountabilityInformationSystem.Api.Features.ExciseNoms.Shared.Create;
+using AccountabilityInformationSystem.Api.Features.ExciseNoms.Shared.CreateBatch;
 using AccountabilityInformationSystem.Api.Features.Flow.Ikunks.Shared;
 using AccountabilityInformationSystem.Api.Features.Flow.MeasurementPoints.Shared;
 using AccountabilityInformationSystem.Api.Features.Flow.MeasurementPointsData.Shared;
+using AccountabilityInformationSystem.Api.Features.Identity.Auth.Login;
+using AccountabilityInformationSystem.Api.Features.Identity.Auth.Shared;
 using AccountabilityInformationSystem.Api.Features.ProductTypes.Shared;
 using AccountabilityInformationSystem.Api.Features.Warehouses.Shared;
 using AccountabilityInformationSystem.Api.Infrastructure.Data;
@@ -15,15 +23,16 @@ using AccountabilityInformationSystem.Api.Settings;
 using AccountabilityInformationSystem.Api.Shared.Constants;
 using AccountabilityInformationSystem.Api.Shared.Services.DataShaping;
 using AccountabilityInformationSystem.Api.Shared.Services.Encrypting;
+using AccountabilityInformationSystem.Api.Shared.Services.FileStoraging;
 using AccountabilityInformationSystem.Api.Shared.Services.Linking;
 using AccountabilityInformationSystem.Api.Shared.Services.Messaging;
 using AccountabilityInformationSystem.Api.Shared.Services.Seeding;
 using AccountabilityInformationSystem.Api.Shared.Services.Sorting;
 using AccountabilityInformationSystem.Api.Shared.Services.Tokenizing;
-using AccountabilityInformationSystem.Api.Features.Identity.Auth.Login;
-using AccountabilityInformationSystem.Api.Features.Identity.Auth.Shared;
 using AccountabilityInformationSystem.Api.Shared.Services.UserContexting;
 using Asp.Versioning;
+using Azure.Monitor.OpenTelemetry.AspNetCore;
+using Azure.Storage.Blobs;
 using FluentValidation;
 using Mapster;
 using MapsterMapper;
@@ -43,13 +52,6 @@ using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using Wolverine;
-using Azure.Monitor.OpenTelemetry.AspNetCore;
-using AccountabilityInformationSystem.Api.Features.ExciseNoms.ApCodes.Create;
-using AccountabilityInformationSystem.Api.Features.ExciseNoms.BrandNames.Create;
-using AccountabilityInformationSystem.Api.Features.ExciseNoms.CnCodes.Create;
-using AccountabilityInformationSystem.Api.Features.ExciseNoms.Shared;
-using AccountabilityInformationSystem.Api.Features.ExciseNoms.Shared.Create;
-using AccountabilityInformationSystem.Api.Features.ExciseNoms.Shared.CreateBatch;
 
 namespace AccountabilityInformationSystem.Api.Shared.Extensions;
 
@@ -369,6 +371,24 @@ public static class WebApplicationBuilderExtensions
                  opts.Discovery
                      .IncludeAssembly(typeof(Program).Assembly);
              }, ExtensionDiscovery.ManualOnly);
+        return builder;
+    }
+
+    public static WebApplicationBuilder AddAzureBlobFilesStorage(this WebApplicationBuilder builder)
+    {
+        builder.Services
+            .AddOptions<AzureStorageOptions>()
+            .BindConfiguration(AzureStorageOptions.SectionName)
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+
+
+        builder.Services.AddSingleton(sp =>
+        {
+            AzureStorageOptions? options = sp.GetRequiredService<IOptions<AzureStorageOptions>>().Value;
+            return new BlobServiceClient(options?.ConnectionString ?? string.Empty);
+        });
+        builder.Services.AddSingleton<IFileStorage, AzureBlobFileStorage>();
         return builder;
     }
 }
