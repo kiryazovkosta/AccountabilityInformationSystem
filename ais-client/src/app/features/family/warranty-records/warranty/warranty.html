@@ -1,0 +1,59 @@
+<div class="app-main-container">
+  <h1 class="app-header-1">Warranty Details</h1>
+  <div>
+    <button type="button" class="app-primary-button" (click)="onBack()">Back to list</button>
+  </div>
+
+  @if (warrantiesService.warrantyRecord.isLoading()) {
+    <p class="text-ink/60 font-sans text-sm">Loading...</p>
+  } @else if (warrantiesService.warrantyRecord.error()) {
+    <div class="error-summary">Failed to load the warranty record. Please try again.</div>
+  } @else if (warrantiesService.warrantyRecord.value(); as warranty) {
+    <dl class="warranty-details">
+      <div class="warranty-details-row">
+        <dt>Brand</dt>
+        <dd class="app-display-field">{{ warranty.warrantyBrand.name }}</dd>
+      </div>
+      <div class="warranty-details-row">
+        <dt>Model</dt>
+        <dd class="app-display-field">{{ warranty.model }}</dd>
+      </div>
+      <div class="warranty-details-row">
+        <dt>Purchase Date</dt>
+        <dd class="app-display-field">{{ warranty.purchaseDate | date: 'mediumDate' }}</dd>
+      </div>
+      <div class="warranty-images-row">
+        <div class="warranty-image-item">
+          <dt>Receipt</dt>
+          <dd>
+            @if (warranty.receipt) {
+              <img class="warranty-image" [src]="warranty.receipt.url" alt="Receipt for {{ warranty.model }}" />
+            } @else {
+              <span class="app-badge-muted">Not uploaded</span>
+            }
+          </dd>
+        </div>
+        <div class="warranty-image-item">
+          <dt>Front Image</dt>
+          <dd>
+            @if (warranty.frontImage) {
+              <img class="warranty-image" [src]="warranty.frontImage.url" alt="Front of {{ warranty.model }}" />
+            } @else {
+              <span class="app-badge-muted">Not uploaded</span>
+            }
+          </dd>
+        </div>
+        <div class="warranty-image-item">
+          <dt>Back Image</dt>
+          <dd>
+            @if (warranty.backImage) {
+              <img class="warranty-image" [src]="warranty.backImage.url" alt="Back of {{ warranty.model }}" />
+            } @else {
+              <span class="app-badge-muted">Not uploaded</span>
+            }
+          </dd>
+        </div>
+      </div>
+    </dl>
+  }
+</div>

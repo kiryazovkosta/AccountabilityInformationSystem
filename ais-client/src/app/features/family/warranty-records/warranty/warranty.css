@@ -1,0 +1,38 @@
+.warranty-details {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.warranty-details-row {
+  display: grid;
+  grid-template-columns: 10rem 1fr;
+  align-items: start;
+  gap: 1rem;
+}
+
+.warranty-details-row dt {
+  font-weight: 600;
+}
+
+.warranty-image {
+  max-width: 20rem;
+  border-radius: 0.5rem;
+}
+
+.warranty-images-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+}
+
+.warranty-image-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.warranty-image-item dt {
+  font-weight: 600;
+}

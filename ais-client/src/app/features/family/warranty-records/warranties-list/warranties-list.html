@@ -3,4 +3,61 @@
   <div>
     <button class="app-primary-button" (click)="onCreate()">Create</button>
   </div>
+
+  @if (warrantiesService.warrantyRecords.isLoading()) {
+    <p class="text-ink/60 font-sans text-sm">Loading...</p>
+  } @else if (warrantiesService.warrantyRecords.error()) {
+    <div class="error-summary">Failed to load warranty records. Please try again.</div>
+  } @else { 
+    <div class="app-data-table-container">
+      <table class="app-data-table">
+        <thead>
+          <tr>
+            <th>Commands</th>
+            <th>Brand</th>
+            <th>Model</th>
+            <th>Purchase</th>
+            <th>Receipt</th>
+            <th>Front</th>
+            <th>Back</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (warranty of warrantiesService.warrantyRecords.value()?.items; track warranty.id) { 
+            <tr>
+              <td>
+                <div class="app-action-buttons">
+                  <button type="button" class="app-action-button">Edit</button>
+                  <button type="button" class="app-action-button" (click)="onView(warranty.id)">View</button>
+                  <button type="button" class="app-action-button-danger">Delete</button>
+                </div>
+              </td>
+              <td>{{ warranty.warrantyBrandName }}</td>
+              <td>{{ warranty.model }}</td>
+              <td>{{ warranty.purchaseDate }}</td>
+              <td>
+                <span [class]="warranty.receiptExists ? 'app-badge-success' : 'app-badge-muted'">
+                  {{ warranty.receiptExists ? 'Yes' : 'No' }}
+                </span>
+              </td>
+              <td>
+                <span [class]="warranty.frontImageExists ? 'app-badge-success' : 'app-badge-muted'">
+                  {{ warranty.frontImageExists ? 'Yes' : 'No' }}
+                </span>
+              </td>
+              <td>
+                <span [class]="warranty.backImageExists ? 'app-badge-success' : 'app-badge-muted'">
+                  {{ warranty.backImageExists ? 'Yes' : 'No' }}
+                </span>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+
+      <app-pagination></app-pagination>
+    </div>
+
+  }
+
 </div>

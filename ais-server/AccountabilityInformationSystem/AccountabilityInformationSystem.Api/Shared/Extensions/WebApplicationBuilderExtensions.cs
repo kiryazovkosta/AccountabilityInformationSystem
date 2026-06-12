@@ -2,6 +2,7 @@ using System.Reflection;
 using System.Text;
 using AccountabilityInformationSystem.Api.Domain.Entities;
 using AccountabilityInformationSystem.Api.Domain.Entities.Excise;
+using AccountabilityInformationSystem.Api.Domain.Entities.Family.Warranty;
 using AccountabilityInformationSystem.Api.Domain.Entities.Flow;
 using AccountabilityInformationSystem.Api.Features.ExciseNoms.ApCodes.Create;
 using AccountabilityInformationSystem.Api.Features.ExciseNoms.BrandNames.Create;
@@ -9,6 +10,7 @@ using AccountabilityInformationSystem.Api.Features.ExciseNoms.CnCodes.Create;
 using AccountabilityInformationSystem.Api.Features.ExciseNoms.Shared;
 using AccountabilityInformationSystem.Api.Features.ExciseNoms.Shared.Create;
 using AccountabilityInformationSystem.Api.Features.ExciseNoms.Shared.CreateBatch;
+using AccountabilityInformationSystem.Api.Features.Family.WarrantyRecords.Shared;
 using AccountabilityInformationSystem.Api.Features.Flow.Ikunks.Shared;
 using AccountabilityInformationSystem.Api.Features.Flow.MeasurementPoints.Shared;
 using AccountabilityInformationSystem.Api.Features.Flow.MeasurementPointsData.Shared;
@@ -238,6 +240,10 @@ public static class WebApplicationBuilderExtensions
             .AddSingleton<ISortMappingDefinition, SortMappingDefinition<ExciseNomenclatureResponse, CnCode>>(_ =>
                 ExciseNomenclatureMappings.SortMappingCnCode);
 
+        builder.Services
+            .AddSingleton<ISortMappingDefinition, SortMappingDefinition<WarrantyRecordListResponse, WarrantyRecord>>(_ =>
+                WarrantyRecordMappings.SortMapping);
+
         builder.Services.AddTransient<DataShapingService>();
 
         builder.Services.AddHttpContextAccessor();
@@ -388,8 +394,11 @@ public static class WebApplicationBuilderExtensions
 
         builder.Services.AddSingleton(sp =>
         {
-            AzureStorageOptions? options = sp.GetRequiredService<IOptions<AzureStorageOptions>>().Value;
-            return new BlobServiceClient(options?.ConnectionString ?? string.Empty);
+            AzureStorageOptions options = sp.GetRequiredService<IOptions<AzureStorageOptions>>().Value;
+            string connectionString = builder.Configuration.GetConnectionString("blobs")
+                ?? options.ConnectionString
+                ?? throw new InvalidOperationException("Azure Storage connection string is not configured.");
+            return new BlobServiceClient(connectionString);
         });
         builder.Services.AddSingleton<IFileStorage, AzureBlobFileStorage>();
         return builder;

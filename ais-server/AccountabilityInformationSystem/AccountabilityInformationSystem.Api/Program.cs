@@ -3,6 +3,7 @@ using AccountabilityInformationSystem.Api.Settings;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 using Wolverine;
+using AccountabilityInformationSystem.Aspire.ServiceDefaults;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -15,6 +16,7 @@ builder
     .AddObservability()
     .AddApplicationServices()
     .AddAuthenticationServices()
+    .AddAzureBlobFilesStorage()
     .AddCorsPolicy()
     .AddMapster()
     .AddWolverine();

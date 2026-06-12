@@ -68,6 +68,11 @@ app-root {
            focus:outline-none focus:border-brand focus:shadow-[0_0_0_3px_rgba(238,20,49,0.08)];
   }
 
+  .app-display-field {
+    @apply w-full bg-white text-ink border border-rose-muted rounded-md
+           py-[0.6rem] px-3 text-base font-[inherit];
+  }
+
   .app-primary-button {
     @apply px-6 py-3 bg-brand text-white border-none rounded-md
            text-base font-semibold font-[inherit] cursor-pointer
@@ -130,6 +135,28 @@ app-root {
     }
   }
 
+  .app-action-buttons {
+    @apply flex items-center gap-2;
+  }
+
+  .app-action-button {
+    @apply px-3 py-1.5 bg-white text-ink border border-rose-muted rounded-md
+           text-xs font-semibold font-[inherit] cursor-pointer
+           transition-colors duration-200
+           hover:border-brand hover:text-brand
+           disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .app-action-button-danger {
+    @apply px-3 py-1.5 bg-white border rounded-md
+           text-xs font-semibold font-[inherit] cursor-pointer
+           transition-colors duration-200
+           hover:bg-brand hover:text-white hover:border-brand
+           disabled:opacity-50 disabled:cursor-not-allowed;
+    color: var(--color-error-text);
+    border-color: var(--color-error-border);
+  }
+
   .app-badge {
     @apply inline-block px-2 py-0.5 rounded-full text-xs font-semibold;
   }
@@ -143,6 +170,6 @@ app-root {
   }
 
   .app-badge-muted {
-    @apply inline-block px-2 py-0.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-500;
+    @apply inline-block px-2 py-0.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-800;
   }
 }

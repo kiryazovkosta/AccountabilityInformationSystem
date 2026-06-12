@@ -1,4 +1,5 @@
 ﻿using System.Reflection.Metadata;
+using AccountabilityInformationSystem.Api.Domain.Entities.Common;
 using AccountabilityInformationSystem.Api.Settings;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
@@ -58,5 +59,33 @@ public sealed class AzureBlobFileStorage(
         return blobService.GetBlobContainerClient(ContainerFor(isPrivate))
             .GetBlobClient(blobName)
             .DeleteIfExistsAsync(cancellationToken: cancellationToken);
+    }
+
+    public async Task<StorageFile?> UploadAsStorageFileAsync(
+        IFormFile? file, 
+        string username, 
+        bool isPrivate = true, 
+        CancellationToken cancellationToken = default)
+    {
+        if (file == null)
+        {
+            return null;
+        }
+
+        await using Stream stream = file.OpenReadStream();
+        string blobName = await UploadAsync(
+            stream, file.FileName, file.ContentType, isPrivate, cancellationToken);
+
+        return new StorageFile
+        {
+            Id = $"sf_{Guid.CreateVersion7()}",
+            BlobName = blobName,
+            IsPrivate = isPrivate,
+            OriginalFileName = file.FileName,
+            ContentType = file.ContentType,
+            SizeBytes = file.Length,
+            CreatedBy = username,
+            CreatedAt = DateTime.UtcNow
+        };
     }
 }

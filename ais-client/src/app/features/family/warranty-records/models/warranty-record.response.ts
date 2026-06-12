@@ -1,9 +1,22 @@
+export interface StorageFileResponse {
+  id: string;
+  originalFileName: string;
+  contentType: string;
+  sizeBytes: number;
+  url?: string;
+}
+
+export interface WarrantyBrandResponse {
+  id: string;
+  name: string;
+}
+
 export interface WarrantyRecordResponse {
   id: string;
-  warrantyBrandId: string;
+  warrantyBrand: WarrantyBrandResponse;
   model: string;
-  purchaseDate: string;
-  receipt?: string;
-  frontImage?: string;
-  backImage?: string;
+  purchaseDate: Date;
+  receipt?: StorageFileResponse;
+  frontImage?: StorageFileResponse;
+  backImage?: StorageFileResponse;
 }

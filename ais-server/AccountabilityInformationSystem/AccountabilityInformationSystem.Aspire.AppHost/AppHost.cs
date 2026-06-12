@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using Aspire.Hosting;
+using Aspire.Hosting.Azure;
 using Aspire.Hosting.JavaScript;
 
 IDistributedApplicationBuilder builder = DistributedApplication.CreateBuilder(args);
@@ -15,11 +16,21 @@ IResourceBuilder<SqlServerDatabaseResource> database = sqlServer.AddDatabase("Ac
 IResourceBuilder<MailPitContainerResource> mailpit = builder.AddMailPit("mailpit")
     .WithDataVolume("mailpit-data");
 
+IResourceBuilder<AzureStorageResource> storage = builder.AddAzureStorage("ais-storage")
+    .RunAsEmulator(emulator => emulator.WithDataVolume("ais-azuritedata"));
+
+IResourceBuilder<AzureBlobStorageResource> blobs = storage.AddBlobs("blobs");
+
+storage.AddBlobContainer("public");
+storage.AddBlobContainer("private");
+
 IResourceBuilder<ProjectResource> backend = builder.AddProject<Projects.AccountabilityInformationSystem_Api>("ais-api")
     .WithReference(mailpit)
     .WaitFor(mailpit)
     .WithReference(database)
     .WaitFor(sqlServer)
+    .WithReference(blobs)
+    .WaitFor(blobs)
     .WithEnvironment("ASPNETCORE_ENVIRONMENT", "Development");
 
 builder.Eventing.Subscribe<BeforeStartEvent>(async (ev, ct) =>
