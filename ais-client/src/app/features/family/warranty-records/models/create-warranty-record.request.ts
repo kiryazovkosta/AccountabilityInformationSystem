@@ -5,4 +5,5 @@ export interface CreateWarrantyRecordRequest {
   receipt?: File;
   frontImage?: File;
   backImage?: File;
+  duration: number;
 }

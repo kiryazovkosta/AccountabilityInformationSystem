@@ -16,7 +16,10 @@ export interface WarrantyRecordResponse {
   warrantyBrand: WarrantyBrandResponse;
   model: string;
   purchaseDate: Date;
+  duration: number;
+  endDate: Date;
   receipt?: StorageFileResponse;
   frontImage?: StorageFileResponse;
   backImage?: StorageFileResponse;
+
 }

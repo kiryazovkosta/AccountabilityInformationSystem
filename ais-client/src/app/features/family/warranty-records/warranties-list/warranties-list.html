@@ -17,9 +17,12 @@
             <th>Brand</th>
             <th>Model</th>
             <th>Purchase</th>
+            <th>Duration</th>
+            <th>EndDate</th>
             <th>Receipt</th>
             <th>Front</th>
             <th>Back</th>
+            <th>Status</th>
           </tr>
         </thead>
         <tbody>
@@ -35,6 +38,8 @@
               <td>{{ warranty.warrantyBrandName }}</td>
               <td>{{ warranty.model }}</td>
               <td>{{ warranty.purchaseDate }}</td>
+              <td>{{ warranty.duration }}</td>
+              <td>{{ warranty.endDate }}</td>
               <td>
                 <span [class]="warranty.receiptExists ? 'app-badge-success' : 'app-badge-muted'">
                   {{ warranty.receiptExists ? 'Yes' : 'No' }}
@@ -50,6 +55,7 @@
                   {{ warranty.backImageExists ? 'Yes' : 'No' }}
                 </span>
               </td>
+              <td>{{ warranty.status }}</td>
             </tr>
           }
         </tbody>

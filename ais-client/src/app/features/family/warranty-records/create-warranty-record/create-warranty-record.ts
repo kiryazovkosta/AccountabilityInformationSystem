@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
-import { form, FormField, schema, FormRoot, required, FieldTree } from '@angular/forms/signals';
+import { form, FormField, schema, FormRoot, required, FieldTree, min } from '@angular/forms/signals';
 import { FormError } from '../../../../shared/form-error/form-error';
 import { HttpErrorService } from '../../../../services/shared/http-error.service';
 import { WarrantyRecordsService } from '../services/warranty-records.service';
@@ -12,6 +12,7 @@ const initialState: CreateWarrantyRecordRequest = {
   warrantyBrandId: '',
   model: '',
   purchaseDate: '',
+  duration: 0,
   receipt: undefined,
   frontImage: undefined,
   backImage: undefined,
@@ -21,6 +22,7 @@ const createWarrantyRecordSchema = schema<CreateWarrantyRecordRequest>((path) =>
   required(path.warrantyBrandId, { message: 'Brand is required.' });
   required(path.model, { message: 'Model is required.' });
   required(path.purchaseDate, { message: 'Purchase date is required.' });
+  min(path.duration, 1, { message: 'Duration must be at least 1 month.' })
 });
 
 @Component({

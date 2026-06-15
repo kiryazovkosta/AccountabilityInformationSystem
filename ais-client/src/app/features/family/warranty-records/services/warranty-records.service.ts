@@ -27,9 +27,12 @@ export interface WarrantyRecordListResponse {
   warrantyBrandName: string;
   model: string;
   purchaseDate: Date;
+  duration: number;
+  endDate: Date;
   receiptExists: boolean;
   frontImageExists: boolean;
   backImageExists: boolean;
+    status: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -63,6 +66,7 @@ export class WarrantyRecordsService {
     formData.append('warrantyBrandId', request.warrantyBrandId);
     formData.append('model', request.model);
     formData.append('purchaseDate', request.purchaseDate);
+    formData.append('duration', request.duration.toString());
 
     if (request.receipt) {
       formData.append('receipt', request.receipt);

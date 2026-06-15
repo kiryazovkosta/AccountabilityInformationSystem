@@ -22,37 +22,46 @@
         <dt>Purchase Date</dt>
         <dd class="app-display-field">{{ warranty.purchaseDate | date: 'mediumDate' }}</dd>
       </div>
-      <div class="warranty-images-row">
-        <div class="warranty-image-item">
-          <dt>Receipt</dt>
-          <dd>
-            @if (warranty.receipt) {
-              <img class="warranty-image" [src]="warranty.receipt.url" alt="Receipt for {{ warranty.model }}" />
-            } @else {
-              <span class="app-badge-muted">Not uploaded</span>
-            }
-          </dd>
-        </div>
-        <div class="warranty-image-item">
-          <dt>Front Image</dt>
-          <dd>
-            @if (warranty.frontImage) {
-              <img class="warranty-image" [src]="warranty.frontImage.url" alt="Front of {{ warranty.model }}" />
-            } @else {
-              <span class="app-badge-muted">Not uploaded</span>
-            }
-          </dd>
-        </div>
-        <div class="warranty-image-item">
-          <dt>Back Image</dt>
-          <dd>
-            @if (warranty.backImage) {
-              <img class="warranty-image" [src]="warranty.backImage.url" alt="Back of {{ warranty.model }}" />
-            } @else {
-              <span class="app-badge-muted">Not uploaded</span>
-            }
-          </dd>
-        </div>
+      <div class="warranty-details-row">
+        <dt>Duration</dt>
+        <dd class="app-display-field">{{ warranty.duration }}</dd>
+      </div>
+      <div class="warranty-details-row">
+        <dt>End Date</dt>
+        <dd class="app-display-field">{{ warranty.endDate | date: 'mediumDate' }}</dd>
+      </div>
+    </dl>
+
+    <dl class="warranty-images-row">
+      <div class="warranty-image-item">
+        <dt>Receipt</dt>
+        <dd>
+          @if (warranty.receipt) {
+            <img class="warranty-image" [src]="warranty.receipt.url" alt="Receipt for {{ warranty.model }}" />
+          } @else {
+            <span class="app-badge-muted">Not uploaded</span>
+          }
+        </dd>
+      </div>
+      <div class="warranty-image-item">
+        <dt>Front Image</dt>
+        <dd>
+          @if (warranty.frontImage) {
+            <img class="warranty-image" [src]="warranty.frontImage.url" alt="Front of {{ warranty.model }}" />
+          } @else {
+            <span class="app-badge-muted">Not uploaded</span>
+          }
+        </dd>
+      </div>
+      <div class="warranty-image-item">
+        <dt>Back Image</dt>
+        <dd>
+          @if (warranty.backImage) {
+            <img class="warranty-image" [src]="warranty.backImage.url" alt="Back of {{ warranty.model }}" />
+          } @else {
+            <span class="app-badge-muted">Not uploaded</span>
+          }
+        </dd>
       </div>
     </dl>
   }

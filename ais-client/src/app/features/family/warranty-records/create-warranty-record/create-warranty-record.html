@@ -39,6 +39,14 @@
         <app-form-error [fieldRef]="warrantyForm.purchaseDate" />
       </label>
 
+      <label class="app-form-label">
+        Duration in months:
+        <input type="number" class="app-form-input"
+          [formField]="warrantyForm.duration"
+          [aria-invalid]="ariaInvalidState(warrantyForm.duration)" />
+        <app-form-error [fieldRef]="warrantyForm.duration" />
+      </label>
+
       <div class="flex gap-4">
         <label class="app-form-label flex-1">
           Receipt:
