@@ -4,6 +4,7 @@ using AccountabilityInformationSystem.Api.Features.Identity.Auth.Login;
 using AccountabilityInformationSystem.Api.Features.Identity.Auth.Register;
 using AccountabilityInformationSystem.Api.Infrastructure.Data;
 using AccountabilityInformationSystem.Api.Shared.Constants;
+using AccountabilityInformationSystem.Api.Shared.Services.FileStoraging;
 using AccountabilityInformationSystem.IntegrationTests.Infrastructure.Stubs;
 using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Hosting;
@@ -68,6 +69,9 @@ public class AisAuthWebApplicationFactory : WebApplicationFactory<Program>, IAsy
         {
             services.RemoveAll<IEmailSender>();
             services.AddScoped<IEmailSender, NullEmailSender>();
+
+            services.RemoveAll<IFileStorage>();
+            services.AddSingleton<IFileStorage, FakeFileStorage>();
 
             services.PostConfigure<AntiforgeryOptions>(options =>
             {
