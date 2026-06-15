@@ -37,5 +37,8 @@ public sealed class WarrantyRecordConfiguration : IEntityTypeConfiguration<Warra
         builder.HasOne(e => e.BackImage)
             .WithMany()
             .HasForeignKey(e => e.BackImageId);
+
+        builder.Ignore(e => e.EndDate);
+        builder.Ignore(e => e.Status);
     }
 }
