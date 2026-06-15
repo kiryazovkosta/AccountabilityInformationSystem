@@ -16,4 +16,13 @@ public sealed class WarrantyRecord : AuditableEntity, IEntity
     public StorageFile? FrontImage { get; set; }
     public string? BackImageId { get; set; }
     public StorageFile? BackImage { get; set; }
+    public int Duration { get; set; }
+    public DateOnly EndDate => PurchaseDate.AddMonths(Duration);
+    public WarrantyStatus Status => DateOnly.FromDateTime(DateTime.Today) <= EndDate ? WarrantyStatus.Active : WarrantyStatus.Deactive; 
+}
+
+public enum WarrantyStatus
+{
+    Active = 0,
+    Deactive = 1,
 }
