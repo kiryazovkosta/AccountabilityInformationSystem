@@ -21,7 +21,7 @@ namespace AccountabilityInformationSystem.Api.Features.Family.WarrantyRecords;
 [ApiController]
 [Route("api/family/warranty-records")]
 [ApiVersion("1.0")]
-//[Authorize]
+[Authorize]
 public sealed class WarrantyRecordsController(IMessageBus bus) : ApiController
 {
     [HttpGet]
