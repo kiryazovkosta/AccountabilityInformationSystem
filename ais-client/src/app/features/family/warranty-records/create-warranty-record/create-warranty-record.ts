@@ -53,6 +53,7 @@ export class CreateWarrantyRecord {
           try {
             console.log(this.warrantyForm().value());
             await firstValueFrom(this.#service.create(this.warrantyForm().value()));
+            this.#service.warrantyRecords.reload();
             await this.#router.navigate(['/family/warranties']);
           } catch {
             // interceptor handles error display
