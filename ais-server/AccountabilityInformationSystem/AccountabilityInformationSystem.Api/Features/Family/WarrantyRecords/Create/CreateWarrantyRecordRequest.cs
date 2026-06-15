@@ -8,4 +8,5 @@ public sealed record CreateWarrantyRecordRequest
     public IFormFile? Receipt { get; init; }
     public IFormFile? FrontImage { get; init; }
     public IFormFile? BackImage { get; init; }
+    public required int Duration { get; init; } 
 }

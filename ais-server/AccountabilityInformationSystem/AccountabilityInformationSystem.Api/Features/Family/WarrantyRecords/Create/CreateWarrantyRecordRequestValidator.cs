@@ -34,5 +34,9 @@ internal sealed class CreateWarrantyRecordRequestValidator : AbstractValidator<C
             .MaxFileSize(2 * 1024 * 1024)
             .AllowedExtensions([".jpg", ".jpeg", ".png" ])
             .AllowedContentTypes(["image/jpeg", "image/png"]);
+
+        RuleFor(x => x.Duration)
+            .GreaterThanOrEqualTo(1)
+            .WithMessage("Duration must be at least 1 month.");
     }
 }

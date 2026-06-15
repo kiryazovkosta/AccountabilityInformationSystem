@@ -20,7 +20,10 @@ internal static class WarrantyRecordMappings
             new SortMapping(nameof(WarrantyRecordListResponse.WarrantyBrandName), nameof(WarrantyRecord.WarrantyBrand.Name)),
             new SortMapping(nameof(WarrantyRecordListResponse.ReceiptExists), nameof(WarrantyRecord.Receipt)),
             new SortMapping(nameof(WarrantyRecordListResponse.FrontImageExists), nameof(WarrantyRecord.FrontImage)),
-            new SortMapping(nameof(WarrantyRecordListResponse.BackImageExists), nameof(WarrantyRecord.BackImage))
+            new SortMapping(nameof(WarrantyRecordListResponse.BackImageExists), nameof(WarrantyRecord.BackImage)),
+            new SortMapping(nameof(WarrantyRecordListResponse.Duration), nameof(WarrantyRecord.Duration)),
+            new SortMapping(nameof(WarrantyRecordListResponse.EndDate), nameof(WarrantyRecord.EndDate)),
+            new SortMapping(nameof(WarrantyRecordListResponse.Status), nameof(WarrantyRecord.Status))
         ]
     };
 
@@ -31,9 +34,7 @@ internal static class WarrantyRecordMappings
             WarrantyBrandId = request.WarrantyBrandId,
             Model = request.Model,
             PurchaseDate = request.PurchaseDate,
-            //Receipt = request.Receipt?.FileName ?? null,
-            //FrontImage = request.FrontImage?.FileName ?? null,
-            //BackImage = request.BackImage?.FileName ?? null,
+            Duration = request.Duration,
             CreatedBy = userName,
             CreatedAt = DateTime.UtcNow,
         };
@@ -45,6 +46,9 @@ internal static class WarrantyRecordMappings
             WarrantyBrand = new WarrantyBrandResponse() { Id = record.WarrantyBrand.Id, Name = record.WarrantyBrand.Name },
             Model = record.Model,
             PurchaseDate = record.PurchaseDate,
+            Duration = record.Duration,
+            EndDate = record.EndDate,
+            Status = record.Status,
             Receipt = record.Receipt is not null ?
                 new StorageFileResponse()
                 {

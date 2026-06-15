@@ -14,6 +14,9 @@ public sealed record WarrantyRecordResponse : IMapFrom<WarrantyRecord>
     public StorageFileResponse? Receipt { get; init; }
     public StorageFileResponse? FrontImage { get; init; }
     public StorageFileResponse? BackImage { get; init; }
+    public int Duration { get; init; }
+    public DateOnly EndDate { get; init; }
+    public WarrantyStatus Status { get; init; }
 }
 
 public sealed record WarrantyRecordListResponse : IMapFrom<WarrantyRecord>, IMapCustom
@@ -25,6 +28,9 @@ public sealed record WarrantyRecordListResponse : IMapFrom<WarrantyRecord>, IMap
     public bool ReceiptExists { get; init; }
     public bool FrontImageExists { get; init; }
     public bool BackImageExists { get; init; }
+    public int Duration { get; init; }
+    public DateOnly EndDate { get; init; }
+    public WarrantyStatus Status { get; init; }
 
     public void CreateMappings(Mapster.TypeAdapterConfig config)
     {

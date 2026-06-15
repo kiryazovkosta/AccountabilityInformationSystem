@@ -33,7 +33,6 @@ public sealed class CreateWarrantyRecordRequestHandler(
                 ResultFailureType.NotFound);
         }
 
-
         WarrantyRecord record = request.ToEntity(user.Username);
         record.WarrantyBrand = warrantyBrand;
         record.Receipt = await fileStorage.UploadAsStorageFileAsync(request.Receipt, user.Username, true, cancellationToken);
