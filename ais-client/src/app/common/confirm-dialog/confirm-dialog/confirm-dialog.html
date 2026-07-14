@@ -1,0 +1,26 @@
+@if (service.request(); as request) {
+  <div class="confirm-dialog-backdrop" (click)="service.onCancel()">
+    <div
+      class="confirm-dialog-panel"
+      role="alertdialog"
+      aria-modal="true"
+      [attr.aria-label]="request.title"
+      (click)="$event.stopPropagation()"
+    >
+      <h2 class="app-header-3 mb-2">{{ request.title }}</h2>
+      <p class="text-ink/80 font-sans text-sm mb-6">{{ request.message }}</p>
+      <div class="flex justify-end gap-2">
+        <button type="button" class="app-action-button" (click)="service.onCancel()">
+          {{ request.cancelText }}
+        </button>
+        <button
+          type="button"
+          [class]="request.variant === 'danger' ? 'app-primary-button' : 'app-action-button'"
+          (click)="service.onConfirm()"
+        >
+          {{ request.confirmText }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

@@ -172,4 +172,9 @@ app-root {
   .app-badge-muted {
     @apply inline-block px-2 py-0.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-800;
   }
+
+  .confirm-dialog-panel {
+    @apply bg-white w-full max-w-md rounded-2xl border border-rose-muted
+           shadow-card p-6 font-sans text-ink;
+  }
 }

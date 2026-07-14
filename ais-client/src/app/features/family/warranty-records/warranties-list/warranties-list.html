@@ -32,7 +32,7 @@
                 <div class="app-action-buttons">
                   <button type="button" class="app-action-button">Edit</button>
                   <button type="button" class="app-action-button" (click)="onView(warranty.id)">View</button>
-                  <button type="button" class="app-action-button-danger">Delete</button>
+                  <button type="button" class="app-action-button-danger" (click)="onDelete(warranty.id)">Delete</button>
                 </div>
               </td>
               <td>{{ warranty.warrantyBrandName }}</td>

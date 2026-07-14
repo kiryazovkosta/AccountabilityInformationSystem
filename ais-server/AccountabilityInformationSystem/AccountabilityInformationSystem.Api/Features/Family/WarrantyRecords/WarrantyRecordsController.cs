@@ -1,6 +1,7 @@
 using System.Dynamic;
 using AccountabilityInformationSystem.Api.Domain.Entities.Abstraction;
 using AccountabilityInformationSystem.Api.Features.Family.WarrantyRecords.Create;
+using AccountabilityInformationSystem.Api.Features.Family.WarrantyRecords.Delete;
 using AccountabilityInformationSystem.Api.Features.Family.WarrantyRecords.GetAll;
 using AccountabilityInformationSystem.Api.Features.Family.WarrantyRecords.GetById;
 using AccountabilityInformationSystem.Api.Features.Family.WarrantyRecords.Shared;
@@ -59,6 +60,13 @@ public sealed class WarrantyRecordsController(IMessageBus bus) : ApiController
     {
         GetWarrantyRecordRequest request = new(id, fields);
         Result<ExpandoObject> result = await bus.InvokeAsync<Result<ExpandoObject>>(request, cancellationToken);
+        return result.ToActionResult();
+    }
+
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeleteWarrantyRecord(string id, CancellationToken cancellationToken)
+    {
+        Result result = await bus.InvokeAsync<Result>(new DeleteWarrantyRecordRequest(id), cancellationToken);
         return result.ToActionResult();
     }
 }

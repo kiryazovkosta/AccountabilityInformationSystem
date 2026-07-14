@@ -1,5 +1,6 @@
 using AccountabilityInformationSystem.Api.Shared.Constants;
 using AccountabilityInformationSystem.Api.Domain.Entities;
+using AccountabilityInformationSystem.Api.Domain.Entities.Common;
 using AccountabilityInformationSystem.Api.Domain.Entities.Excise;
 using AccountabilityInformationSystem.Api.Domain.Entities.Family.Warranty;
 using AccountabilityInformationSystem.Api.Domain.Entities.Flow;
@@ -26,6 +27,7 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
 
     public DbSet<WarrantyBrand> WarrantyBrands { get; set; }
     public DbSet<WarrantyRecord> WarrantyRecords { get; set; }
+    public DbSet<StorageFile> StorageFiles { get; set; }
 
     public DbSet<User> Users { get; set; }
 

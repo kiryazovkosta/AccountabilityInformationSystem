@@ -84,4 +84,11 @@ export class WarrantyRecordsService {
       { withCredentials: true }
     );
   }
+
+  delete(id: string): Observable<void> {
+    return this.#http.delete<void>(
+      `${environment.apiBaseUrl}api/family/warranty-records/${id}`,
+      { withCredentials: true }
+    );
+  }
 }
