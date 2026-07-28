@@ -3,6 +3,7 @@ using AccountabilityInformationSystem.Api.Domain.Entities.Abstraction;
 using AccountabilityInformationSystem.Api.Features.ProductTypes.Shared;
 using AccountabilityInformationSystem.Api.Infrastructure.Data;
 using AccountabilityInformationSystem.Api.Shared.Services.DataShaping;
+using Mapster;
 using Microsoft.EntityFrameworkCore;
 
 namespace AccountabilityInformationSystem.Api.Features.ProductTypes.GetById;
@@ -22,7 +23,7 @@ public sealed class GetProductTypeByIdRequestHandler(
         ProductTypeResponse? productTypeResponse = await dbContext
             .ProductTypes
             .AsNoTracking()
-            .Select(ProductTypeQueries.ProjectToResponse())
+            .ProjectToType<ProductTypeResponse>()
             .FirstOrDefaultAsync(mp => mp.Id == request.Id, cancellationToken);
         if (productTypeResponse is null)
         {

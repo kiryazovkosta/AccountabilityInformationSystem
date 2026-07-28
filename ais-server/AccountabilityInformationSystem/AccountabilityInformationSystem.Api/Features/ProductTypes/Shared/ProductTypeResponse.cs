@@ -1,6 +1,9 @@
+using AccountabilityInformationSystem.Api.Domain.Entities;
+using AccountabilityInformationSystem.Api.Shared.Services.Mapping;
+
 namespace AccountabilityInformationSystem.Api.Features.ProductTypes.Shared;
 
-public sealed class ProductTypeResponse
+public sealed class ProductTypeResponse : IMapFrom<ProductType>
 {
     public string Id { get; init; }
     public string Name { get; init; }

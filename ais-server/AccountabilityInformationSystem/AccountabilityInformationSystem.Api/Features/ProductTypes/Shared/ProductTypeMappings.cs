@@ -1,5 +1,4 @@
 using AccountabilityInformationSystem.Api.Domain.Entities;
-using AccountabilityInformationSystem.Api.Features.ProductTypes.Create;
 using AccountabilityInformationSystem.Api.Shared.Services.Sorting;
 
 namespace AccountabilityInformationSystem.Api.Features.ProductTypes.Shared;
@@ -14,29 +13,4 @@ internal static class ProductTypeMappings
             new SortMapping(nameof(ProductTypeResponse.FullName), nameof(ProductType.FullName)),
         ]
     };
-
-
-    public static ProductType ToEntity(this CreateProductTypeRequest request, string userName)
-        => new()
-        {
-            Id = $"pt_{Guid.CreateVersion7()}",
-            Name = request.Name,
-            FullName = request.FullName,
-            CreatedBy = userName,
-            CreatedAt = DateTime.UtcNow,
-        };
-
-    public static ProductTypeResponse ToResponse(this ProductType productType)
-        => new()
-        {
-            Id = productType.Id,
-            Name = productType.Name,
-            FullName = productType.FullName,
-            Products = [..productType.Products.Select(p => new ProductTypeProductResponse()
-            {
-                Id = p.Id,
-                Code = p.Code,
-                FullName = p.FullName,
-            })]
-        };
 }

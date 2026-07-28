@@ -7,6 +7,7 @@ using AccountabilityInformationSystem.Api.Shared.Extensions;
 using AccountabilityInformationSystem.Api.Shared.Models;
 using AccountabilityInformationSystem.Api.Shared.Services.DataShaping;
 using AccountabilityInformationSystem.Api.Shared.Services.Sorting;
+using Mapster;
 using Microsoft.EntityFrameworkCore;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
@@ -46,7 +47,7 @@ public sealed class GetProductTypesRequestHandler(
             )
             .ApplySort(request.Sort, sortMappings)
             .AsNoTracking()
-            .Select(ProductTypeQueries.ProjectToResponse());
+            .ProjectToType<ProductTypeResponse>();
 
         PaginationResponse<ExpandoObject> response = new()
         {

@@ -5,13 +5,15 @@ using AccountabilityInformationSystem.Api.Features.ProductTypes.Create;
 using AccountabilityInformationSystem.Api.Features.ProductTypes.Shared;
 using AccountabilityInformationSystem.Api.Infrastructure.Data;
 using AccountabilityInformationSystem.Api.Shared.Services.UserContexting;
+using Mapster;
 using Microsoft.EntityFrameworkCore;
 
 namespace AccountabilityInformationSystem.Api.Features.ProductTypes.Create;
 
 public sealed class CreateProductTypeRequestHandler(
     ApplicationDbContext dbContext,
-    UserContext userContext)
+    UserContext userContext,
+    TimeProvider timeProvider)
 {
     public async Task<Result<string>> Handle(CreateProductTypeRequest request, CancellationToken cancellationToken)
     {
@@ -28,10 +30,13 @@ public sealed class CreateProductTypeRequestHandler(
                 ResultFailureType.Conflict);
         }
 
-        ProductType productType = request.ToEntity(user.Email);
+        ProductType productType = request.Adapt<ProductType>();
+        productType.CreatedBy = user.Email;
+        productType.CreatedAt = timeProvider.GetUtcNow().UtcDateTime;
+
         await dbContext.ProductTypes.AddAsync(productType, cancellationToken);
         await dbContext.SaveChangesAsync(cancellationToken);
-        ProductTypeResponse productTypeResponse = productType.ToResponse();
+        ProductTypeResponse productTypeResponse = productType.Adapt<ProductTypeResponse>();
         return Result<string>.Success(productTypeResponse.Id);
     } 
 }
