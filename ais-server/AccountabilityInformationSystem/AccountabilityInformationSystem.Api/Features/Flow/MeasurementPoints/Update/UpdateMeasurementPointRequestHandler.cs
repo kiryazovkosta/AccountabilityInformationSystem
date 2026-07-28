@@ -5,6 +5,7 @@ using AccountabilityInformationSystem.Api.Domain.Entities.Identity;
 using AccountabilityInformationSystem.Api.Features.Flow.MeasurementPoints.Shared;
 using AccountabilityInformationSystem.Api.Infrastructure.Data;
 using AccountabilityInformationSystem.Api.Shared.Services.UserContexting;
+using Mapster;
 using Microsoft.EntityFrameworkCore;
 
 namespace AccountabilityInformationSystem.Api.Features.Flow.MeasurementPoints.Update;
@@ -46,7 +47,9 @@ public sealed class UpdateMeasurementPointRequestHandler(
                 ResultFailureType.Conflict);
         }
 
-        measuringPoint.UpdateFromRequest(request, user.Email);
+        request.Adapt(measuringPoint);
+        measuringPoint.ModifiedBy = user.Email;
+        measuringPoint.ModifiedAt = DateTime.UtcNow;
         await dbContext.SaveChangesAsync(cancellationToken);
 
         return Result.Success(ResultSuccessType.NoContent);

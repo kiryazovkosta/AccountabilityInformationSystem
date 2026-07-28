@@ -1,6 +1,10 @@
+using AccountabilityInformationSystem.Api.Domain.Entities.Flow;
+using AccountabilityInformationSystem.Api.Shared.Services.Mapping;
+using Mapster;
+
 namespace AccountabilityInformationSystem.Api.Features.Flow.Ikunks.Update;
 
-public sealed record UpdateIkunkRequest
+public sealed record UpdateIkunkRequest : IMapTo<Ikunk>, IMapCustom
 {
     internal string Id { get; init; }
     public string? Name { get; init; }
@@ -10,4 +14,9 @@ public sealed record UpdateIkunkRequest
     public DateOnly? ActiveFrom { get; init; }
     public DateOnly? ActiveTo { get; init; }
     public string? WarehouseId { get; init; }
+
+    public void CreateMappings(TypeAdapterConfig config) =>
+        config.NewConfig<UpdateIkunkRequest, Ikunk>()
+            .IgnoreNullValues(true)
+            .Ignore(dest => dest.Id);
 }

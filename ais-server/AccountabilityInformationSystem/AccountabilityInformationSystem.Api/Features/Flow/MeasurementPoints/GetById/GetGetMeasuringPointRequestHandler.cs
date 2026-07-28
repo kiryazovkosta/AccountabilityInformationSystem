@@ -3,6 +3,7 @@ using AccountabilityInformationSystem.Api.Domain.Entities.Abstraction;
 using AccountabilityInformationSystem.Api.Features.Flow.MeasurementPoints.Shared;
 using AccountabilityInformationSystem.Api.Infrastructure.Data;
 using AccountabilityInformationSystem.Api.Shared.Services.DataShaping;
+using Mapster;
 using Microsoft.EntityFrameworkCore;
 
 namespace AccountabilityInformationSystem.Api.Features.Flow.MeasurementPoints.GetById;
@@ -23,7 +24,7 @@ public sealed class GetGetMeasuringPointRequestHandler(
         MeasurementPointResponse? measuringPointResponse = await dbContext
             .MeasurementPoints
             .AsNoTracking()
-            .Select(MeasurementPointQueries.ProjectToResponse())
+            .ProjectToType<MeasurementPointResponse>()
             .FirstOrDefaultAsync(mp => mp.Id == request.Id, cancellationToken);
         if (measuringPointResponse is null)
         {

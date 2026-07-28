@@ -1,6 +1,10 @@
+using AccountabilityInformationSystem.Api.Domain.Entities.Flow;
+using AccountabilityInformationSystem.Api.Shared.Services.Mapping;
+using Mapster;
+
 namespace AccountabilityInformationSystem.Api.Features.Warehouses.Create;
 
-public sealed record CreateWarehouseRequest
+public sealed record CreateWarehouseRequest : IMapTo<Warehouse>, IMapCustom
 {
     public required string Name { get; init; }
     public required string FullName { get; init; }
@@ -9,4 +13,8 @@ public sealed record CreateWarehouseRequest
     public required string ExciseNumber { get; init; }
     public required DateOnly ActiveFrom { get; init; }
     public required DateOnly ActiveTo { get; init; }
+
+    public void CreateMappings(TypeAdapterConfig config) =>
+        config.NewConfig<CreateWarehouseRequest, Warehouse>()
+            .Map(dest => dest.Id, _ => $"wh_{Guid.CreateVersion7()}");
 }

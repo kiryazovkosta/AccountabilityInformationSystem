@@ -5,6 +5,7 @@ using AccountabilityInformationSystem.Api.Domain.Entities.Identity;
 using AccountabilityInformationSystem.Api.Features.Flow.Ikunks.Shared;
 using AccountabilityInformationSystem.Api.Infrastructure.Data;
 using AccountabilityInformationSystem.Api.Shared.Services.UserContexting;
+using Mapster;
 using Microsoft.EntityFrameworkCore;
 
 namespace AccountabilityInformationSystem.Api.Features.Flow.Ikunks.Create;
@@ -33,10 +34,12 @@ public sealed class CreateIkunkRequestHandler(
                 ResultFailureType.Conflict);
         }
 
-        Ikunk ikunk = request.ToEntity(user.Email);
+        Ikunk ikunk = request.Adapt<Ikunk>();
+        ikunk.CreatedBy = user.Email;
+        ikunk.CreatedAt = DateTime.UtcNow;
         await dbContext.Ikunks.AddAsync(ikunk, cancellationToken);
         await dbContext.SaveChangesAsync(cancellationToken);
-        IkunkResponse ikunkResponse = ikunk.ToResponse();
+        IkunkResponse ikunkResponse = ikunk.Adapt<IkunkResponse>();
         return Result<IkunkResponse>.Success(ikunkResponse);
     }
 }

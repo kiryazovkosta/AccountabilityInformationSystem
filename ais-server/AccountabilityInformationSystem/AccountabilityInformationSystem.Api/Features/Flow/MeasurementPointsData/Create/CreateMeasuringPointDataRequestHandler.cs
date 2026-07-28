@@ -6,6 +6,7 @@ using AccountabilityInformationSystem.Api.Features.Flow.MeasurementPointsData.Sh
 using AccountabilityInformationSystem.Api.Infrastructure.Data;
 using AccountabilityInformationSystem.Api.Shared.Services.Encrypting;
 using AccountabilityInformationSystem.Api.Shared.Services.UserContexting;
+using Mapster;
 using Microsoft.EntityFrameworkCore;
 
 namespace AccountabilityInformationSystem.Api.Features.Flow.MeasurementPointsData.Create;
@@ -50,12 +51,13 @@ public sealed class CreateMeasuringPointDataRequestHandler(
                 ResultFailureType.Conflict);
         }
 
-        MeasurementPointData measuringPointData = request.ToEntity(user.Email);
+        MeasurementPointData measuringPointData = request.Adapt<MeasurementPointData>();
+        measuringPointData.CreatedAt = DateTime.UtcNow;
         measuringPointData.CreatedBy = encryptionService.Encrypt(user.Email);
         await dbContext.MeasurementPointsData.AddAsync(measuringPointData, cancellationToken);
         await dbContext.SaveChangesAsync(cancellationToken);
 
-        MeasurementPointDataResponse measurementPointResponse = measuringPointData.ToResponse() with
+        MeasurementPointDataResponse measurementPointResponse = measuringPointData.Adapt<MeasurementPointDataResponse>() with
         {
             Links = measuringPointDataLinkService.CreateLinksForMeasuringPointData(measuringPointData.Id)
         };

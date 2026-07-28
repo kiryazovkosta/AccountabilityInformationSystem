@@ -5,6 +5,7 @@ using AccountabilityInformationSystem.Api.Shared.Extensions;
 using AccountabilityInformationSystem.Api.Shared.Models;
 using AccountabilityInformationSystem.Api.Shared.Services.DataShaping;
 using AccountabilityInformationSystem.Api.Shared.Services.Sorting;
+using Mapster;
 using Microsoft.EntityFrameworkCore;
 
 namespace AccountabilityInformationSystem.Api.Features.ExciseNoms.Shared.GetAll;
@@ -45,7 +46,7 @@ public class GetAllExciseNomenclaturesRequestHandler<TEntity>(
             .Where(en => request.Query.IsUsed == null || en.IsUsed == request.Query.IsUsed)
             .ApplySort(request.Query.Sort, sortMappings)
             .AsNoTracking()
-            .Select(ExciseNomenclatureQueries.ProjectToResponse<TEntity>());
+            .ProjectToType<ExciseNomenclatureResponse>();
 
         PaginationResponse<ExpandoObject> response = new()
         {

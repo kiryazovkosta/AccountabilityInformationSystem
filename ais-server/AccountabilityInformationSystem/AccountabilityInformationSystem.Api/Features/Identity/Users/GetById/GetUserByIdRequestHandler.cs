@@ -1,6 +1,7 @@
 using AccountabilityInformationSystem.Api.Domain.Entities.Abstraction;
 using AccountabilityInformationSystem.Api.Features.Identity.Users.Shared;
 using AccountabilityInformationSystem.Api.Infrastructure.Data;
+using Mapster;
 using Microsoft.EntityFrameworkCore;
 
 namespace AccountabilityInformationSystem.Api.Features.Identity.Users.GetById;
@@ -11,7 +12,7 @@ public sealed class GetUserByIdRequestHandler(ApplicationDbContext dbContext)
     {
         UserResponse? userResponse = await dbContext.Users
             .AsNoTracking()
-            .Select(UserQueries.ProjectToResponse())
+            .ProjectToType<UserResponse>()
             .FirstOrDefaultAsync(u => u.Id == request.Id, cancellationToken);
 
         if (userResponse is null)

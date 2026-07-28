@@ -2,6 +2,7 @@
 using AccountabilityInformationSystem.Api.Domain.Entities.Abstraction;
 using AccountabilityInformationSystem.Api.Infrastructure.Data;
 using AccountabilityInformationSystem.Api.Shared.Services.DataShaping;
+using Mapster;
 using Microsoft.EntityFrameworkCore;
 
 namespace AccountabilityInformationSystem.Api.Features.ExciseNoms.Shared.GetById;
@@ -24,7 +25,7 @@ public class GetExciseNomenclatureByIdRequestHandler<TEntity>(
         ExciseNomenclatureResponse? exciseNomenclatureResponse = await dbContext
             .Set<TEntity>()
             .AsNoTracking()
-            .Select(ExciseNomenclatureQueries.ProjectToResponse<TEntity>())
+            .ProjectToType<ExciseNomenclatureResponse>()
             .FirstOrDefaultAsync(mp => mp.Id == request.Id, cancellationToken);
         if (exciseNomenclatureResponse is null)
         {

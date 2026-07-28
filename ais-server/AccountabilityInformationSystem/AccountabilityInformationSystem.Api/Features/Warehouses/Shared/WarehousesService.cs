@@ -4,6 +4,7 @@ using AccountabilityInformationSystem.Api.Features.Warehouses.Create;
 using AccountabilityInformationSystem.Api.Features.Warehouses.Update;
 using AccountabilityInformationSystem.Api.Infrastructure.Data;
 using AccountabilityInformationSystem.Api.Shared.Services.UserContexting;
+using Mapster;
 using Microsoft.EntityFrameworkCore;
 
 namespace AccountabilityInformationSystem.Api.Features.Warehouses.Shared;
@@ -33,11 +34,13 @@ public sealed class WarehousesService(
         }
             
 
-        Warehouse warehouse = request.ToEntity(user.Email);
+        Warehouse warehouse = request.Adapt<Warehouse>();
+        warehouse.CreatedBy = user.Email;
+        warehouse.CreatedAt = DateTime.UtcNow;
         await db.Warehouses.AddAsync(warehouse, cancellationToken);
         await db.SaveChangesAsync(cancellationToken);
 
-        return warehouse.ToResponse();
+        return warehouse.Adapt<WarehouseResponse>();
     }
 
     public async Task UpdateAsync(
@@ -66,7 +69,9 @@ public sealed class WarehousesService(
             throw new KeyNotFoundException("Warehouse with specific id does not exist!");
         }
             
-        warehouse.UpdateFromRequest(request, user.Email);
+        request.Adapt(warehouse);
+        warehouse.ModifiedBy = user.Email;
+        warehouse.ModifiedAt = DateTime.UtcNow;
         await db.SaveChangesAsync(cancellationToken);
     }
 

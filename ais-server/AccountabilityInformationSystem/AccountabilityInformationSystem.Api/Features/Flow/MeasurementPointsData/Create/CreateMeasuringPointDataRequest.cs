@@ -1,8 +1,9 @@
 using AccountabilityInformationSystem.Api.Domain.Entities.Flow;
+using AccountabilityInformationSystem.Api.Shared.Services.Mapping;
 
 namespace AccountabilityInformationSystem.Api.Features.Flow.MeasurementPointsData.Create;
 
-public sealed record CreateMeasuringPointDataRequest
+public sealed record CreateMeasuringPointDataRequest : IMapTo<MeasurementPointData>, IMapCustom
 {
     public required string MeasurementPointId { get; init; }
     public required int Number { get; init; }
@@ -25,4 +26,8 @@ public sealed record CreateMeasuringPointDataRequest
     public decimal? AlcoholContent { get; init; }
     public string? BatchNumber { get; init; }
     public string? ExternalId { get; init; }
+
+    public void CreateMappings(Mapster.TypeAdapterConfig config) =>
+        config.NewConfig<CreateMeasuringPointDataRequest, MeasurementPointData>()
+            .Map(dest => dest.Id, _ => $"md_{Guid.CreateVersion7()}");
 }

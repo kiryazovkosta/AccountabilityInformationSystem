@@ -2,7 +2,9 @@ using AccountabilityInformationSystem.Api.Domain.Entities.Abstraction;
 using AccountabilityInformationSystem.Api.Domain.Entities.Excise;
 using AccountabilityInformationSystem.Api.Features.ExciseNoms.Shared.Create;
 using AccountabilityInformationSystem.Api.Features.ExciseNoms.Shared.Update;
+using AccountabilityInformationSystem.Api.Shared.Services.Mapping;
 using AccountabilityInformationSystem.Api.Shared.Services.Sorting;
+using Mapster;
 
 namespace AccountabilityInformationSystem.Api.Features.ExciseNoms.Shared;
 
@@ -44,40 +46,42 @@ public static class ExciseNomenclatureMappings
         ]
     };
 
-
     public static TEntity ToEntity<TEntity>(this CreateExciseNomenclatureRequest request, string userName, string prefix)
         where TEntity : AuditableEntity, IEntity, IExciseEntity, new()
-        => new()
-        {
-            Id = $"{prefix}_{Guid.CreateVersion7()}",
-            Code = request.Code,
-            DescriptionBg = request.DescriptionBg,
-            DescriptionEn = request.DescriptionEn,
-            IsUsed = request.IsUsed,
-            CreatedBy = userName,
-            CreatedAt = DateTime.UtcNow
-        };
+    {
+        TEntity entity = request.Adapt<TEntity>();
+        entity.Id = $"{prefix}_{Guid.CreateVersion7()}";
+        entity.CreatedBy = userName;
+        entity.CreatedAt = DateTime.UtcNow;
+        return entity;
+    }
 
     public static ExciseNomenclatureResponse ToResponse<TEntity>(this TEntity exciseEntity)
         where TEntity : AuditableEntity, IEntity, IExciseEntity
-        => new()
-        {
-            Id = exciseEntity.Id,
-            Code = exciseEntity.Code,
-            DescriptionBg = exciseEntity.DescriptionBg,
-            DescriptionEn = exciseEntity.DescriptionEn,
-            IsUsed = exciseEntity.IsUsed
-        };
+        => exciseEntity.Adapt<ExciseNomenclatureResponse>();
 
     public static void UpdateFromRequest<TEntity, TUpdateRequest>(this TEntity entity, TUpdateRequest request, string userName)
         where TEntity : AuditableEntity, IEntity, IExciseEntity
         where TUpdateRequest : UpdateExciseNomenclatureRequest
     {
-        entity.Code = request.Code ?? entity.Code;
-        entity.DescriptionBg = request.DescriptionBg ?? entity.DescriptionBg;
-        entity.DescriptionEn = request.DescriptionEn ?? entity.DescriptionEn;
-        entity.IsUsed = request.IsUsed ?? entity.IsUsed;
+        request.Adapt(entity);
         entity.ModifiedBy = userName;
         entity.ModifiedAt = DateTime.UtcNow;
+    }
+}
+
+internal sealed class ExciseNomenclatureUpdateMappings : IMapCustom
+{
+    public void CreateMappings(TypeAdapterConfig config)
+    {
+        config.NewConfig<UpdateExciseNomenclatureRequest, ApCode>()
+            .IgnoreNullValues(true)
+            .Ignore(dest => dest.Id);
+        config.NewConfig<UpdateExciseNomenclatureRequest, BrandName>()
+            .IgnoreNullValues(true)
+            .Ignore(dest => dest.Id);
+        config.NewConfig<UpdateExciseNomenclatureRequest, CnCode>()
+            .IgnoreNullValues(true)
+            .Ignore(dest => dest.Id);
     }
 }

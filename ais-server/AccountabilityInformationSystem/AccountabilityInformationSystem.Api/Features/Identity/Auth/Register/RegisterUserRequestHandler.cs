@@ -5,6 +5,7 @@ using AccountabilityInformationSystem.Api.Features.Identity.Users.Shared;
 using AccountabilityInformationSystem.Api.Infrastructure.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 
@@ -47,7 +48,7 @@ public sealed class RegisterUserRequestHandler(
                 return Result.Failure(errors, ResultFailureType.BadRequest);
             }
 
-            User user = request.ToEntity();
+            User user = request.Adapt<User>();
             user.IdentityId = identityUser.Id;
 
             await applicationDbContext.Users.AddAsync(user, cancellationToken);

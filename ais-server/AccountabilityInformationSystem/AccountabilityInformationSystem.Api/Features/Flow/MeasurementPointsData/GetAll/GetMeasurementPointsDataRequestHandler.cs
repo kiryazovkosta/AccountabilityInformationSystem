@@ -7,6 +7,7 @@ using AccountabilityInformationSystem.Api.Shared.Extensions;
 using AccountabilityInformationSystem.Api.Shared.Models;
 using AccountabilityInformationSystem.Api.Shared.Services.DataShaping;
 using AccountabilityInformationSystem.Api.Shared.Services.Sorting;
+using Mapster;
 using Microsoft.EntityFrameworkCore;
 
 namespace AccountabilityInformationSystem.Api.Features.Flow.MeasurementPointsData.GetAll;
@@ -51,7 +52,7 @@ public sealed class GetMeasurementPointsDataRequestHandler(
             .Where(mpd => request.Products == null || !request.Products.Any() || request.Products.Contains(mpd.ProductId))
             .ApplySort(request.Sort, sortMappings)
             .AsNoTracking()
-            .Select(MeasurementPointDataQueries.ProjectToResponse());
+            .ProjectToType<MeasurementPointDataListResponse>();
 
         PaginationResponse<ExpandoObject> response = new()
         {

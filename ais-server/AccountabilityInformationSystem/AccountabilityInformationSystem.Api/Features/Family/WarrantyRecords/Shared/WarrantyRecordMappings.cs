@@ -1,8 +1,5 @@
 using AccountabilityInformationSystem.Api.Domain.Entities.Common;
 using AccountabilityInformationSystem.Api.Domain.Entities.Family.Warranty;
-using AccountabilityInformationSystem.Api.Domain.Entities.Flow;
-using AccountabilityInformationSystem.Api.Features.Family.WarrantyRecords.Create;
-using AccountabilityInformationSystem.Api.Features.Flow.Ikunks.Shared;
 using AccountabilityInformationSystem.Api.Shared.Services.FileStoraging;
 using AccountabilityInformationSystem.Api.Shared.Services.Mapping;
 using AccountabilityInformationSystem.Api.Shared.Services.Sorting;
@@ -26,54 +23,6 @@ internal static class WarrantyRecordMappings
             new SortMapping(nameof(WarrantyRecordListResponse.Status), nameof(WarrantyRecord.Status))
         ]
     };
-
-    public static WarrantyRecord ToEntity(this CreateWarrantyRecordRequest request, string userName)
-        => new()
-        {
-            Id = $"wr_{Guid.CreateVersion7()}",
-            WarrantyBrandId = request.WarrantyBrandId,
-            Model = request.Model,
-            PurchaseDate = request.PurchaseDate,
-            Duration = request.Duration,
-            CreatedBy = userName,
-            CreatedAt = DateTime.UtcNow,
-        };
-
-    public static WarrantyRecordResponse ToResponse(this WarrantyRecord record)
-        => new()
-        {
-            Id = record.Id,
-            WarrantyBrand = new WarrantyBrandResponse() { Id = record.WarrantyBrand.Id, Name = record.WarrantyBrand.Name },
-            Model = record.Model,
-            PurchaseDate = record.PurchaseDate,
-            Duration = record.Duration,
-            EndDate = record.EndDate,
-            Status = record.Status,
-            Receipt = record.Receipt is not null ?
-                new StorageFileResponse()
-                {
-                    Id = record.Receipt.Id,
-                    OriginalFileName = record.Receipt.OriginalFileName,
-                    ContentType  = record.Receipt.ContentType,
-                    SizeBytes = record.Receipt.SizeBytes,
-                } : null,
-            FrontImage = record.FrontImage is not null ?
-                new StorageFileResponse()
-                {
-                    Id = record.FrontImage.Id,
-                    OriginalFileName = record.FrontImage.OriginalFileName,
-                    ContentType = record.FrontImage.ContentType,
-                    SizeBytes = record.FrontImage.SizeBytes,
-                } : null,
-            BackImage = record.BackImage is not null ?
-                new StorageFileResponse()
-                {
-                    Id = record.BackImage.Id,
-                    OriginalFileName = record.BackImage.OriginalFileName,
-                    ContentType = record.BackImage.ContentType,
-                    SizeBytes = record.BackImage.SizeBytes,
-                } : null,
-        };
 
     public static WarrantyRecordResponse FillFileUrls(
         this WarrantyRecordResponse response,
@@ -108,4 +57,4 @@ public sealed record StorageFileResponse : IMapFrom<StorageFile>
     public string ContentType { get; init; }
     public long SizeBytes { get; init; }
     public string? Url { get; set; }
-} 
+}

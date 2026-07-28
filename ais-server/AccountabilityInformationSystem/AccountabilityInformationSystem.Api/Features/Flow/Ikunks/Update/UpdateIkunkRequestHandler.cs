@@ -5,6 +5,7 @@ using AccountabilityInformationSystem.Api.Domain.Entities.Identity;
 using AccountabilityInformationSystem.Api.Features.Flow.Ikunks.Shared;
 using AccountabilityInformationSystem.Api.Infrastructure.Data;
 using AccountabilityInformationSystem.Api.Shared.Services.UserContexting;
+using Mapster;
 using Microsoft.EntityFrameworkCore;
 
 namespace AccountabilityInformationSystem.Api.Features.Flow.Ikunks.Update;
@@ -51,7 +52,9 @@ public sealed class UpdateIkunkRequestHandler(
                 new Error("id", "Warehouse with specific id does not exists!"));
         }
 
-        ikunk.UpdateFromRequest(request, user.Email);
+        request.Adapt(ikunk);
+        ikunk.ModifiedBy = user.Email;
+        ikunk.ModifiedAt = DateTime.UtcNow;
         await dbContext.SaveChangesAsync(cancellationToken);
         return Result.Success(ResultSuccessType.NoContent);
     }

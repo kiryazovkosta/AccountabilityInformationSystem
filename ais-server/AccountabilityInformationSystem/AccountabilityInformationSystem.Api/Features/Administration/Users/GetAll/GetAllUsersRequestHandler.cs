@@ -1,9 +1,10 @@
-﻿using AccountabilityInformationSystem.Api.Domain.Entities.Abstraction;
+using AccountabilityInformationSystem.Api.Domain.Entities.Abstraction;
 using AccountabilityInformationSystem.Api.Domain.Entities.Identity;
 using AccountabilityInformationSystem.Api.Infrastructure.Data;
+using Mapster;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-    
+
 namespace AccountabilityInformationSystem.Api.Features.Administration.Users.GetAll;
 
 public sealed class GetAllUsersRequestHandler(
@@ -25,17 +26,8 @@ public sealed class GetAllUsersRequestHandler(
             IList<string> roles = identityUser is not null
                 ? await userManager.GetRolesAsync(identityUser)
                 : [];
-            responseUsers.Add(new UsersListResponse
+            responseUsers.Add(x.Adapt<UsersListResponse>() with
             {
-                Id = x.Id,
-                Username = x.Username,
-                Email = x.Email,
-                FirstName = x.FirstName,
-                MiddleName = x.MiddleName,
-                LastName = x.LastName,
-                Image = x.Image,
-                Enable2Fa = x.Enable2Fa,
-                IdentityId = x.IdentityId,
                 IsConfirmed = identityUser?.EmailConfirmed ?? false,
                 IsLocked = identityUser is not null && identityUser.LockoutEnabled && identityUser.LockoutEnd >= DateTimeOffset.UtcNow,
                 Roles = roles
@@ -44,20 +36,4 @@ public sealed class GetAllUsersRequestHandler(
 
         return Result<List<UsersListResponse>>.Success(responseUsers);
     }
-}
-
-public class UsersListResponse
-{
-    public string Id { get; init; }
-    public string Username { get; init; }
-    public string Email { get; init; }
-    public string FirstName { get; init; }
-    public string? MiddleName { get; init; }
-    public string LastName { get; init; }
-    public string? Image { get; init; }
-    public bool? Enable2Fa { get; init; }
-    public string? IdentityId { get; init; }
-    public bool IsConfirmed {  get; init; }
-    public bool IsLocked { get; init; }
-    public IList<string> Roles { get; init; }
 }

@@ -7,6 +7,7 @@ using AccountabilityInformationSystem.Api.Shared.Extensions;
 using AccountabilityInformationSystem.Api.Shared.Models;
 using AccountabilityInformationSystem.Api.Shared.Services.DataShaping;
 using AccountabilityInformationSystem.Api.Shared.Services.Sorting;
+using Mapster;
 using Microsoft.EntityFrameworkCore;
 
 namespace AccountabilityInformationSystem.Api.Features.Warehouses.GetAll;
@@ -47,7 +48,7 @@ public sealed class GetWarehousesRequestHandler(
             )
             .ApplySort(request.Sort, sortMappings)
             .AsNoTracking()
-            .Select(WarehouseQueries.ProjectToResponse());
+            .ProjectToType<WarehouseResponse>();
 
         PaginationResponse<ExpandoObject> response = new()
         {

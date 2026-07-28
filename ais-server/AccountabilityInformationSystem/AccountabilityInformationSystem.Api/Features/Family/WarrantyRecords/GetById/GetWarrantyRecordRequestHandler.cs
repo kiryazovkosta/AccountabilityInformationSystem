@@ -5,6 +5,7 @@ using AccountabilityInformationSystem.Api.Features.Family.WarrantyRecords.Shared
 using AccountabilityInformationSystem.Api.Infrastructure.Data;
 using AccountabilityInformationSystem.Api.Shared.Services.DataShaping;
 using AccountabilityInformationSystem.Api.Shared.Services.FileStoraging;
+using Mapster;
 using Microsoft.EntityFrameworkCore;
 
 namespace AccountabilityInformationSystem.Api.Features.Family.WarrantyRecords.GetById;
@@ -39,7 +40,7 @@ public sealed class GetWarrantyRecordRequestHandler(
                 ResultFailureType.NotFound);
         }
 
-        WarrantyRecordResponse response = record.ToResponse().FillFileUrls(record, fileStorage);
+        WarrantyRecordResponse response = record.Adapt<WarrantyRecordResponse>().FillFileUrls(record, fileStorage);
 
         return Result<ExpandoObject>.Success(dataShapingService.ShapeData(response, request.Fields));
     }

@@ -5,6 +5,7 @@ using AccountabilityInformationSystem.Api.Features.Warehouses.Create;
 using AccountabilityInformationSystem.Api.Features.Warehouses.Shared;
 using AccountabilityInformationSystem.Api.Infrastructure.Data;
 using AccountabilityInformationSystem.Api.Shared.Services.UserContexting;
+using Mapster;
 using Microsoft.EntityFrameworkCore;
 
 namespace AccountabilityInformationSystem.Api.Features.Warehouses.Create;
@@ -30,10 +31,12 @@ public sealed class CreateWarehouseRequestHandler(
                 ResultFailureType.Conflict);
         }
 
-        Warehouse warehouse = request.ToEntity(user.Email);
+        Warehouse warehouse = request.Adapt<Warehouse>();
+        warehouse.CreatedBy = user.Email;
+        warehouse.CreatedAt = DateTime.UtcNow;
         await dbContext.Warehouses.AddAsync(warehouse, cancellationToken);
         await dbContext.SaveChangesAsync(cancellationToken);
-        WarehouseResponse warehouseResponse = warehouse.ToResponse();
+        WarehouseResponse warehouseResponse = warehouse.Adapt<WarehouseResponse>();
         return Result< WarehouseResponse>.Success(warehouseResponse, ResultSuccessType.Created);
     }
 }

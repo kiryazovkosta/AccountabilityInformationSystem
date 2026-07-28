@@ -5,6 +5,7 @@ using AccountabilityInformationSystem.Api.Features.Family.WarrantyRecords.Shared
 using AccountabilityInformationSystem.Api.Infrastructure.Data;
 using AccountabilityInformationSystem.Api.Shared.Services.FileStoraging;
 using AccountabilityInformationSystem.Api.Shared.Services.UserContexting;
+using Mapster;
 using Microsoft.EntityFrameworkCore;
 
 namespace AccountabilityInformationSystem.Api.Features.Family.WarrantyRecords.Create;
@@ -33,7 +34,9 @@ public sealed class CreateWarrantyRecordRequestHandler(
                 ResultFailureType.NotFound);
         }
 
-        WarrantyRecord record = request.ToEntity(user.Username);
+        WarrantyRecord record = request.Adapt<WarrantyRecord>();
+        record.CreatedBy = user.Username;
+        record.CreatedAt = DateTime.UtcNow;
         record.WarrantyBrand = warrantyBrand;
         record.Receipt = await fileStorage.UploadAsStorageFileAsync(request.Receipt, user.Username, true, cancellationToken);
         record.FrontImage = await fileStorage.UploadAsStorageFileAsync(request.FrontImage, user.Username, true, cancellationToken);
@@ -42,6 +45,6 @@ public sealed class CreateWarrantyRecordRequestHandler(
         await dbContext.WarrantyRecords.AddAsync(record, cancellationToken);
         await dbContext.SaveChangesAsync(cancellationToken);
 
-        return Result<WarrantyRecordResponse>.Success(record.ToResponse(), ResultSuccessType.Created);
+        return Result<WarrantyRecordResponse>.Success(record.Adapt<WarrantyRecordResponse>(), ResultSuccessType.Created);
     }
 }

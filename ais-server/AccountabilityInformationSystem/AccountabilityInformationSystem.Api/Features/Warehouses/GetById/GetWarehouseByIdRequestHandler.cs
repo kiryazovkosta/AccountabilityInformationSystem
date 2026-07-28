@@ -3,6 +3,7 @@ using AccountabilityInformationSystem.Api.Domain.Entities.Abstraction;
 using AccountabilityInformationSystem.Api.Features.Warehouses.Shared;
 using AccountabilityInformationSystem.Api.Infrastructure.Data;
 using AccountabilityInformationSystem.Api.Shared.Services.DataShaping;
+using Mapster;
 using Microsoft.EntityFrameworkCore;
 
 namespace AccountabilityInformationSystem.Api.Features.Warehouses.GetById;
@@ -24,7 +25,7 @@ public sealed class GetWarehouseByIdRequestHandler(
         WarehouseResponse? warehouseResponse = await dbContext
             .Warehouses
             .AsNoTracking()
-            .Select(WarehouseQueries.ProjectToResponse())
+            .ProjectToType<WarehouseResponse>()
             .FirstOrDefaultAsync(warehouse => warehouse.Id == request.Id, cancellationToken);
         if (warehouseResponse is null)
         {

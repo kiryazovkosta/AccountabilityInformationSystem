@@ -16,6 +16,7 @@ using AccountabilityInformationSystem.Api.Shared.Extensions;
 using AccountabilityInformationSystem.Api.Shared.Models;
 using Asp.Versioning;
 using FluentValidation;
+using Mapster;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -119,11 +120,7 @@ public sealed class MeasuringPointsController(
     {
         List<EnumTypeResponse> transports = [.. Enum
             .GetValues<TransportType>()
-            .Select(t => new EnumTypeResponse
-            {
-                Value = t,
-                Description = t.GetDescription()
-            })];
+            .Select(t => t.Adapt<EnumTypeResponse>())];
         return Ok(transports);
     }
 
@@ -132,11 +129,7 @@ public sealed class MeasuringPointsController(
     {
         List<EnumTypeResponse> transports = [.. Enum
             .GetValues<FlowDirectionType>()
-            .Select(t => new EnumTypeResponse
-            {
-                Value = t,
-                Description = t.GetDescription()
-            })];
+            .Select(t => t.Adapt<EnumTypeResponse>())];
         return Ok(transports);
     }
 }
