@@ -4,9 +4,6 @@ import { authGuard } from './core/guards/auth.guard';
 export const routes: Routes = [
     { path: '', loadComponent: () => import('./features/home/home').then(m => m.Home) },
     { path: 'home', loadComponent: () => import('./features/home/home').then(m => m.Home) },
-    { path: 'ikunks', loadComponent: () => import('./features/measurement-flow/ikunks/ikunks-list/ikunks-list').then(m => m.IkunksList), canActivate: [authGuard] },
-    { path: 'pricing', loadComponent: () => import('./features/pricing/pricing').then(m => m.Pricing) },
-    { path: 'contact', loadComponent: () => import('./features/contact/contact').then(m => m.Contact) },
     {
         path: 'auth',
         children: [

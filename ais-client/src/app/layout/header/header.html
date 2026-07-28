@@ -3,9 +3,6 @@
     <nav class="nav-menu" [class.active]="isMenuOpen()">
         <ul class="main-nav">
             <li><a routerLink="/home" routerLinkActive="active" (click)="closeMenu()">Home</a></li>
-            <li><a routerLink="/ikunks" routerLinkActive="active" (click)="closeMenu()">Ikunks</a></li>
-            <li><a routerLink="/pricing" routerLinkActive="active" (click)="closeMenu()">Pricing</a></li>
-            <li><a routerLink="/contact" routerLinkActive="active" (click)="closeMenu()">Contact</a></li>
             @if (isLoggedIn()) {
                 <li class="has-submenu" [class.show-submenu]="isFamilySubmenuOpen()">
                     <a (click)="toggleFamilySubmenu($event)">Family</a>
