@@ -34,8 +34,6 @@ public class ToggleExciseNomenclatureStatusRequestHandler<TEntity>(
         }
 
         entity.IsUsed = !entity.IsUsed;
-        entity.ModifiedBy = user.Email;
-        entity.ModifiedAt = DateTime.UtcNow;
         await dbContext.SaveChangesAsync(cancellationToken);
 
         return Result.Success(ResultSuccessType.NoContent);

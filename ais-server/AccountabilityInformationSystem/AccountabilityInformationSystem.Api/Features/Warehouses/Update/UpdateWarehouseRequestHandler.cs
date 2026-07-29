@@ -38,8 +38,6 @@ public sealed class UpdateWarehouseRequestHandler(
         }
 
         command.Request.Adapt(warehouse);
-        warehouse.ModifiedBy = user.Email;
-        warehouse.ModifiedAt = DateTime.UtcNow;
         await dbContext.SaveChangesAsync(cancellationToken);
         return Result.Success(ResultSuccessType.NoContent);
     }
