@@ -35,8 +35,6 @@ public sealed class CreateWarrantyRecordRequestHandler(
         }
 
         WarrantyRecord record = request.Adapt<WarrantyRecord>();
-        record.CreatedBy = user.Username;
-        record.CreatedAt = DateTime.UtcNow;
         record.WarrantyBrand = warrantyBrand;
         record.Receipt = await fileStorage.UploadAsStorageFileAsync(request.Receipt, user.Username, true, cancellationToken);
         record.FrontImage = await fileStorage.UploadAsStorageFileAsync(request.FrontImage, user.Username, true, cancellationToken);

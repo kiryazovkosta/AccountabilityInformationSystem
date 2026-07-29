@@ -35,8 +35,6 @@ public sealed class CreateIkunkRequestHandler(
         }
 
         Ikunk ikunk = request.Adapt<Ikunk>();
-        ikunk.CreatedBy = user.Email;
-        ikunk.CreatedAt = DateTime.UtcNow;
         await dbContext.Ikunks.AddAsync(ikunk, cancellationToken);
         await dbContext.SaveChangesAsync(cancellationToken);
         IkunkResponse ikunkResponse = ikunk.Adapt<IkunkResponse>();

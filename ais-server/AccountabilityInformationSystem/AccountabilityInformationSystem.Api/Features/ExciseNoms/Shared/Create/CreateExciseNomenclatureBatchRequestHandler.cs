@@ -43,7 +43,7 @@ public class CreateExciseNomenclatureBatchRequestHandler<TEntity, TCreateRequest
                 ResultFailureType.Conflict);
         }
 
-        List<TEntity> entities = [.. command.Entries.Select(e => e.ToEntity<TEntity>(user.Email, command.EntityIdPrefix))];
+        List<TEntity> entities = [.. command.Entries.Select(e => e.ToEntity<TEntity>(command.EntityIdPrefix))];
         await dbContext.Set<TEntity>().AddRangeAsync(entities, cancellationToken);
         await dbContext.SaveChangesAsync(cancellationToken);
 

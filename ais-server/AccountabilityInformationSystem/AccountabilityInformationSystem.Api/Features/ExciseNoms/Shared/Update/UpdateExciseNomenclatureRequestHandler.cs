@@ -43,7 +43,7 @@ public class UpdateExciseNomenclatureRequestHandler<TEntity>(
                 ResultFailureType.Conflict);
         }
 
-        entity.UpdateFromRequest(command.Request, user.Email);
+        entity.UpdateFromRequest(command.Request);
         await dbContext.SaveChangesAsync(cancellationToken);
         return Result.Success(ResultSuccessType.NoContent);
     }

@@ -53,8 +53,6 @@ public sealed class UpdateIkunkRequestHandler(
         }
 
         request.Adapt(ikunk);
-        ikunk.ModifiedBy = user.Email;
-        ikunk.ModifiedAt = DateTime.UtcNow;
         await dbContext.SaveChangesAsync(cancellationToken);
         return Result.Success(ResultSuccessType.NoContent);
     }

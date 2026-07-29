@@ -12,8 +12,7 @@ namespace AccountabilityInformationSystem.Api.Features.ProductTypes.Create;
 
 public sealed class CreateProductTypeRequestHandler(
     ApplicationDbContext dbContext,
-    UserContext userContext,
-    TimeProvider timeProvider)
+    UserContext userContext)
 {
     public async Task<Result<string>> Handle(CreateProductTypeRequest request, CancellationToken cancellationToken)
     {
@@ -31,9 +30,6 @@ public sealed class CreateProductTypeRequestHandler(
         }
 
         ProductType productType = request.Adapt<ProductType>();
-        productType.CreatedBy = user.Email;
-        productType.CreatedAt = timeProvider.GetUtcNow().UtcDateTime;
-
         await dbContext.ProductTypes.AddAsync(productType, cancellationToken);
         await dbContext.SaveChangesAsync(cancellationToken);
         ProductTypeResponse productTypeResponse = productType.Adapt<ProductTypeResponse>();

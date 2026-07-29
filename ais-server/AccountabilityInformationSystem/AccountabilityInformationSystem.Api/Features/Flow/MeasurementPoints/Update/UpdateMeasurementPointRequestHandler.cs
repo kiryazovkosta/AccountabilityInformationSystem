@@ -48,8 +48,6 @@ public sealed class UpdateMeasurementPointRequestHandler(
         }
 
         request.Adapt(measuringPoint);
-        measuringPoint.ModifiedBy = user.Email;
-        measuringPoint.ModifiedAt = DateTime.UtcNow;
         await dbContext.SaveChangesAsync(cancellationToken);
 
         return Result.Success(ResultSuccessType.NoContent);

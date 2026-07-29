@@ -13,7 +13,6 @@ namespace AccountabilityInformationSystem.Api.Features.Flow.MeasurementPointsDat
 
 public sealed class CreateMeasuringPointDataRequestHandler(
     ApplicationDbContext dbContext,
-    EncryptionService encryptionService,
     UserContext userContext,
     MeasuringPointDataLinkService measuringPointDataLinkService)
 {
@@ -52,8 +51,6 @@ public sealed class CreateMeasuringPointDataRequestHandler(
         }
 
         MeasurementPointData measuringPointData = request.Adapt<MeasurementPointData>();
-        measuringPointData.CreatedAt = DateTime.UtcNow;
-        measuringPointData.CreatedBy = encryptionService.Encrypt(user.Email);
         await dbContext.MeasurementPointsData.AddAsync(measuringPointData, cancellationToken);
         await dbContext.SaveChangesAsync(cancellationToken);
 

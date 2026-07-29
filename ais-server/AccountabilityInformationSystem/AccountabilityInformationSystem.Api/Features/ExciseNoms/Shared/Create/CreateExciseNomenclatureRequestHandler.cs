@@ -34,7 +34,7 @@ public class CreateExciseNomenclatureRequestHandler<TEntity, TCreateRequest>(
                 ResultFailureType.Conflict);
         }
 
-        TEntity entity = command.Request.ToEntity<TEntity>(user.Email, command.EntityIdPrefix);
+        TEntity entity = command.Request.ToEntity<TEntity>(command.EntityIdPrefix);
         await dbContext.Set<TEntity>().AddAsync(entity, cancellationToken);
         await dbContext.SaveChangesAsync(cancellationToken);
 

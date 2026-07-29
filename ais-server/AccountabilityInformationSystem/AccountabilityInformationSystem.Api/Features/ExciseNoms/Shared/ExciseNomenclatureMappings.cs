@@ -46,13 +46,13 @@ public static class ExciseNomenclatureMappings
         ]
     };
 
-    public static TEntity ToEntity<TEntity>(this CreateExciseNomenclatureRequest request, string userName, string prefix)
+    public static TEntity ToEntity<TEntity>(this CreateExciseNomenclatureRequest request, /*string userName,*/ string prefix)
         where TEntity : AuditableEntity, IEntity, IExciseEntity, new()
     {
         TEntity entity = request.Adapt<TEntity>();
         entity.Id = $"{prefix}_{Guid.CreateVersion7()}";
-        entity.CreatedBy = userName;
-        entity.CreatedAt = DateTime.UtcNow;
+        //entity.CreatedBy = userName;
+        //entity.CreatedAt = DateTime.UtcNow;
         return entity;
     }
 
@@ -60,13 +60,13 @@ public static class ExciseNomenclatureMappings
         where TEntity : AuditableEntity, IEntity, IExciseEntity
         => exciseEntity.Adapt<ExciseNomenclatureResponse>();
 
-    public static void UpdateFromRequest<TEntity, TUpdateRequest>(this TEntity entity, TUpdateRequest request, string userName)
+    public static void UpdateFromRequest<TEntity, TUpdateRequest>(this TEntity entity, TUpdateRequest request)
         where TEntity : AuditableEntity, IEntity, IExciseEntity
         where TUpdateRequest : UpdateExciseNomenclatureRequest
     {
         request.Adapt(entity);
-        entity.ModifiedBy = userName;
-        entity.ModifiedAt = DateTime.UtcNow;
+        //entity.ModifiedBy = userName;
+        //entity.ModifiedAt = DateTime.UtcNow;
     }
 }
 

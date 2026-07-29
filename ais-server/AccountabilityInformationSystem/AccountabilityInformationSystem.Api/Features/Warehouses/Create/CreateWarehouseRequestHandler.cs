@@ -32,8 +32,8 @@ public sealed class CreateWarehouseRequestHandler(
         }
 
         Warehouse warehouse = request.Adapt<Warehouse>();
-        warehouse.CreatedBy = user.Email;
-        warehouse.CreatedAt = DateTime.UtcNow;
+        //warehouse.CreatedBy = user.Email;
+        //warehouse.CreatedAt = DateTime.UtcNow;
         await dbContext.Warehouses.AddAsync(warehouse, cancellationToken);
         await dbContext.SaveChangesAsync(cancellationToken);
         WarehouseResponse warehouseResponse = warehouse.Adapt<WarehouseResponse>();

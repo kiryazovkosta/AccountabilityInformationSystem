@@ -5,4 +5,6 @@ public static class ApplicationConstants
     public const string ApplicationName = "AccountabilityInformationSystem";
 
     public const string AuthenticatorTokenKey = "AuthenticatorKey";
+
+    public const string DefaultUserName = "SystemUser";
 }

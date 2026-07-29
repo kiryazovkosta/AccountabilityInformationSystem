@@ -20,9 +20,11 @@ using AccountabilityInformationSystem.Api.Features.ProductTypes.Shared;
 using AccountabilityInformationSystem.Api.Features.Warehouses.Shared;
 using AccountabilityInformationSystem.Api.Infrastructure.Data;
 using AccountabilityInformationSystem.Api.Infrastructure.Data.Identity;
+using AccountabilityInformationSystem.Api.Interceptors;
 using AccountabilityInformationSystem.Api.Middleware;
 using AccountabilityInformationSystem.Api.Settings;
 using AccountabilityInformationSystem.Api.Shared.Constants;
+using AccountabilityInformationSystem.Api.Shared.Services.CurrentUserAccessing;
 using AccountabilityInformationSystem.Api.Shared.Services.DataShaping;
 using AccountabilityInformationSystem.Api.Shared.Services.Encrypting;
 using AccountabilityInformationSystem.Api.Shared.Services.FileStoraging;
@@ -46,8 +48,10 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json.Serialization;
 using OpenTelemetry;
@@ -162,6 +166,8 @@ public static class WebApplicationBuilderExtensions
 
     public static WebApplicationBuilder AddDatabase(this WebApplicationBuilder builder)
     {
+        builder.Services.AddSingleton<SaveAuditableEntityInterceptor>();
+
         builder.AddSqlServerDbContext<ApplicationDbContext>(
             DatabasesConstants.ApplicationDatabase,
             configureDbContextOptions: options =>
@@ -169,6 +175,9 @@ public static class WebApplicationBuilderExtensions
                 options.UseSqlServer(sqlOptions =>
                     sqlOptions.MigrationsHistoryTable(HistoryRepository.DefaultTableName, SchemasConstants.Application));
             });
+
+        builder.Services.ConfigureDbContext<ApplicationDbContext>((serviceProvider, options) =>
+            options.AddInterceptors(serviceProvider.GetRequiredService<SaveAuditableEntityInterceptor>()));
 
         builder.AddSqlServerDbContext<ApplicationIdentityDbContext>(
             DatabasesConstants.ApplicationDatabase,
@@ -255,6 +264,7 @@ public static class WebApplicationBuilderExtensions
 
         builder.Services.AddMemoryCache();
         builder.Services.AddScoped<UserContext>();
+        builder.Services.AddSingleton<CurrentUserAccessor>();
 
         builder.Services.Configure<EncryptionOptions>(builder.Configuration.GetSection("Encryption"));
         builder.Services.AddTransient<EncryptionService>();
@@ -319,7 +329,8 @@ public static class WebApplicationBuilderExtensions
 
                     ValidIssuer = jwtAuthOptions.Issuer,
                     ValidAudience = jwtAuthOptions.Audience,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtAuthOptions.Key))
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtAuthOptions.Key)),
+                    NameClaimType = JwtRegisteredClaimNames.Name
                 };
 
                 options.Events = new JwtBearerEvents

@@ -39,8 +39,6 @@ public sealed class CreateMeasuringPointRequestHandler(
         }
 
         MeasurementPoint measuringPoint = request.Adapt<MeasurementPoint>();
-        measuringPoint.CreatedBy = user.Email;
-        measuringPoint.CreatedAt = DateTime.UtcNow;
         await dbContext.MeasurementPoints.AddAsync(measuringPoint, cancellationToken);
         await dbContext.SaveChangesAsync(cancellationToken);
 
