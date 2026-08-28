@@ -14,7 +14,7 @@ internal sealed class CreateWarrantyBrandRequestValidator : AbstractValidator<Cr
 
         RuleFor(wb => wb.Logo)
             .MaximumLength(EntitiesConstants.WarrantyBrand.LogoMaxLength)
-            .When(wr => string.IsNullOrEmpty(wr.Logo))
+            .When(wr => !string.IsNullOrEmpty(wr.Logo))
             .WithMessage($"When Logo is provided it must not exceed {EntitiesConstants.WarrantyBrand.LogoMaxLength} characters.");
     }
 }

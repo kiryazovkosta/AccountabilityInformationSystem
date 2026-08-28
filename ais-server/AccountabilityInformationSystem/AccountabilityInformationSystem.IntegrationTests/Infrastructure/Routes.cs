@@ -31,4 +31,9 @@ public static class Routes
     {
         public const string Base = "/api/family/warranty-records";
     }
+
+    public static class WarrantyBrands
+    {
+        public const string Base = "/api/family/warranty-brands";
+    }
 }

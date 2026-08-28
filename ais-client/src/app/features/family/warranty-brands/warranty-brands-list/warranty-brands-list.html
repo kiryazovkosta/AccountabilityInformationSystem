@@ -1,0 +1,38 @@
+<div class="app-main-container">
+  <h1 class="app-header-1">Warranty Brands</h1>
+  <div>
+    <button class="app-primary-button" (click)="onCreate()">Create</button>
+  </div>
+
+  @if (warrantyBrandsService.warrantyBrands.isLoading()) {
+    <p class="text-ink/60 font-sans text-sm">Loading...</p>
+  } @else if (warrantyBrandsService.warrantyBrands.error()) {
+    <div class="error-summary">Failed to load warranty brands. Please try again.</div>
+  } @else {
+    <div class="app-data-table-container">
+      <table class="app-data-table">
+        <thead>
+          <tr>
+            <th>Commands</th>
+            <th>Name</th>
+            <th>Logo</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (brand of warrantyBrandsService.warrantyBrands.value()?.items; track brand.id) {
+            <tr>
+              <td>
+                <div class="app-action-buttons">
+                  <button type="button" class="app-action-button" (click)="onView(brand.id)">View</button>
+                  <button type="button" class="app-action-button-danger" (click)="onDelete(brand.id)">Delete</button>
+                </div>
+              </td>
+              <td>{{ brand.name }}</td>
+              <td>{{ brand.logo || '-' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

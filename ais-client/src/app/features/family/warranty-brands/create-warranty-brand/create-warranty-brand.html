@@ -1,0 +1,38 @@
+<div class="app-auth-page">
+  <div class="app-auth-card max-w-2xl">
+    <h1 class="app-header-1">Add Warranty Brand</h1>
+    <h3 class="app-header-3">Fill in the details to register a new brand</h3>
+
+    @if (httpErrorService.errorDetail()) {
+      <div class="error-summary">{{ httpErrorService.errorDetail() }}</div>
+    }
+
+    <form class="app-form" [formRoot]="warrantyBrandForm">
+
+      <label class="app-form-label">
+        Name:
+        <input type="text" class="app-form-input"
+          [formField]="warrantyBrandForm.name"
+          [aria-invalid]="ariaInvalidState(warrantyBrandForm.name)"
+          placeholder="Enter brand name" />
+        <app-form-error [fieldRef]="warrantyBrandForm.name" />
+      </label>
+
+      <label class="app-form-label">
+        Logo URL:
+        <input type="text" class="app-form-input"
+          [formField]="warrantyBrandForm.logo"
+          [aria-invalid]="ariaInvalidState(warrantyBrandForm.logo)"
+          placeholder="Enter logo URL (optional)" />
+        <app-form-error [fieldRef]="warrantyBrandForm.logo" />
+      </label>
+
+      <button type="submit" class="app-primary-button"
+        [disabled]="warrantyBrandForm().submitting()"
+        [aria-busy]="warrantyBrandForm().submitting()">
+        @if (warrantyBrandForm().submitting()) { Saving... } @else { Save Brand }
+      </button>
+
+    </form>
+  </div>
+</div>

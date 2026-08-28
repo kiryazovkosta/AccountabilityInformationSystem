@@ -31,7 +31,6 @@ const createWarrantyRecordSchema = schema<CreateWarrantyRecordRequest>((path) =>
   imports: [FormField, FormRoot, FormError],
   templateUrl: './create-warranty-record.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [WarrantyBrandsService],
 })
 export class CreateWarrantyRecord {
   readonly #service = inject(WarrantyRecordsService);

@@ -44,12 +44,6 @@ internal static class WarrantyRecordMappings
     }
 }
 
-public sealed record WarrantyBrandResponse : IMapFrom<WarrantyBrand>
-{
-    public string Id { get; init; }
-    public string Name { get; init; }
-}
-
 public sealed record StorageFileResponse : IMapFrom<StorageFile>
 {
     public string Id { get; init; }

@@ -28,6 +28,7 @@ public static class ResultExtensions
                 Type = errorData.Type,
                 Title = errorData.Title,
                 Status = errorData.Status,
+                Detail = string.Join(" ", result.Errors.Select(e => e.Message).Distinct()),
                 Extensions = extensions
             };
             return new ObjectResult(problem) { StatusCode = problem.Status };

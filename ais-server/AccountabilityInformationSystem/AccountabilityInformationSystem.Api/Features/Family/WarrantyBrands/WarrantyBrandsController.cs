@@ -1,6 +1,7 @@
 using System.Dynamic;
 using AccountabilityInformationSystem.Api.Domain.Entities.Abstraction;
 using AccountabilityInformationSystem.Api.Features.Family.WarrantyBrands.Create;
+using AccountabilityInformationSystem.Api.Features.Family.WarrantyBrands.Delete;
 using AccountabilityInformationSystem.Api.Features.Family.WarrantyBrands.GetAll;
 using AccountabilityInformationSystem.Api.Features.Family.WarrantyBrands.GetById;
 using AccountabilityInformationSystem.Api.Features.Family.WarrantyBrands.Shared;
@@ -55,5 +56,12 @@ public sealed class WarrantyBrandsController(IMessageBus bus) : ApiController
         }
 
         return CreatedAtAction(nameof(GetWarrantyBrandById), new { id = result.Value!.Id }, result.Value);
+    }
+
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeleteWarrantyBrand(string id, CancellationToken cancellationToken)
+    {
+        Result result = await bus.InvokeAsync<Result>(new DeleteWarrantyBrandRequest(id), cancellationToken);
+        return result.ToActionResult();
     }
  }

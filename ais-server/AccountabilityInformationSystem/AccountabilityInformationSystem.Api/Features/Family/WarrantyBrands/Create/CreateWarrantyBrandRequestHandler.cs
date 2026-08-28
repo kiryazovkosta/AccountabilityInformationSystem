@@ -1,11 +1,7 @@
 ﻿using AccountabilityInformationSystem.Api.Domain.Entities.Abstraction;
 using AccountabilityInformationSystem.Api.Domain.Entities.Family.Warranty;
-using AccountabilityInformationSystem.Api.Domain.Entities.Flow;
-using AccountabilityInformationSystem.Api.Features.Family.WarrantyRecords.Create;
-using AccountabilityInformationSystem.Api.Features.Family.WarrantyRecords.Shared;
-using AccountabilityInformationSystem.Api.Features.Warehouses.Shared;
+using AccountabilityInformationSystem.Api.Features.Family.WarrantyBrands.Shared;
 using AccountabilityInformationSystem.Api.Infrastructure.Data;
-using ImTools;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 
@@ -22,7 +18,7 @@ public sealed class CreateWarrantyBrandRequestHandler(
         if (alreadyExists)
         {
             return Result<WarrantyBrandResponse>.Failure(
-                new Error("ExciseNumber", "Warehouse with the same name or excise number already exists!"),
+                new Error("Name", "WarrantyBrand with the same name already exists!"),
                 ResultFailureType.Conflict);
         }
 

@@ -1,14 +1,11 @@
+import { WarrantyBrandResponse } from './warranty-brand.response';
+
 export interface StorageFileResponse {
   id: string;
   originalFileName: string;
   contentType: string;
   sizeBytes: number;
   url?: string;
-}
-
-export interface WarrantyBrandResponse {
-  id: string;
-  name: string;
 }
 
 export interface WarrantyRecordResponse {

@@ -32,6 +32,9 @@ export const routes: Routes = [
             { path: 'warranties', loadComponent: () => import('./features/family/warranty-records/warranties-list/warranties-list').then(m => m.WarrantiesList), canActivate: [authGuard] },
             { path: 'warranty-records/create', loadComponent: () => import('./features/family/warranty-records/create-warranty-record/create-warranty-record').then(m => m.CreateWarrantyRecord), canActivate: [authGuard] },
             { path: 'warranty-records/:id', loadComponent: () => import('./features/family/warranty-records/warranty/warranty').then(m => m.Warranty), canActivate: [authGuard] },
+            { path: 'warranty-brands', loadComponent: () => import('./features/family/warranty-brands/warranty-brands-list/warranty-brands-list').then(m => m.WarrantyBrandsList), canActivate: [authGuard] },
+            { path: 'warranty-brands/create', loadComponent: () => import('./features/family/warranty-brands/create-warranty-brand/create-warranty-brand').then(m => m.CreateWarrantyBrand), canActivate: [authGuard] },
+            { path: 'warranty-brands/:id', loadComponent: () => import('./features/family/warranty-brands/warranty-brand/warranty-brand').then(m => m.WarrantyBrand), canActivate: [authGuard] },
         ]
     },
     { path: '**', loadComponent: () => import('./layout/not-found/not-found').then(ng => ng.NotFound) }

@@ -1,0 +1,23 @@
+<div class="app-main-container">
+  <h1 class="app-header-1">Warranty Brand Details</h1>
+  <div>
+    <button type="button" class="app-primary-button" (click)="onBack()">Back to list</button>
+  </div>
+
+  @if (warrantyBrandsService.warrantyBrand.isLoading()) {
+    <p class="text-ink/60 font-sans text-sm">Loading...</p>
+  } @else if (warrantyBrandsService.warrantyBrand.error()) {
+    <div class="error-summary">Failed to load the warranty brand. Please try again.</div>
+  } @else if (warrantyBrandsService.warrantyBrand.value(); as brand) {
+    <dl class="warranty-details">
+      <div class="warranty-details-row">
+        <dt>Name</dt>
+        <dd class="app-display-field">{{ brand.name }}</dd>
+      </div>
+      <div class="warranty-details-row">
+        <dt>Logo</dt>
+        <dd class="app-display-field">{{ brand.logo || '-' }}</dd>
+      </div>
+    </dl>
+  }
+</div>
