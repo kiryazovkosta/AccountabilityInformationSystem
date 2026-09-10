@@ -16,6 +16,7 @@ public sealed class GetWarrantyBrandsRequestHandler(ApplicationDbContext dbConte
 
         List<WarrantyBrandResponse> items = await dbContext.WarrantyBrands
             .AsNoTracking()
+            //.Include(brand => brand.WarrantyRecords)
             .OrderBy(brand => brand.Name)
             .ProjectToType<WarrantyBrandResponse>()
             .ToListAsync(cancellationToken);
