@@ -105,12 +105,12 @@ public sealed class MeasuringPointsController(
     [HttpPut("{id}/deactivate")]
     public async Task<IActionResult> DeactivateMeasurementPoint(
         string id,
-        [FromBody] DeactivateMeasuringPointBody body,
-        IValidator<DeactivateMeasuringPointBody> validator,
+        [FromBody] DeactivateMeasuringPointRequest request,
+        IValidator<DeactivateMeasuringPointRequest> validator,
         CancellationToken cancellationToken)
     {
-        await validator.ValidateAndThrowAsync(body, cancellationToken);
-        DeactivateMeasuringPointRequest request = new(id, body.ActiveTo);
+        request = request with { Id = id };
+        await validator.ValidateAndThrowAsync(request, cancellationToken);
         Result result = await bus.InvokeAsync<Result>(request, cancellationToken);
         return result.ToActionResult();
     }

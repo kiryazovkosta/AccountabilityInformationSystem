@@ -2,9 +2,9 @@ using FluentValidation;
 
 namespace AccountabilityInformationSystem.Api.Features.Flow.MeasurementPoints.Deactivate;
 
-internal sealed class DeactivateMeasuringPointBodyValidator : AbstractValidator<DeactivateMeasuringPointBody>
+internal sealed class DeactivateMeasuringPointRequestValidator : AbstractValidator<DeactivateMeasuringPointRequest>
 {
-    public DeactivateMeasuringPointBodyValidator()
+    public DeactivateMeasuringPointRequestValidator()
     {
         RuleFor(x => x.ActiveTo)
             .GreaterThanOrEqualTo(DateOnly.FromDateTime(DateTime.Today))

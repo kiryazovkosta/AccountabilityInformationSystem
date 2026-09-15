@@ -46,13 +46,11 @@ public static class ExciseNomenclatureMappings
         ]
     };
 
-    public static TEntity ToEntity<TEntity>(this CreateExciseNomenclatureRequest request, /*string userName,*/ string prefix)
+    public static TEntity ToEntity<TEntity>(this CreateExciseNomenclatureRequest request, string prefix)
         where TEntity : AuditableEntity, IEntity, IExciseEntity, new()
     {
         TEntity entity = request.Adapt<TEntity>();
         entity.Id = $"{prefix}_{Guid.CreateVersion7()}";
-        //entity.CreatedBy = userName;
-        //entity.CreatedAt = DateTime.UtcNow;
         return entity;
     }
 

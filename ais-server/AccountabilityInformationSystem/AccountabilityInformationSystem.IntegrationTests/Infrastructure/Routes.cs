@@ -27,6 +27,18 @@ public static class Routes
         public const string Base = "/api/warehouses";
     }
 
+    public static class Ikunks
+    {
+        public const string Base = "/api/flow/ikunks";
+    }
+
+    public static class MeasuringPoints
+    {
+        public const string Base = "/api/flow/measuring-points";
+
+        public static string Deactivate(string id) => $"{Base}/{id}/deactivate";
+    }
+
     public static class WarrantyRecords
     {
         public const string Base = "/api/family/warranty-records";
