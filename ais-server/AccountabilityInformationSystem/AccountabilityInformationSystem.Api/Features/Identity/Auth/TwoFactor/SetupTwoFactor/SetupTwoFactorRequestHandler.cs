@@ -15,8 +15,10 @@ public sealed class SetupTwoFactorRequestHandler(
     private readonly ITimeLimitedDataProtector _setupProtector =
         dataProtectionProvider.CreateProtector("TwoFactorSetupToken").ToTimeLimitedDataProtector();
 
-    public async Task<Result<SetupTwoFactorResponse>> Handle(SetupTwoFactorRequest request)
+    public async Task<Result<SetupTwoFactorResponse>> Handle(SetupTwoFactorRequest request, CancellationToken cancellationToken)
     {
+        _ = cancellationToken;
+
         string userId = string.Empty;
         try
         {

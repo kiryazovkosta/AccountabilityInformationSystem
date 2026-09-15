@@ -13,8 +13,10 @@ public sealed class VerifyTwoFactorRequestHandler(
     private readonly ITimeLimitedDataProtector _setupProtector =
         dataProtectionProvider.CreateProtector("TwoFactorSetupToken").ToTimeLimitedDataProtector();
 
-    public async Task<Result<VerifyTwoFactorResponse>> Handle(VerifyTwoFactorRequest request)
+    public async Task<Result<VerifyTwoFactorResponse>> Handle(VerifyTwoFactorRequest request, CancellationToken cancellationToken)
     {
+        _ = cancellationToken;
+
         string userId = string.Empty;
         try
         {

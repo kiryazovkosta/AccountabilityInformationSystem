@@ -12,8 +12,10 @@ public sealed class NewDeviceRequestHandler(
     private readonly ITimeLimitedDataProtector _setupProtector =
         dataProtectionProvider.CreateProtector("TwoFactorSetupToken").ToTimeLimitedDataProtector();
 
-    public async Task<Result<LoginUserResponse>> Handle(NewDeviceRequest request)
+    public async Task<Result<LoginUserResponse>> Handle(NewDeviceRequest request, CancellationToken cancellationToken)
     {
+        _ = cancellationToken;
+
         IdentityUser? identityUser = await userManager.FindByNameAsync(request.Username);
         if (identityUser is null ||
             !await userManager.CheckPasswordAsync(identityUser, request.Password))
