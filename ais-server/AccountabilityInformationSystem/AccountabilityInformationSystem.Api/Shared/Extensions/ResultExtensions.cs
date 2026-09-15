@@ -36,6 +36,7 @@ public static class ResultExtensions
 
         return result.SuccessType switch
         {
+            ResultSuccessType.Ok => new OkResult(),
             ResultSuccessType.Created => new StatusCodeResult(201),
             ResultSuccessType.Accepted => new StatusCodeResult(202),
             ResultSuccessType.NoContent => new NoContentResult(),
