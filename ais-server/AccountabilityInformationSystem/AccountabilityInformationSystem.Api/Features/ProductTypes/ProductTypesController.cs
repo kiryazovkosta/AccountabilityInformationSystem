@@ -19,6 +19,7 @@ namespace AccountabilityInformationSystem.Api.Features.ProductTypes;
 
 [ApiController]
 [Route("api/product-types")]
+[ApiVersion("1.0")]
 [Authorize]
 public sealed class ProductTypesController(
     IMessageBus bus) : ControllerBase

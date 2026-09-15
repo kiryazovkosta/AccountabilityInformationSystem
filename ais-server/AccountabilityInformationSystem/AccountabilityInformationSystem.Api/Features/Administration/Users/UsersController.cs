@@ -1,10 +1,9 @@
 ﻿using AccountabilityInformationSystem.Api.Domain.Entities.Abstraction;
 using AccountabilityInformationSystem.Api.Domain.Entities.Identity;
 using AccountabilityInformationSystem.Api.Features.Administration.Users.GetAll;
-using AccountabilityInformationSystem.Api.Features.Identity.Users.GetById;
-using AccountabilityInformationSystem.Api.Features.Identity.Users.Shared;
 using AccountabilityInformationSystem.Api.Shared;
 using AccountabilityInformationSystem.Api.Shared.Extensions;
+using Asp.Versioning;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Wolverine;
@@ -12,6 +11,7 @@ using Wolverine;
 namespace AccountabilityInformationSystem.Api.Features.Administration.Users;
 
 [Route("api/admin/users")]
+[ApiVersion("1.0")]
 [Authorize(Roles = $"{Role.Admin}")]
 public sealed class UsersController(IMessageBus bus) : ApiController
 {

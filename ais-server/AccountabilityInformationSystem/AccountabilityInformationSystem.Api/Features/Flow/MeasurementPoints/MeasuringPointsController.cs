@@ -51,7 +51,7 @@ public sealed class MeasuringPointsController(
     }
 
     [HttpGet]
-    [ApiVersion(2.0)]
+    [ApiVersion("2.0")]
     public async Task<IActionResult> GetMeasuringPointsV2(
         [FromQuery] GetMeasuringPointsV2Request request,
         CancellationToken cancellationToken)

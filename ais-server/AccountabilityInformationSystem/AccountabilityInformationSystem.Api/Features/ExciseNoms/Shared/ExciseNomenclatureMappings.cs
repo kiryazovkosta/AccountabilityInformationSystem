@@ -65,8 +65,6 @@ public static class ExciseNomenclatureMappings
         where TUpdateRequest : UpdateExciseNomenclatureRequest
     {
         request.Adapt(entity);
-        //entity.ModifiedBy = userName;
-        //entity.ModifiedAt = DateTime.UtcNow;
     }
 }
 

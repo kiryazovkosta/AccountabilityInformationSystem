@@ -5,6 +5,7 @@ using AccountabilityInformationSystem.Api.Features.Identity.Users.GetCurrent;
 using AccountabilityInformationSystem.Api.Features.Identity.Users.Shared;
 using AccountabilityInformationSystem.Api.Shared;
 using AccountabilityInformationSystem.Api.Shared.Extensions;
+using Asp.Versioning;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Wolverine;
@@ -12,6 +13,7 @@ using Wolverine;
 namespace AccountabilityInformationSystem.Api.Features.Identity.Users;
 
 [Route("api/identity/users")]
+[ApiVersion("1.0")]
 [Authorize]
 public sealed class UsersController(IMessageBus bus) : ApiController
 {

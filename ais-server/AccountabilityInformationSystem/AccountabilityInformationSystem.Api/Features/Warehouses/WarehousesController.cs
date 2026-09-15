@@ -13,6 +13,7 @@ using AccountabilityInformationSystem.Api.Shared.Extensions;
 using AccountabilityInformationSystem.Api.Shared.Models;
 using AccountabilityInformationSystem.Api.Shared.Services.DataShaping;
 using AccountabilityInformationSystem.Api.Shared.Services.Sorting;
+using Asp.Versioning;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -23,6 +24,7 @@ namespace AccountabilityInformationSystem.Api.Features.Warehouses;
 
 [ApiController]
 [Route("api/warehouses")]
+[ApiVersion("1.0")]
 [Authorize]
 public sealed class WarehousesController(IMessageBus bus) : ApiController
 {

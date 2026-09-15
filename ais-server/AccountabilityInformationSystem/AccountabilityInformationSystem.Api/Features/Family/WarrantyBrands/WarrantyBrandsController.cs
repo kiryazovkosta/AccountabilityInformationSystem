@@ -5,9 +5,9 @@ using AccountabilityInformationSystem.Api.Features.Family.WarrantyBrands.Delete;
 using AccountabilityInformationSystem.Api.Features.Family.WarrantyBrands.GetAll;
 using AccountabilityInformationSystem.Api.Features.Family.WarrantyBrands.GetById;
 using AccountabilityInformationSystem.Api.Features.Family.WarrantyBrands.Shared;
-using AccountabilityInformationSystem.Api.Features.Family.WarrantyRecords.GetById;
 using AccountabilityInformationSystem.Api.Shared;
 using AccountabilityInformationSystem.Api.Shared.Extensions;
+using Asp.Versioning;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -17,6 +17,7 @@ namespace AccountabilityInformationSystem.Api.Features.Family.WarrantyBrands;
 
 [ApiController]
 [Route("api/family/warranty-brands")]
+[ApiVersion("1.0")]
 [Authorize]
 public sealed class WarrantyBrandsController(IMessageBus bus) : ApiController
 {

@@ -47,7 +47,7 @@ public sealed class IkunksController(IMessageBus bus) : ApiController
     }
 
     [HttpGet("{id}")]
-    [ApiVersion(2.0)]
+    [ApiVersion("2.0")]
     public async Task<IActionResult> GetIkunkV2(
         string id,
         string? fields,
