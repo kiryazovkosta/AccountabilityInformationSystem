@@ -14,17 +14,17 @@ public sealed class CreateProductTypeRequestHandler(
     ApplicationDbContext dbContext,
     UserContext userContext)
 {
-    public async Task<Result<string>> Handle(CreateProductTypeRequest request, CancellationToken cancellationToken)
+    public async Task<Result<ProductTypeResponse>> Handle(CreateProductTypeRequest request, CancellationToken cancellationToken)
     {
         User? user = await userContext.GetUserAsync(cancellationToken);
         if (user is null)
         {
-            return Result< string>.Failure(new Error("user", "Unauthorized"), ResultFailureType.Unauthorized);
+            return Result<ProductTypeResponse>.Failure(new Error("user", "Unauthorized"), ResultFailureType.Unauthorized);
         }
 
         if (await dbContext.ProductTypes.AnyAsync(mp => mp.Name == request.Name, cancellationToken))
         {
-            return Result<string>.Failure(
+            return Result<ProductTypeResponse>.Failure(
                 new Error("name", "Product type with specific name already exists!"),
                 ResultFailureType.Conflict);
         }
@@ -33,6 +33,6 @@ public sealed class CreateProductTypeRequestHandler(
         await dbContext.ProductTypes.AddAsync(productType, cancellationToken);
         await dbContext.SaveChangesAsync(cancellationToken);
         ProductTypeResponse productTypeResponse = productType.Adapt<ProductTypeResponse>();
-        return Result<string>.Success(productTypeResponse.Id);
+        return Result<ProductTypeResponse>.Success(productTypeResponse);
     } 
 }

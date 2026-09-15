@@ -60,6 +60,6 @@ public sealed class ProductTypesController(
             return result.ToActionResult();
         }
 
-        return CreatedAtAction(nameof(GetProductType), new { id = result.Value }, result.Value);
+        return CreatedAtAction(nameof(GetProductType), new { id = result.Value!.Id }, result.Value);
     }
 }
