@@ -26,7 +26,7 @@ namespace AccountabilityInformationSystem.Api.Features.Flow.MeasurementPoints;
 
 [ApiController]
 [Route("api/flow/measuring-points")]
-[ApiVersion(1.0)]
+[ApiVersion("1.0")]
 [Authorize(Roles = $"{Role.Admin},{Role.FlowUser}")]
 [Produces(
     MediaTypeNames.Application.Json,

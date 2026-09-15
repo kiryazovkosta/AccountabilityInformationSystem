@@ -19,7 +19,7 @@ namespace AccountabilityInformationSystem.Api.Features.Flow.Ikunks;
 
 [ApiController]
 [Route("api/flow/ikunks")]
-[ApiVersion(1.0)]
+[ApiVersion("1.0")]
 [Authorize(Roles = $"{Role.Admin},{Role.FlowUser}")]
 public sealed class IkunksController(IMessageBus bus) : ApiController
 {

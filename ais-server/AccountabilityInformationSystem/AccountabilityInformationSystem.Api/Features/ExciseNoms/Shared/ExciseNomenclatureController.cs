@@ -18,7 +18,7 @@ namespace AccountabilityInformationSystem.Api.Features.ExciseNoms.Shared;
 [ResponseCache(Duration = 120)]
 [Authorize]
 [ApiController]
-[ApiVersion(1.0)]
+[ApiVersion("1.0")]
 public abstract class ExciseNomenclatureController<TEntity, TCreateRequest, TUpdateRequest> : ControllerBase
     where TEntity : AuditableEntity, IEntity, IExciseEntity, new()
     where TCreateRequest : CreateExciseNomenclatureRequest

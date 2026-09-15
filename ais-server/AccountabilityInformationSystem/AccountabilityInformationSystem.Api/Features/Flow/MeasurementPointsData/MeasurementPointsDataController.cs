@@ -17,7 +17,7 @@ namespace AccountabilityInformationSystem.Api.Features.Flow.MeasurementPointsDat
 
 [ApiController]
 [Route("api/flow/measuring-points-data")]
-[ApiVersion(1.0)]
+[ApiVersion("1.0")]
 [Authorize(Roles = $"{Role.Admin},{Role.FlowUser}")]
 public class MeasurementPointsDataController(
     IMessageBus bus) : ControllerBase
