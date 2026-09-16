@@ -25,6 +25,31 @@ public static class Routes
     public static class Warehouses
     {
         public const string Base = "/api/warehouses";
+
+        public static string Delete(string id) => $"{Base}/{id}";
+    }
+
+    public static class ProductTypes
+    {
+        public const string Base = "/api/product-types";
+    }
+
+    public static class ExciseNoms
+    {
+        public static class ApCodes
+        {
+            public const string Base = "/api/excise/ap-codes";
+        }
+
+        public static class BrandNames
+        {
+            public const string Base = "/api/excise/brand-names";
+        }
+
+        public static class CnCodes
+        {
+            public const string Base = "/api/excise/cn-codes";
+        }
     }
 
     public static class Ikunks
@@ -47,5 +72,7 @@ public static class Routes
     public static class WarrantyBrands
     {
         public const string Base = "/api/family/warranty-brands";
+
+        public static string Delete(string id) => $"{Base}/{id}";
     }
 }

@@ -1,5 +1,4 @@
 ﻿using AccountabilityInformationSystem.Api.Domain.Entities.Family.Warranty;
-using AccountabilityInformationSystem.Api.Features.Family.WarrantyRecords.Create;
 using AccountabilityInformationSystem.Api.Shared.Services.Mapping;
 using Mapster;
 
