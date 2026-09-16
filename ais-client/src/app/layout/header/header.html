@@ -4,12 +4,12 @@
         <ul class="main-nav">
             <li><a routerLink="/home" routerLinkActive="active" (click)="closeMenu()">Home</a></li>
             @if (isLoggedIn()) {
-                <li class="has-submenu" [class.show-submenu]="isFamilySubmenuOpen()">
-                    <a (click)="toggleFamilySubmenu($event)">Family</a>
+                <li class="has-submenu" [class.show-submenu]="openSubmenuId() === 'family'">
+                    <a (click)="toggleSubmenu('family', $event)">Family</a>
                     <div class="submenu-panel">
                         <div class="panel-header">
                             <span class="panel-title">Family</span>
-                            <button type="button" class="close-btn" (click)="closeFamilySubmenu($event)" aria-label="Close menu">
+                            <button type="button" class="close-btn" (click)="closeSubmenu($event)" aria-label="Close menu">
                                 <span>&times;</span>
                             </button>
                         </div>
@@ -23,12 +23,12 @@
                 </li>
             }
             @if (isLoggedIn() && isAdministrator()) {
-                <li class="has-submenu" [class.show-submenu]="isAdminSubmenuOpen()">
-                    <a (click)="toggleAdminSubmenu($event)">Administration</a>
+                <li class="has-submenu" [class.show-submenu]="openSubmenuId() === 'admin'">
+                    <a (click)="toggleSubmenu('admin', $event)">Administration</a>
                     <div class="submenu-panel">
                         <div class="panel-header">
                             <span class="panel-title">Administration</span>
-                            <button type="button" class="close-btn" (click)="closeAdminSubmenu($event)" aria-label="Close menu">
+                            <button type="button" class="close-btn" (click)="closeSubmenu($event)" aria-label="Close menu">
                                 <span>&times;</span>
                             </button>
                         </div>
@@ -45,8 +45,8 @@
         <ul class="user-nav">
             <li>
                 @if (isLoggedIn()) {
-                    <div class="has-submenu" [class.show-submenu]="isSubmenuOpen()">
-                        <a class="profile-btn" (click)="toggleSubmenu($event)">{{ userName() || 'User' }}</a>
+                    <div class="has-submenu" [class.show-submenu]="openSubmenuId() === 'user'">
+                        <a class="profile-btn" (click)="toggleSubmenu('user', $event)">{{ userName() || 'User' }}</a>
                         <div class="submenu-panel">
                             <div class="panel-header">
                                 <span class="panel-title"></span>

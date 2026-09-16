@@ -221,7 +221,7 @@ public sealed class AuthController(
     public async Task<IActionResult> Logout(CancellationToken cancellationToken)
     {
         HttpContext.Request.Cookies.TryGetValue("refreshToken", out string? refreshTokenValue);
-        Result result = await bus.InvokeAsync<Result>(new LogoutCommand(refreshTokenValue), cancellationToken);
+        Result result = await bus.InvokeAsync<Result>(new LogoutRequest(refreshTokenValue), cancellationToken);
         if (result.IsFailure)
         {
             return result.ToActionResult();

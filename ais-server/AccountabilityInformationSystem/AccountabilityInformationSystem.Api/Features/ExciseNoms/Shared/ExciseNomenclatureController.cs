@@ -115,7 +115,7 @@ public abstract class ExciseNomenclatureController<TEntity, TCreateRequest, TUpd
         CancellationToken cancellationToken)
     {
         Result result = await bus.InvokeAsync<Result>(
-            new ToggleExciseNomenclatureStatusCommand<TEntity>(id), cancellationToken);
+            new ToggleExciseNomenclatureStatusRequest<TEntity>(id), cancellationToken);
         return result.ToActionResult();
     }
 }

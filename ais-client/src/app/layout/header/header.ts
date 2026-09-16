@@ -16,66 +16,36 @@ export class Header {
   readonly isAdministrator = this.authService.isAdministrator;
   readonly userName = computed(() => this.authService.currentUser()?.fullName ?? null);
   readonly isMenuOpen = signal(false);
-  readonly isSubmenuOpen = signal(false);
-  readonly isAdminSubmenuOpen = signal(false);
-  readonly isFamilySubmenuOpen = signal(false);
+  readonly openSubmenuId = signal<string | null>(null);
 
   toggleMenu(): void {
     const opening = !this.isMenuOpen();
     this.isMenuOpen.set(opening);
     if (!opening) {
-      this.isSubmenuOpen.set(false);
-      this.isAdminSubmenuOpen.set(false);
-      this.isFamilySubmenuOpen.set(false);
+      this.openSubmenuId.set(null);
     }
   }
 
   closeMenu(): void {
     this.isMenuOpen.set(false);
-    this.isSubmenuOpen.set(false);
-    this.isAdminSubmenuOpen.set(false);
-    this.isFamilySubmenuOpen.set(false);
+    this.openSubmenuId.set(null);
   }
 
-  toggleSubmenu(event: Event): void {
+  toggleSubmenu(id: string, event: Event): void {
     event.preventDefault();
-    this.isSubmenuOpen.update(v => !v);
+    this.openSubmenuId.update(current => (current === id ? null : id));
   }
 
   closeSubmenu(event: Event): void {
     event.preventDefault();
     event.stopPropagation();
-    this.isSubmenuOpen.set(false);
-  }
-
-  toggleAdminSubmenu(event: Event): void {
-    event.preventDefault();
-    this.isAdminSubmenuOpen.update(v => !v);
-  }
-
-  closeAdminSubmenu(event: Event): void {
-    event.preventDefault();
-    event.stopPropagation();
-    this.isAdminSubmenuOpen.set(false);
-  }
-
-  toggleFamilySubmenu(event: Event): void {
-    event.preventDefault();
-    this.isFamilySubmenuOpen.update(v => !v);
-  }
-
-  closeFamilySubmenu(event: Event): void {
-    event.preventDefault();
-    event.stopPropagation();
-    this.isFamilySubmenuOpen.set(false);
+    this.openSubmenuId.set(null);
   }
 
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent): void {
     if (!(event.target as HTMLElement).closest('.has-submenu')) {
-      this.isSubmenuOpen.set(false);
-      this.isAdminSubmenuOpen.set(false);
-      this.isFamilySubmenuOpen.set(false);
+      this.openSubmenuId.set(null);
     }
   }
 }

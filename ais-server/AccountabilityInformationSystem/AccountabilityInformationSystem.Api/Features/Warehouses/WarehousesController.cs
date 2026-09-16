@@ -72,8 +72,9 @@ public sealed class WarehousesController(IMessageBus bus) : ApiController
         IValidator<UpdateWarehouseRequest> validator,
         CancellationToken cancellationToken)
     {
+        request = request with { Id = id };
         await validator.ValidateAndThrowAsync(request, cancellationToken);
-        Result result = await bus.InvokeAsync<Result>(new UpdateWarehouseCommand(id, request), cancellationToken);
+        Result result = await bus.InvokeAsync<Result>(request, cancellationToken);
         return result.ToActionResult();
     }
 

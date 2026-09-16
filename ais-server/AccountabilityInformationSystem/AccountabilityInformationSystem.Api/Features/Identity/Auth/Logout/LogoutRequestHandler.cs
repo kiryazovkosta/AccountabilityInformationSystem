@@ -4,17 +4,17 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AccountabilityInformationSystem.Api.Features.Identity.Auth.Logout;
 
-public sealed class LogoutCommandHandler(ApplicationIdentityDbContext identityDbContext)
+public sealed class LogoutRequestHandler(ApplicationIdentityDbContext identityDbContext)
 {
-    public async Task<Result> Handle(LogoutCommand command, CancellationToken cancellationToken)
+    public async Task<Result> Handle(LogoutRequest request, CancellationToken cancellationToken)
     {
-        if (string.IsNullOrWhiteSpace(command.RefreshTokenValue))
+        if (string.IsNullOrWhiteSpace(request.RefreshTokenValue))
         {
             return Result.Success();
         }
 
         var refreshToken = await identityDbContext.RefreshTokens
-            .FirstOrDefaultAsync(rt => rt.Token == command.RefreshTokenValue, cancellationToken);
+            .FirstOrDefaultAsync(rt => rt.Token == request.RefreshTokenValue, cancellationToken);
 
         if (refreshToken is null || refreshToken.ExpiresAt < DateTime.UtcNow)
         {

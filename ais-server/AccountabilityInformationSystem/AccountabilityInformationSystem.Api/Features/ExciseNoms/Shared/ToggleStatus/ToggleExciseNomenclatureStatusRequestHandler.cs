@@ -12,7 +12,7 @@ public class ToggleExciseNomenclatureStatusRequestHandler<TEntity>(
     where TEntity : AuditableEntity, IEntity, IExciseEntity, new()
 {
     public async Task<Result> Handle(
-        ToggleExciseNomenclatureStatusCommand<TEntity> command,
+        ToggleExciseNomenclatureStatusRequest<TEntity> request,
         CancellationToken cancellationToken)
     {
         User? user = await userContext.GetUserAsync(cancellationToken);
@@ -25,7 +25,7 @@ public class ToggleExciseNomenclatureStatusRequestHandler<TEntity>(
 
         TEntity? entity = await dbContext
             .Set<TEntity>()
-            .FirstOrDefaultAsync(en => en.Id == command.Id, cancellationToken);
+            .FirstOrDefaultAsync(en => en.Id == request.Id, cancellationToken);
         if (entity is null)
         {
             return Result.Failure(
