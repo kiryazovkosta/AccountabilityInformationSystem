@@ -55,13 +55,22 @@ public static class Routes
     public static class Ikunks
     {
         public const string Base = "/api/flow/ikunks";
+
+        public static string Update(string id) => $"{Base}/{id}";
     }
 
     public static class MeasuringPoints
     {
         public const string Base = "/api/flow/measuring-points";
 
+        public static string Update(string id) => $"{Base}/{id}";
+
         public static string Deactivate(string id) => $"{Base}/{id}/deactivate";
+    }
+
+    public static class MeasurementPointsData
+    {
+        public const string Base = "/api/flow/measuring-points-data";
     }
 
     public static class WarrantyRecords
