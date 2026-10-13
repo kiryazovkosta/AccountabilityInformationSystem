@@ -1,5 +1,5 @@
 using AccountabilityInformationSystem.Api.Domain.Entities.Abstraction;
-using AccountabilityInformationSystem.Api.Features.Identity.Auth.Login;
+using AccountabilityInformationSystem.Api.Features.Identity.Auth.Shared;
 using AccountabilityInformationSystem.Api.Features.Identity.Auth.TwoFactor.NewDevice;
 using AccountabilityInformationSystem.UnitTests.Fakes;
 using Microsoft.AspNetCore.DataProtection;
@@ -15,11 +15,11 @@ public sealed class NewDeviceRequestHandlerTests
     public async Task Handle_ShouldReturnUnauthorized_WhenUserDoesNotExist()
     {
         // Arrange
-        FakeUserManager userManager = new()
+        using FakeUserManager userManager = new()
         {
             FindByNameAsyncFunc = _ => Task.FromResult<IdentityUser?>(null)
         };
-        NewDeviceRequestHandler handler = new(userManager, _dataProtectionProvider);
+        NewDeviceRequestHandler handler = new(userManager, new TwoFactorSetupTokenProtector(_dataProtectionProvider));
 
         // Act
         Result<LoginUserResponse> result = await handler.Handle(
@@ -36,12 +36,12 @@ public sealed class NewDeviceRequestHandlerTests
     {
         // Arrange
         IdentityUser user = new("user1") { Id = "user-1" };
-        FakeUserManager userManager = new()
+        using FakeUserManager userManager = new()
         {
             FindByNameAsyncFunc = _ => Task.FromResult<IdentityUser?>(user),
             CheckPasswordAsyncFunc = (_, _) => Task.FromResult(false)
         };
-        NewDeviceRequestHandler handler = new(userManager, _dataProtectionProvider);
+        NewDeviceRequestHandler handler = new(userManager, new TwoFactorSetupTokenProtector(_dataProtectionProvider));
 
         // Act
         Result<LoginUserResponse> result = await handler.Handle(
@@ -58,12 +58,12 @@ public sealed class NewDeviceRequestHandlerTests
     {
         // Arrange
         IdentityUser user = new("user1") { Id = "user-1", TwoFactorEnabled = false };
-        FakeUserManager userManager = new()
+        using FakeUserManager userManager = new()
         {
             FindByNameAsyncFunc = _ => Task.FromResult<IdentityUser?>(user),
             CheckPasswordAsyncFunc = (_, _) => Task.FromResult(true)
         };
-        NewDeviceRequestHandler handler = new(userManager, _dataProtectionProvider);
+        NewDeviceRequestHandler handler = new(userManager, new TwoFactorSetupTokenProtector(_dataProtectionProvider));
 
         // Act
         Result<LoginUserResponse> result = await handler.Handle(
@@ -80,13 +80,13 @@ public sealed class NewDeviceRequestHandlerTests
     {
         // Arrange
         IdentityUser user = new("user1") { Id = "user-1", TwoFactorEnabled = true };
-        FakeUserManager userManager = new()
+        using FakeUserManager userManager = new()
         {
             FindByNameAsyncFunc = _ => Task.FromResult<IdentityUser?>(user),
             CheckPasswordAsyncFunc = (_, _) => Task.FromResult(true),
             RedeemTwoFactorRecoveryCodeAsyncFunc = (_, _) => Task.FromResult(IdentityResult.Failed())
         };
-        NewDeviceRequestHandler handler = new(userManager, _dataProtectionProvider);
+        NewDeviceRequestHandler handler = new(userManager, new TwoFactorSetupTokenProtector(_dataProtectionProvider));
 
         // Act
         Result<LoginUserResponse> result = await handler.Handle(
@@ -103,14 +103,14 @@ public sealed class NewDeviceRequestHandlerTests
     {
         // Arrange
         IdentityUser user = new("user1") { Id = "user-1", TwoFactorEnabled = true };
-        FakeUserManager userManager = new()
+        using FakeUserManager userManager = new()
         {
             FindByNameAsyncFunc = _ => Task.FromResult<IdentityUser?>(user),
             CheckPasswordAsyncFunc = (_, _) => Task.FromResult(true),
             RedeemTwoFactorRecoveryCodeAsyncFunc = (_, _) => Task.FromResult(IdentityResult.Success),
             SetTwoFactorEnabledAsyncFunc = (_, _) => Task.FromResult(IdentityResult.Success)
         };
-        NewDeviceRequestHandler handler = new(userManager, _dataProtectionProvider);
+        NewDeviceRequestHandler handler = new(userManager, new TwoFactorSetupTokenProtector(_dataProtectionProvider));
 
         // Act
         Result<LoginUserResponse> result = await handler.Handle(

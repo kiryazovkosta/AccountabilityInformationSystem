@@ -3,7 +3,7 @@ using FluentValidation;
 
 namespace AccountabilityInformationSystem.Api.Features.Family.WarrantyBrands.Create;
 
-internal sealed class CreateWarrantyBrandRequestValidator : AbstractValidator<CreateWarrantyBrandRequest>
+public sealed class CreateWarrantyBrandRequestValidator : AbstractValidator<CreateWarrantyBrandRequest>
 {
     public CreateWarrantyBrandRequestValidator()
     {

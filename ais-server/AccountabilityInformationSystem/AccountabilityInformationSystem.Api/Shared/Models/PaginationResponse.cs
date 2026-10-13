@@ -1,5 +1,3 @@
-using Microsoft.EntityFrameworkCore;
-
 namespace AccountabilityInformationSystem.Api.Shared.Models;
 
 /// <summary>
@@ -52,24 +50,4 @@ where T: class
     /// Gets the collection of link responses associated with the current object.
     /// </summary>
     public List<LinkResponse> Links { get; set; }
-
-    public static async Task<PaginationResponse<T>> CreateAsync(
-        IQueryable<T> source,
-        int page,
-        int pageSize,
-        CancellationToken cancellationToken)
-    {
-        int totalCount = await source.CountAsync(cancellationToken);
-        List<T> items = await source
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize)
-            .ToListAsync(cancellationToken);
-        return new PaginationResponse<T>
-        {
-            Page = page,
-            PageSize = pageSize,
-            TotalCount = totalCount,
-            Items = items
-        };
-    }
 }

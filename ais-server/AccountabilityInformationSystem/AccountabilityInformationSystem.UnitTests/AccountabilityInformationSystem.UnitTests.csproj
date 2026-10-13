@@ -13,6 +13,7 @@
     </PackageReference>
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
     <PackageReference Include="Microsoft.OpenApi" />
+    <PackageReference Include="NetArchTest.Rules" />
     <PackageReference Include="System.Security.Cryptography.Xml" />
     <PackageReference Include="xunit.runner.visualstudio">
       <PrivateAssets>all</PrivateAssets>

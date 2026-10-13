@@ -1,7 +1,6 @@
-using AccountabilityInformationSystem.Api.Features.ExciseNoms.Shared.Create;
 using FluentValidation;
 
-namespace AccountabilityInformationSystem.Api.Features.ExciseNoms.Shared.CreateBatch;
+namespace AccountabilityInformationSystem.Api.Features.ExciseNoms.Shared.Create;
 
 public sealed class CreateExciseNomenclatureBatchRequestValidator<TCreateRequest>
     : AbstractValidator<CreateExciseNomenclatureBatchRequest<TCreateRequest>>

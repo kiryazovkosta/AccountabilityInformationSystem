@@ -1,32 +1,22 @@
 using AccountabilityInformationSystem.Api.Domain.Entities.Abstraction;
-using AccountabilityInformationSystem.Api.Domain.Entities.Identity;
-using AccountabilityInformationSystem.Api.Features.ExciseNoms.Shared;
 using AccountabilityInformationSystem.Api.Infrastructure.Data;
-using AccountabilityInformationSystem.Api.Shared.Services.UserContexting;
 using Microsoft.EntityFrameworkCore;
 
 namespace AccountabilityInformationSystem.Api.Features.ExciseNoms.Shared.Create;
 
-public class CreateExciseNomenclatureBatchRequestHandler<TEntity, TCreateRequest>(
-    UserContext userContext,
+public abstract class CreateExciseNomenclatureBatchRequestHandler<TEntity, TCreateRequest>(
     ApplicationDbContext dbContext)
     where TEntity : AuditableEntity, IEntity, IExciseEntity, new()
     where TCreateRequest : CreateExciseNomenclatureRequest
 {
+    protected abstract string EntityIdPrefix { get; }
+
     public async Task<Result> Handle(
-        CreateExciseNomenclatureBatchCommand<TEntity, TCreateRequest> command,
+        CreateExciseNomenclatureBatchRequest<TCreateRequest> request,
         CancellationToken cancellationToken)
     {
-        User? user = await userContext.GetUserAsync(cancellationToken);
-        if (user is null)
-        {
-            return Result.Failure(
-                new Error("User", "Unauthorized"),
-                ResultFailureType.Unauthorized);
-        }
-
-        HashSet<string> codes = [.. command.Entries.Select(e => e.Code)];
-        if (codes.Count != command.Entries.Count)
+        HashSet<string> codes = [.. request.Entries.Select(e => e.Code)];
+        if (codes.Count != request.Entries.Count)
         {
             return Result.Failure(
                 new Error("Entries", "Invalid number of unique codes"),
@@ -43,7 +33,7 @@ public class CreateExciseNomenclatureBatchRequestHandler<TEntity, TCreateRequest
                 ResultFailureType.Conflict);
         }
 
-        List<TEntity> entities = [.. command.Entries.Select(e => e.ToEntity<TEntity>(command.EntityIdPrefix))];
+        List<TEntity> entities = [.. request.Entries.Select(e => e.ToEntity<TEntity>(EntityIdPrefix))];
         await dbContext.Set<TEntity>().AddRangeAsync(entities, cancellationToken);
         await dbContext.SaveChangesAsync(cancellationToken);
 

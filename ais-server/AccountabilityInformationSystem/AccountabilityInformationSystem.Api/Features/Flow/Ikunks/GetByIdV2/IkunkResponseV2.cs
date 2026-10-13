@@ -1,7 +1,8 @@
 using AccountabilityInformationSystem.Api.Domain.Entities.Flow;
+using AccountabilityInformationSystem.Api.Features.Flow.Ikunks.Shared;
 using AccountabilityInformationSystem.Api.Shared.Services.Mapping;
 
-namespace AccountabilityInformationSystem.Api.Features.Flow.Ikunks.Shared;
+namespace AccountabilityInformationSystem.Api.Features.Flow.Ikunks.GetByIdV2;
 
 public sealed record IkunkResponseV2 : IMapFrom<Ikunk>, IMapCustom
 {

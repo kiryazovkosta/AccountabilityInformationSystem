@@ -1,11 +1,12 @@
 using AccountabilityInformationSystem.Api.Domain.Entities.Excise;
 using AccountabilityInformationSystem.Api.Features.ExciseNoms.Shared.Create;
 using AccountabilityInformationSystem.Api.Infrastructure.Data;
-using AccountabilityInformationSystem.Api.Shared.Services.UserContexting;
+using AccountabilityInformationSystem.Api.Shared.Constants;
 
 namespace AccountabilityInformationSystem.Api.Features.ExciseNoms.BrandNames.Create;
 
-public sealed class CreateBrandNameNomenclatureRequestHandler(
-    UserContext userContext,
-    ApplicationDbContext dbContext)
-    : CreateExciseNomenclatureRequestHandler<BrandName, CreateBrandNameNomenclatureRequest>(userContext, dbContext);
+public sealed class CreateBrandNameNomenclatureRequestHandler(ApplicationDbContext dbContext)
+    : CreateExciseNomenclatureRequestHandler<BrandName, CreateBrandNameNomenclatureRequest>(dbContext)
+{
+    protected override string EntityIdPrefix => EntitiesConstants.BrandNameConstants.IdPrefix;
+}

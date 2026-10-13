@@ -1,9 +1,8 @@
 using AccountabilityInformationSystem.Api.Domain.Entities.Flow;
-using FluentValidation;
 
-namespace AccountabilityInformationSystem.Api.Features.Flow.MeasurementPointsData.Shared;
+namespace AccountabilityInformationSystem.Api.Features.Flow.MeasurementPointsData.GetAll;
 
-public static class QueryableMeasurementPointDataExtensions
+internal static class QueryableMeasurementPointDataExtensions
 {
     public static IQueryable<MeasurementPointData> SetMeasuringPoints(this IQueryable<MeasurementPointData> query,
         List<string>? warehouses,

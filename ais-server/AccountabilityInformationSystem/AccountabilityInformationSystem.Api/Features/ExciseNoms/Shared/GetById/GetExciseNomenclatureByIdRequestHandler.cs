@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AccountabilityInformationSystem.Api.Features.ExciseNoms.Shared.GetById;
 
-public class GetExciseNomenclatureByIdRequestHandler<TEntity>(
+public abstract class GetExciseNomenclatureByIdRequestHandler<TEntity>(
     DataShapingService dataShapingService,
     ApplicationDbContext dbContext)
         where TEntity : AuditableEntity, IEntity, IExciseEntity, new()

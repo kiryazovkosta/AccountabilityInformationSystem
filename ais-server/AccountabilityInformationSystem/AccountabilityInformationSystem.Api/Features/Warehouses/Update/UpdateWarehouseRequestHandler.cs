@@ -1,26 +1,17 @@
 using AccountabilityInformationSystem.Api.Domain.Entities.Abstraction;
 using AccountabilityInformationSystem.Api.Domain.Entities.Flow;
-using AccountabilityInformationSystem.Api.Domain.Entities.Identity;
 using AccountabilityInformationSystem.Api.Features.Warehouses.Shared;
 using AccountabilityInformationSystem.Api.Infrastructure.Data;
-using AccountabilityInformationSystem.Api.Shared.Services.UserContexting;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 
 namespace AccountabilityInformationSystem.Api.Features.Warehouses.Update;
 
 public sealed class UpdateWarehouseRequestHandler(
-    ApplicationDbContext dbContext,
-    UserContext userContext)
+    ApplicationDbContext dbContext)
 {
     public async Task<Result> Handle(UpdateWarehouseRequest request, CancellationToken cancellationToken)
     {
-        User? user = await userContext.GetUserAsync(cancellationToken);
-        if (user is null)
-        {
-            return Result.Failure(new Error("User", "Non existing or unauthorized user!"), ResultFailureType.Unauthorized);
-        }
-
         if (request.ExciseNumber is not null &&
             await dbContext.Warehouses.AnyAsync(
                 w => w.ExciseNumber == request.ExciseNumber

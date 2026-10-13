@@ -2,7 +2,7 @@ using FluentValidation;
 
 namespace AccountabilityInformationSystem.Api.Features.Identity.Auth.TwoFactor.NewDevice;
 
-internal sealed class NewDeviceRequestValidator : AbstractValidator<NewDeviceRequest>
+public sealed class NewDeviceRequestValidator : AbstractValidator<NewDeviceRequest>
 {
     public NewDeviceRequestValidator()
     {

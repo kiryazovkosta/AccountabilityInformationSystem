@@ -1,7 +1,7 @@
 using AccountabilityInformationSystem.Api.Domain.Entities.Excise;
 using AccountabilityInformationSystem.Api.Features.ExciseNoms.ApCodes.Create;
+using AccountabilityInformationSystem.Api.Features.ExciseNoms.ApCodes.Update;
 using AccountabilityInformationSystem.Api.Features.ExciseNoms.Shared;
-using AccountabilityInformationSystem.Api.Features.ExciseNoms.Shared.Update;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -13,5 +13,6 @@ namespace AccountabilityInformationSystem.Api.Features.ExciseNoms.ApCodes;
 public sealed class ApCodesController
     : ExciseNomenclatureController<ApCode, CreateApCodeNomenclatureRequest, UpdateApCodeNomenclatureRequest>
 {
-    protected override string EntityIdPrefix => "ap";
+    protected override UpdateApCodeNomenclatureRequest WithId(UpdateApCodeNomenclatureRequest request, string id) =>
+        request with { Id = id };
 }

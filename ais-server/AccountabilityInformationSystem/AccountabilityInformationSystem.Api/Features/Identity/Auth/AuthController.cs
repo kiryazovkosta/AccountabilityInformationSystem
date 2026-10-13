@@ -1,50 +1,32 @@
-using System.Linq.Dynamic.Core.Tokenizer;
-using System.Net;
-using System.Security;
-using System.Security.Cryptography;
-using System.Text;
-using System.Text.Encodings.Web;
+using System.Diagnostics.CodeAnalysis;
 using AccountabilityInformationSystem.Api.Domain.Entities.Abstraction;
-using AccountabilityInformationSystem.Api.Domain.Entities.Identity;
 using AccountabilityInformationSystem.Api.Features.Identity.Auth.ChangePassword;
 using AccountabilityInformationSystem.Api.Features.Identity.Auth.ConfirmEmail;
 using AccountabilityInformationSystem.Api.Features.Identity.Auth.ForgotPassword;
 using AccountabilityInformationSystem.Api.Features.Identity.Auth.Login;
+using AccountabilityInformationSystem.Api.Features.Identity.Auth.Logout;
 using AccountabilityInformationSystem.Api.Features.Identity.Auth.Refresh;
 using AccountabilityInformationSystem.Api.Features.Identity.Auth.Register;
 using AccountabilityInformationSystem.Api.Features.Identity.Auth.ResendEmailConfirmation;
 using AccountabilityInformationSystem.Api.Features.Identity.Auth.ResetPassword;
 using AccountabilityInformationSystem.Api.Features.Identity.Auth.Shared;
-using AccountabilityInformationSystem.Api.Features.Identity.Auth.TwoFactor.SetupTwoFactor;
 using AccountabilityInformationSystem.Api.Features.Identity.Auth.TwoFactor.NewDevice;
+using AccountabilityInformationSystem.Api.Features.Identity.Auth.TwoFactor.SetupTwoFactor;
 using AccountabilityInformationSystem.Api.Features.Identity.Auth.TwoFactor.VerifyTwoFactor;
-using AccountabilityInformationSystem.Api.Features.Identity.Users.Shared;
-using AccountabilityInformationSystem.Api.Features.Identity.Auth.Logout;
-using AccountabilityInformationSystem.Api.Settings;
 using AccountabilityInformationSystem.Api.Shared;
 using AccountabilityInformationSystem.Api.Shared.Extensions;
-using AccountabilityInformationSystem.Api.Shared.Services.Tokenizing;
-using FluentValidation;
-using Mapster;
 using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.DataProtection;
-using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.WebUtilities;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Storage;
-using Microsoft.Extensions.Options;
-using Newtonsoft.Json.Linq;
-using QRCoder;
 using Wolverine;
 
 namespace AccountabilityInformationSystem.Api.Features.Identity.Auth;
 
 [Route("api/identity/auth")]
+[SuppressMessage(
+    "Security",
+    "S4502:Disabling CSRF protections is security-sensitive",
+    Justification = "Pre-authentication endpoints and logout must work without an antiforgery token, which is only issued at login, refresh or GET csrf-token.")]
 public sealed class AuthController(
     IAntiforgery antiforgery,
     IMessageBus bus) : ApiController
@@ -55,10 +37,8 @@ public sealed class AuthController(
     [IgnoreAntiforgeryToken]
     public async Task<IActionResult> Register(
         RegisterUserRequest registerRequest,
-        IValidator<RegisterUserRequest> validator,
         CancellationToken cancellationToken)
     {
-        await validator.ValidateAndThrowAsync(registerRequest, cancellationToken);
         Result result = await bus.InvokeAsync<Result>(registerRequest, cancellationToken);
         return result.ToActionResult();
     }
@@ -68,10 +48,8 @@ public sealed class AuthController(
     [IgnoreAntiforgeryToken]
     public async Task<IActionResult> Login(
         LoginUserRequest request,
-        IValidator<LoginUserRequest> validator,
         CancellationToken cancellationToken)
     {
-        await validator.ValidateAndThrowAsync(request, cancellationToken);
         Result<LoginUserResponse> result = await bus.InvokeAsync<Result<LoginUserResponse>>(request, cancellationToken);
         if (result.IsSuccessWith(ResultSuccessType.Ok) && result.Value is not null)
         {
@@ -99,7 +77,7 @@ public sealed class AuthController(
         Result<AccessTokenResponse> result = await bus.InvokeAsync<Result<AccessTokenResponse>>(request, cancellationToken);
         if (result.IsSuccessWith(ResultSuccessType.Ok))
         {
-            SetCookies(result.Value!.AccessToken!, result.Value.RefreshToken!);
+            SetCookies(result.Value!.AccessToken, result.Value.RefreshToken);
         }
 
         return result.ToActionResult();
@@ -107,7 +85,6 @@ public sealed class AuthController(
 
     [HttpGet("confirm-email", Name = "ConfirmEmailRoute")]
     [AllowAnonymous]
-    [IgnoreAntiforgeryToken]
     public async Task<IActionResult> ConfirmEmail(string userId, string code, CancellationToken cancellationToken)
     {
         ConfirmEmailRequest request = new(userId, code);
@@ -120,10 +97,8 @@ public sealed class AuthController(
     [IgnoreAntiforgeryToken]
     public async Task<IActionResult> SetupTwoFactor(
         SetupTwoFactorRequest request,
-        IValidator<SetupTwoFactorRequest> validator,
         CancellationToken cancellationToken)
     {
-        await validator.ValidateAndThrowAsync(request, cancellationToken);
         Result<SetupTwoFactorResponse> result = await bus.InvokeAsync<Result<SetupTwoFactorResponse>>(request, cancellationToken);
         return result.ToActionResult();
     }
@@ -133,10 +108,8 @@ public sealed class AuthController(
     [IgnoreAntiforgeryToken]
     public async Task<IActionResult> VerifyTwoFactor(
         VerifyTwoFactorRequest request,
-        IValidator<VerifyTwoFactorRequest> validator,
         CancellationToken cancellationToken)
     {
-        await validator.ValidateAndThrowAsync(request, cancellationToken);
         Result<VerifyTwoFactorResponse> result = await bus.InvokeAsync<Result<VerifyTwoFactorResponse>>(request, cancellationToken);
         return result.ToActionResult();
     }
@@ -146,10 +119,8 @@ public sealed class AuthController(
     [IgnoreAntiforgeryToken]
     public async Task<IActionResult> NewDevice(
         NewDeviceRequest request,
-        IValidator<NewDeviceRequest> validator,
         CancellationToken cancellationToken)
     {
-        await validator.ValidateAndThrowAsync(request, cancellationToken);
         Result<LoginUserResponse> result = await bus.InvokeAsync<Result<LoginUserResponse>>(request, cancellationToken);
         if (result.IsSuccessWith(ResultSuccessType.Ok) && result.Value is not null)
         {
@@ -163,10 +134,8 @@ public sealed class AuthController(
     [IgnoreAntiforgeryToken]
     public async Task<IActionResult> ForgotPassword(
         ForgotPasswordRequest request,
-        IValidator<ForgotPasswordRequest> validator,
         CancellationToken cancellationToken)
     {
-        await validator.ValidateAndThrowAsync(request, cancellationToken);
         Result result = await bus.InvokeAsync<Result>(request, cancellationToken);
         return result.ToActionResult();
     }
@@ -176,17 +145,14 @@ public sealed class AuthController(
     [IgnoreAntiforgeryToken]
     public async Task<IActionResult> ResetPassword(
         ResetPasswordRequest request,
-        IValidator<ResetPasswordRequest> validator,
         CancellationToken cancellationToken)
     {
-        await validator.ValidateAndThrowAsync(request, cancellationToken);
         Result result = await bus.InvokeAsync<Result>(request, cancellationToken);
         return result.ToActionResult();
     }
 
     [HttpGet("resend-email-confirmation", Name = "ResendEmailConfirmationRoute")]
     [AllowAnonymous]
-    [IgnoreAntiforgeryToken]
     public async Task<IActionResult> ResendEmailConfirmation(string email, CancellationToken cancellationToken)
     {
         ResendEmailConfirmationRequest request = new(email);
@@ -198,10 +164,8 @@ public sealed class AuthController(
     [Authorize]
     public async Task<IActionResult> ChangePassword(
         ChangePasswordRequest request, 
-        IValidator<ChangePasswordRequest> validator, 
         CancellationToken cancellationToken)
     {
-        await validator.ValidateAndThrowAsync(request, cancellationToken);
         Result result = await bus.InvokeAsync<Result>(request, cancellationToken);
         return result.ToActionResult();
     }
@@ -260,6 +224,10 @@ public sealed class AuthController(
             });
     }
 
+    [SuppressMessage(
+        "Security",
+        "S3330:Creating cookies without the \"HttpOnly\" flag is security-sensitive",
+        Justification = "The Angular client reads XSRF-TOKEN and echoes it in the X-XSRF-TOKEN header, so it cannot be HttpOnly.")]
     private void SetAntiforgeryToken()
     {
         AntiforgeryTokenSet? tokens = antiforgery.GetAndStoreTokens(HttpContext);

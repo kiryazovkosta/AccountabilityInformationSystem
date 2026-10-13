@@ -4,7 +4,7 @@ using FluentValidation;
 
 namespace AccountabilityInformationSystem.Api.Features.Flow.MeasurementPoints.Update;
 
-internal sealed class UpdateMeasurementPointRequestValidator
+public sealed class UpdateMeasurementPointRequestValidator
     : AbstractValidator<UpdateMeasurementPointRequest>
 {
     public UpdateMeasurementPointRequestValidator()

@@ -3,7 +3,7 @@ using FluentValidation;
 
 namespace AccountabilityInformationSystem.Api.Features.Flow.Ikunks.Create;
 
-internal sealed class CreateIkunkRequestValidator : AbstractValidator<CreateIkunkRequest>
+public sealed class CreateIkunkRequestValidator : AbstractValidator<CreateIkunkRequest>
 {
     public CreateIkunkRequestValidator()
     {

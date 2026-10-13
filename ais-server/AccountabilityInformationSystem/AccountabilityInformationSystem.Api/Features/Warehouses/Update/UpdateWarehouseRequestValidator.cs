@@ -3,7 +3,7 @@ using FluentValidation;
 
 namespace AccountabilityInformationSystem.Api.Features.Warehouses.Update;
 
-internal sealed class UpdateWarehouseRequestValidator : AbstractValidator<UpdateWarehouseRequest>
+public sealed class UpdateWarehouseRequestValidator : AbstractValidator<UpdateWarehouseRequest>
 {
     public UpdateWarehouseRequestValidator()
     {

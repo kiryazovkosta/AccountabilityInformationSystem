@@ -58,9 +58,10 @@ public static class ExciseNomenclatureMappings
         where TEntity : AuditableEntity, IEntity, IExciseEntity
         => exciseEntity.Adapt<ExciseNomenclatureResponse>();
 
-    public static void UpdateFromRequest<TEntity, TUpdateRequest>(this TEntity entity, TUpdateRequest request)
+    // Typed to the base request on purpose: the partial-update config (IgnoreNullValues) is registered for
+    // UpdateExciseNomenclatureRequest, so adapting from a derived request type must still resolve that config.
+    public static void UpdateFromRequest<TEntity>(this TEntity entity, UpdateExciseNomenclatureRequest request)
         where TEntity : AuditableEntity, IEntity, IExciseEntity
-        where TUpdateRequest : UpdateExciseNomenclatureRequest
     {
         request.Adapt(entity);
     }

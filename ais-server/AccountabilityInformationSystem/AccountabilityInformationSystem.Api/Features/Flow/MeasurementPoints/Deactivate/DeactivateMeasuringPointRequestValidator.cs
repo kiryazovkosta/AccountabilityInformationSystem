@@ -2,7 +2,7 @@ using FluentValidation;
 
 namespace AccountabilityInformationSystem.Api.Features.Flow.MeasurementPoints.Deactivate;
 
-internal sealed class DeactivateMeasuringPointRequestValidator : AbstractValidator<DeactivateMeasuringPointRequest>
+public sealed class DeactivateMeasuringPointRequestValidator : AbstractValidator<DeactivateMeasuringPointRequest>
 {
     public DeactivateMeasuringPointRequestValidator()
     {

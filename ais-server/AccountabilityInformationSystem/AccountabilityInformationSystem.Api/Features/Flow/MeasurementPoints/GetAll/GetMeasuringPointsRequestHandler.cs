@@ -6,6 +6,7 @@ using AccountabilityInformationSystem.Api.Infrastructure.Data;
 using AccountabilityInformationSystem.Api.Shared.Extensions;
 using AccountabilityInformationSystem.Api.Shared.Models;
 using AccountabilityInformationSystem.Api.Shared.Services.DataShaping;
+using AccountabilityInformationSystem.Api.Shared.Services.Linking;
 using AccountabilityInformationSystem.Api.Shared.Services.Sorting;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
@@ -16,7 +17,8 @@ public sealed class GetMeasuringPointsRequestHandler(
     ApplicationDbContext dbContext,
     SortMappingProvider sortMappingProvider,
     DataShapingService dataShapingService,
-    MeasuringPointLinkService measuringPointLinkService)
+    MeasuringPointLinkService measuringPointLinkService,
+    LinkService linkService)
 {
     public async Task<Result<PaginationResponse<ExpandoObject>>> Handle(
         GetMeasuringPointsRequest request, 
@@ -67,7 +69,7 @@ public sealed class GetMeasuringPointsRequestHandler(
         };
         if (request.IncludeLinks)
         {
-            response.Links = measuringPointLinkService.CreateLinksForMeasuringPoints(request, response.HasNextPage, response.HasPreviousPage);
+            response.Links = linkService.CreateLinksForMeasuringPoints(request, response.HasNextPage, response.HasPreviousPage);
         }
 
         return Result<PaginationResponse<ExpandoObject>>.Success(response);

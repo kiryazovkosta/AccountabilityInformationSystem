@@ -9,7 +9,6 @@ using AccountabilityInformationSystem.Api.Shared;
 using AccountabilityInformationSystem.Api.Shared.Extensions;
 using AccountabilityInformationSystem.Api.Shared.Models;
 using Asp.Versioning;
-using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Wolverine;
@@ -36,10 +35,8 @@ public sealed class WarrantyRecordsController(IMessageBus bus) : ApiController
     [HttpPost]
     public async Task<IActionResult> CreateWarrantyRecord(
         [FromForm] CreateWarrantyRecordRequest request,
-        IValidator<CreateWarrantyRecordRequest> validator,
         CancellationToken cancellationToken)
     {
-        await validator.ValidateAndThrowAsync(request, cancellationToken);
         Result<WarrantyRecordResponse> result = await bus.InvokeAsync<Result<WarrantyRecordResponse>>(request, cancellationToken);
         if (result.IsFailure)
         {

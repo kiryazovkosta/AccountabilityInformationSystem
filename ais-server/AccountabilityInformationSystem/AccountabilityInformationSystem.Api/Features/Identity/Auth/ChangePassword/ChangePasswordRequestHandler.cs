@@ -1,6 +1,5 @@
 ﻿using AccountabilityInformationSystem.Api.Domain.Entities.Abstraction;
 using AccountabilityInformationSystem.Api.Domain.Entities.Identity;
-using AccountabilityInformationSystem.Api.Features.Identity.Auth.Login;
 using AccountabilityInformationSystem.Api.Shared.Services.UserContexting;
 using Microsoft.AspNetCore.Identity;
 

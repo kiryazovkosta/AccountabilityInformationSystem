@@ -1,9 +1,9 @@
-using AccountabilityInformationSystem.Api.Shared.Extensions;
 using AccountabilityInformationSystem.Api.Settings;
+using AccountabilityInformationSystem.Api.Shared.Extensions;
+using AccountabilityInformationSystem.Aspire.ServiceDefaults;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 using Wolverine;
-using AccountabilityInformationSystem.Aspire.ServiceDefaults;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -15,6 +15,7 @@ builder
     .AddDatabase()
     .AddObservability()
     .AddApplicationServices()
+    .AddFeatureModules()
     .AddAuthenticationServices()
     .AddAzureBlobFilesStorage()
     .AddCorsPolicy()
@@ -34,9 +35,9 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseExceptionHandler();
 app.UseCors(CorsOptions.PolicyName);
-app.UseResponseCaching();
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseResponseCaching();
 app.UseAntiforgery();
 app.MapControllers();
 await app.RunAsync();

@@ -5,10 +5,10 @@ using AccountabilityInformationSystem.Api.Features.Flow.MeasurementPointsData.Cr
 using AccountabilityInformationSystem.Api.Features.Flow.MeasurementPointsData.GetAll;
 using AccountabilityInformationSystem.Api.Features.Flow.MeasurementPointsData.GetById;
 using AccountabilityInformationSystem.Api.Features.Flow.MeasurementPointsData.Shared;
+using AccountabilityInformationSystem.Api.Shared;
 using AccountabilityInformationSystem.Api.Shared.Extensions;
 using AccountabilityInformationSystem.Api.Shared.Models;
 using Asp.Versioning;
-using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Wolverine;
@@ -19,8 +19,8 @@ namespace AccountabilityInformationSystem.Api.Features.Flow.MeasurementPointsDat
 [Route("api/flow/measuring-points-data")]
 [ApiVersion("1.0")]
 [Authorize(Roles = $"{Role.Admin},{Role.FlowUser}")]
-public class MeasurementPointsDataController(
-    IMessageBus bus) : ControllerBase
+public sealed class MeasurementPointsDataController(
+    IMessageBus bus) : ApiController
 {
     [HttpGet]
     [MapToApiVersion(1.0)]
@@ -50,10 +50,8 @@ public class MeasurementPointsDataController(
     [MapToApiVersion(1.0)]
     public async Task<IActionResult> CreateMeasuringPointData(
         [FromBody] CreateMeasuringPointDataRequest request,
-        IValidator<CreateMeasuringPointDataRequest> validator,
         CancellationToken cancellationToken)
     {
-        await validator.ValidateAndThrowAsync(request, cancellationToken);
         Result<MeasurementPointDataResponse> result = await bus.InvokeAsync<Result<MeasurementPointDataResponse>>(request, cancellationToken);
         if (result.IsFailure)
         {

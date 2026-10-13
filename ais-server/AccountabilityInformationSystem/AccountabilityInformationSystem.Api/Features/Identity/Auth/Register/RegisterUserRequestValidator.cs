@@ -3,7 +3,7 @@ using FluentValidation;
 
 namespace AccountabilityInformationSystem.Api.Features.Identity.Auth.Register;
 
-internal sealed class RegisterUserRequestValidator : AbstractValidator<RegisterUserRequest>
+public sealed class RegisterUserRequestValidator : AbstractValidator<RegisterUserRequest>
 {
     public RegisterUserRequestValidator()
     {

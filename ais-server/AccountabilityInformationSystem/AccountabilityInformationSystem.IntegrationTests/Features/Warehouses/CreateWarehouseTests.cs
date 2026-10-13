@@ -1,5 +1,6 @@
 ﻿using System.Net;
 using System.Net.Http.Json;
+using System.Text.Json;
 using AccountabilityInformationSystem.Api.Features.Warehouses.Create;
 using AccountabilityInformationSystem.IntegrationTests.Infrastructure;
 
@@ -58,6 +59,34 @@ public sealed class CreateWarehouseTests(AisWithAutoEmailConfirmWebApplicationFa
 
         // Assert
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task CreateWarehouse_ShouldReturnValidationProblem_WithFieldErrors()
+    {
+        // Arrange
+        HttpClient client = await factory.CreateAuthenticatedClientWithout2FaAsync();
+        CreateWarehouseRequest request = new()
+        {
+            Name = "WH03",
+            FullName = "Warehouse 03",
+            OrderPosition = 1,
+            ExciseNumber = "BGNCA0000",
+            ActiveFrom = new DateOnly(2024, 1, 1),
+            ActiveTo = new DateOnly(2099, 12, 31)
+        };
+
+        // Act
+        HttpResponseMessage response = await client.PostAsJsonAsync(
+            Routes.Warehouses.Base,
+            request,
+            TestContext.Current.CancellationToken);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        JsonElement problem = await response.Content.ReadFromJsonAsync<JsonElement>(TestContext.Current.CancellationToken);
+        Assert.Equal("Validation Error", problem.GetProperty("title").GetString());
+        Assert.True(problem.GetProperty("errors").TryGetProperty("excisenumber", out _));
     }
 
     [Fact]

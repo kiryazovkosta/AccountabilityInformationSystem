@@ -2,7 +2,7 @@ using FluentValidation;
 
 namespace AccountabilityInformationSystem.Api.Features.Identity.Auth.Login;
 
-internal sealed class LoginUserRequestValidator : AbstractValidator<LoginUserRequest>
+public sealed class LoginUserRequestValidator : AbstractValidator<LoginUserRequest>
 {
     public LoginUserRequestValidator()
     {

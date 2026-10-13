@@ -3,7 +3,7 @@ using FluentValidation;
 
 namespace AccountabilityInformationSystem.Api.Features.Flow.MeasurementPoints.Create;
 
-internal sealed class CreateMeasuringPointRequestValidator : AbstractValidator<CreateMeasuringPointRequest>
+public sealed class CreateMeasuringPointRequestValidator : AbstractValidator<CreateMeasuringPointRequest>
 {
     public CreateMeasuringPointRequestValidator()
     {

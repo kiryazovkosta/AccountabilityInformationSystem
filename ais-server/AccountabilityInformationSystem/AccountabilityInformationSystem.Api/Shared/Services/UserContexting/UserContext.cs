@@ -26,10 +26,10 @@ public sealed class UserContext (
 
         User? user = await memoryCache.GetOrCreateAsync(cacheKey, async entry =>
         {
-            entry.SetSlidingExpiration(CacheDuration);
+            entry.SetAbsoluteExpiration(CacheDuration);
             User? user = await applicationDbContext.Users
+                .AsNoTracking()
                 .Where(user => user.IdentityId == identityId)
-                .Select(user => user)
                 .FirstOrDefaultAsync(cancellationToken);
 
             return user;

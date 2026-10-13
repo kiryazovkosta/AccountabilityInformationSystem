@@ -4,7 +4,7 @@ using FluentValidation;
 
 namespace AccountabilityInformationSystem.Api.Features.Warehouses.Create;
 
-internal sealed class CreateWarehouseRequestValidator : AbstractValidator<CreateWarehouseRequest>
+public sealed class CreateWarehouseRequestValidator : AbstractValidator<CreateWarehouseRequest>
 {
     public CreateWarehouseRequestValidator()
     {

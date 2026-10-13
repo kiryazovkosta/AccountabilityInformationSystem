@@ -1,8 +1,5 @@
-﻿using System.Security.Cryptography;
-using AccountabilityInformationSystem.Api.Domain.Entities.Abstraction;
-using AccountabilityInformationSystem.Api.Features.Identity.Auth.Register;
-using AccountabilityInformationSystem.Api.Features.Identity.Auth.TwoFactor.VerifyTwoFactor;
-using Microsoft.AspNetCore.DataProtection;
+﻿using AccountabilityInformationSystem.Api.Domain.Entities.Abstraction;
+using AccountabilityInformationSystem.Api.Features.Identity.Auth.Shared;
 using Microsoft.AspNetCore.Identity;
 using QRCoder;
 
@@ -10,21 +7,13 @@ namespace AccountabilityInformationSystem.Api.Features.Identity.Auth.TwoFactor.S
 
 public sealed class SetupTwoFactorRequestHandler(
     UserManager<IdentityUser> userManager,
-    IDataProtectionProvider dataProtectionProvider)
+    TwoFactorSetupTokenProtector setupTokenProtector)
 {
-    private readonly ITimeLimitedDataProtector _setupProtector =
-        dataProtectionProvider.CreateProtector("TwoFactorSetupToken").ToTimeLimitedDataProtector();
-
     public async Task<Result<SetupTwoFactorResponse>> Handle(SetupTwoFactorRequest request, CancellationToken cancellationToken)
     {
         _ = cancellationToken;
 
-        string userId = string.Empty;
-        try
-        {
-            userId = _setupProtector.Unprotect(request.SetupToken);
-        }
-        catch(CryptographicException)
+        if (!setupTokenProtector.TryUnprotect(request.SetupToken, out string? userId))
         {
             return Result<SetupTwoFactorResponse>.Failure(
                 new Error("SetupToken", "Invalid or expired setup token."));
@@ -62,6 +51,6 @@ public sealed class SetupTwoFactorRequestHandler(
         byte[] qrCodeBytes = qrCode.GetGraphic(20);
         string qrCodeBase64 = $"data:image/png;base64,{Convert.ToBase64String(qrCodeBytes)}";
 
-        return Result< SetupTwoFactorResponse>.Success(new SetupTwoFactorResponse(qrCodeBase64, key!));
+        return Result< SetupTwoFactorResponse>.Success(new SetupTwoFactorResponse(qrCodeBase64, key));
     }
 }

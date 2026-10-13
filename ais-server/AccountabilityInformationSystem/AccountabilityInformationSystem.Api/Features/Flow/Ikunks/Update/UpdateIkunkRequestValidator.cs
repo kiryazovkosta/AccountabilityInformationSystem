@@ -3,7 +3,7 @@ using FluentValidation;
 
 namespace AccountabilityInformationSystem.Api.Features.Flow.Ikunks.Update;
 
-internal sealed class UpdateIkunkRequestValidator : AbstractValidator<UpdateIkunkRequest>
+public sealed class UpdateIkunkRequestValidator : AbstractValidator<UpdateIkunkRequest>
 {
     public UpdateIkunkRequestValidator()
     {
@@ -24,7 +24,7 @@ internal sealed class UpdateIkunkRequestValidator : AbstractValidator<UpdateIkun
                 .WithMessage("'Full Name' must not be empty.");
 
             RuleFor(x => x.FullName)
-                .MaximumLength(EntitiesConstants.NameMaxLength)
+                .MaximumLength(EntitiesConstants.FullNameMaxLength)
                 .WithMessage($"'Full Name' must not exceed {EntitiesConstants.FullNameMaxLength} characters.");
         });
 

@@ -1,11 +1,8 @@
 using AccountabilityInformationSystem.Api.Domain.Entities.Excise;
 using AccountabilityInformationSystem.Api.Features.ExciseNoms.Shared.ToggleStatus;
 using AccountabilityInformationSystem.Api.Infrastructure.Data;
-using AccountabilityInformationSystem.Api.Shared.Services.UserContexting;
 
 namespace AccountabilityInformationSystem.Api.Features.ExciseNoms.CnCodes.ToggleStatus;
 
-public sealed class ToggleCnCodeNomenclatureStatusRequestHandler(
-    UserContext userContext,
-    ApplicationDbContext dbContext)
-    : ToggleExciseNomenclatureStatusRequestHandler<CnCode>(userContext, dbContext);
+public sealed class ToggleCnCodeNomenclatureStatusRequestHandler(ApplicationDbContext dbContext)
+    : ToggleExciseNomenclatureStatusRequestHandler<CnCode>(dbContext);

@@ -1,13 +1,10 @@
 using AccountabilityInformationSystem.Api.Domain.Entities.Abstraction;
-using AccountabilityInformationSystem.Api.Domain.Entities.Identity;
 using AccountabilityInformationSystem.Api.Infrastructure.Data;
-using AccountabilityInformationSystem.Api.Shared.Services.UserContexting;
 using Microsoft.EntityFrameworkCore;
 
 namespace AccountabilityInformationSystem.Api.Features.ExciseNoms.Shared.ToggleStatus;
 
-public class ToggleExciseNomenclatureStatusRequestHandler<TEntity>(
-    UserContext userContext,
+public abstract class ToggleExciseNomenclatureStatusRequestHandler<TEntity>(
     ApplicationDbContext dbContext)
     where TEntity : AuditableEntity, IEntity, IExciseEntity, new()
 {
@@ -15,14 +12,6 @@ public class ToggleExciseNomenclatureStatusRequestHandler<TEntity>(
         ToggleExciseNomenclatureStatusRequest<TEntity> request,
         CancellationToken cancellationToken)
     {
-        User? user = await userContext.GetUserAsync(cancellationToken);
-        if (user is null)
-        {
-            return Result.Failure(
-                new Error("User", "Unauthorized"),
-                ResultFailureType.Unauthorized);
-        }
-
         TEntity? entity = await dbContext
             .Set<TEntity>()
             .FirstOrDefaultAsync(en => en.Id == request.Id, cancellationToken);

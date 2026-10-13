@@ -1,11 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using AccountabilityInformationSystem.Api.Domain.Entities.Abstraction;
 using AccountabilityInformationSystem.Api.Domain.Entities.Flow;
-using AccountabilityInformationSystem.Api.Domain.Entities.Identity;
 using AccountabilityInformationSystem.Api.Features.Flow.MeasurementPointsData.Shared;
 using AccountabilityInformationSystem.Api.Infrastructure.Data;
-using AccountabilityInformationSystem.Api.Shared.Services.Encrypting;
-using AccountabilityInformationSystem.Api.Shared.Services.UserContexting;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 
@@ -13,19 +10,10 @@ namespace AccountabilityInformationSystem.Api.Features.Flow.MeasurementPointsDat
 
 public sealed class CreateMeasuringPointDataRequestHandler(
     ApplicationDbContext dbContext,
-    UserContext userContext,
     MeasuringPointDataLinkService measuringPointDataLinkService)
 {
     public async Task<Result<MeasurementPointDataResponse>> Handle(CreateMeasuringPointDataRequest request, CancellationToken cancellationToken)
     {
-        User? user = await userContext.GetUserAsync(cancellationToken);
-        if (user is null)
-        {
-            return Result<MeasurementPointDataResponse>.Failure(
-                new Error("user", "Unauthorized"),
-                ResultFailureType.Unauthorized);
-        }
-
         if (!await dbContext.MeasurementPoints.AnyAsync(i => i.Id == request.MeasurementPointId, cancellationToken))
         {
             return Result<MeasurementPointDataResponse>.Failure(

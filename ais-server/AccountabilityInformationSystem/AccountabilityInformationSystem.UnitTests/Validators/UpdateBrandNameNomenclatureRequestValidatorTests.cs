@@ -1,5 +1,4 @@
 using AccountabilityInformationSystem.Api.Features.ExciseNoms.BrandNames.Update;
-using AccountabilityInformationSystem.Api.Features.ExciseNoms.Shared.Update;
 using AccountabilityInformationSystem.Api.Shared.Constants;
 using FluentValidation.Results;
 using System.Linq;

@@ -1,32 +1,23 @@
 using AccountabilityInformationSystem.Api.Domain.Entities.Abstraction;
-using AccountabilityInformationSystem.Api.Domain.Entities.Identity;
 using AccountabilityInformationSystem.Api.Infrastructure.Data;
-using AccountabilityInformationSystem.Api.Shared.Services.UserContexting;
 using Microsoft.EntityFrameworkCore;
 
 namespace AccountabilityInformationSystem.Api.Features.ExciseNoms.Shared.Create;
 
-public class CreateExciseNomenclatureRequestHandler<TEntity, TCreateRequest>(
-    UserContext userContext,
+public abstract class CreateExciseNomenclatureRequestHandler<TEntity, TCreateRequest>(
     ApplicationDbContext dbContext)
     where TEntity : AuditableEntity, IEntity, IExciseEntity, new()
     where TCreateRequest : CreateExciseNomenclatureRequest
 {
+    protected abstract string EntityIdPrefix { get; }
+
     public async Task<Result<ExciseNomenclatureResponse>> Handle(
-        CreateExciseNomenclatureCommand<TEntity, TCreateRequest> command,
+        TCreateRequest request,
         CancellationToken cancellationToken)
     {
-        User? user = await userContext.GetUserAsync(cancellationToken);
-        if (user is null)
-        {
-            return Result<ExciseNomenclatureResponse>.Failure(
-                new Error("User", "Unauthorized"),
-                ResultFailureType.Unauthorized);
-        }
-
         bool codeExists = await dbContext
             .Set<TEntity>()
-            .AnyAsync(en => en.Code == command.Request.Code, cancellationToken);
+            .AnyAsync(en => en.Code == request.Code, cancellationToken);
         if (codeExists)
         {
             return Result<ExciseNomenclatureResponse>.Failure(
@@ -34,7 +25,7 @@ public class CreateExciseNomenclatureRequestHandler<TEntity, TCreateRequest>(
                 ResultFailureType.Conflict);
         }
 
-        TEntity entity = command.Request.ToEntity<TEntity>(command.EntityIdPrefix);
+        TEntity entity = request.ToEntity<TEntity>(EntityIdPrefix);
         await dbContext.Set<TEntity>().AddAsync(entity, cancellationToken);
         await dbContext.SaveChangesAsync(cancellationToken);
 

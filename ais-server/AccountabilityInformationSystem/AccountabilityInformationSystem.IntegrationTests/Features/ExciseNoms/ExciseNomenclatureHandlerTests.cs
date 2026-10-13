@@ -98,6 +98,31 @@ public sealed class ExciseNomenclatureHandlerTests(AisWithAutoEmailConfirmWebApp
 
     [Theory]
     [MemberData(nameof(EntityRoutes))]
+    public async Task Update_ShouldOnlyChangeProvidedFields(string baseRoute, Func<string> nextCode)
+    {
+        // Arrange
+        HttpClient client = await factory.CreateAuthenticatedClientWithout2FaAsync();
+        string code = nextCode();
+        string id = await CreateAsync(client, baseRoute, code);
+
+        // Act
+        HttpResponseMessage response = await client.PutAsJsonAsync(
+            $"{baseRoute}/{id}",
+            new { DescriptionEn = "Updated description" },
+            TestContext.Current.CancellationToken);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+        ExciseNomenclatureResponse updated = (await client.GetFromJsonAsync<ExciseNomenclatureResponse>(
+            $"{baseRoute}/{id}",
+            TestContext.Current.CancellationToken))!;
+        Assert.Equal(code, updated.Code);
+        Assert.Equal("Тестово описание", updated.DescriptionBg);
+        Assert.Equal("Updated description", updated.DescriptionEn);
+    }
+
+    [Theory]
+    [MemberData(nameof(EntityRoutes))]
     public async Task ToggleStatus_ShouldSucceed_AndFlipIsUsed(string baseRoute, Func<string> nextCode)
     {
         // Arrange

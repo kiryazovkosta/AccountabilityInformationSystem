@@ -13,15 +13,12 @@ public static class EnumExtensions
             throw new ArgumentException("Invalid enum value", nameof(value));
         }
 
-        DescriptionAttribute? descriptionAttribute = fieldInfo.GetCustomAttributes(typeof(System.ComponentModel.DescriptionAttribute), false)
-            .FirstOrDefault() as System.ComponentModel.DescriptionAttribute;
-
-        if (descriptionAttribute is null && Attribute.IsDefined(fieldInfo!, typeof(System.ComponentModel.DescriptionAttribute)))
+        if (fieldInfo.GetCustomAttributes(typeof(DescriptionAttribute), false).FirstOrDefault()
+            is not DescriptionAttribute descriptionAttribute)
         {
             throw new InvalidOperationException($"Enum value '{value}' is missing a Description attribute.");
         }
 
-
-        return descriptionAttribute!.Description;
+        return descriptionAttribute.Description;
     }
 }

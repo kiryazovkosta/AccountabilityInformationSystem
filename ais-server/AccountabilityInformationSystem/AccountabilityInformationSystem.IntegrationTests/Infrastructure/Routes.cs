@@ -84,4 +84,9 @@ public static class Routes
 
         public static string Delete(string id) => $"{Base}/{id}";
     }
+
+    public static class Admin
+    {
+        public const string Users = "/api/admin/users";
+    }
 }

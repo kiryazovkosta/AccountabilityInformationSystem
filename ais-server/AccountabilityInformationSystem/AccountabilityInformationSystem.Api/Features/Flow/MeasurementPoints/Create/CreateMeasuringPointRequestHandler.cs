@@ -1,10 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using AccountabilityInformationSystem.Api.Domain.Entities.Abstraction;
 using AccountabilityInformationSystem.Api.Domain.Entities.Flow;
-using AccountabilityInformationSystem.Api.Domain.Entities.Identity;
 using AccountabilityInformationSystem.Api.Features.Flow.MeasurementPoints.Shared;
 using AccountabilityInformationSystem.Api.Infrastructure.Data;
-using AccountabilityInformationSystem.Api.Shared.Services.UserContexting;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,19 +10,10 @@ namespace AccountabilityInformationSystem.Api.Features.Flow.MeasurementPoints.Cr
 
 public sealed class CreateMeasuringPointRequestHandler(
     ApplicationDbContext dbContext,
-    UserContext userContext,
     MeasuringPointLinkService measuringPointLinkService)
 {
     public async Task<Result<MeasurementPointResponse>> Handle(CreateMeasuringPointRequest request, CancellationToken cancellationToken)
     {
-        User? user = await userContext.GetUserAsync(cancellationToken);
-        if (user is null)
-        {
-            return Result<MeasurementPointResponse>.Failure(
-                new Error("user", "Unauthorized"),
-                ResultFailureType.Unauthorized);
-        }
-
         if (!await dbContext.Ikunks.AnyAsync(i => i.Id == request.IkunkId, cancellationToken))
         {
             return Result<MeasurementPointResponse>.Failure(

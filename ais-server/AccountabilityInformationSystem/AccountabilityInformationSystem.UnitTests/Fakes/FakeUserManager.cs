@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -9,6 +10,10 @@ namespace AccountabilityInformationSystem.UnitTests.Fakes;
 // virtual members the handlers under test actually call, mirroring the existing NullEmailSender/FakeFileStorage
 // hand-written-fake convention one layer deeper. Every overridden member defaults to throwing so a test that
 // forgets to configure a branch it hits fails loudly instead of silently returning a default.
+[SuppressMessage(
+    "Reliability",
+    "CA2000:Dispose objects before losing scope",
+    Justification = "UserManager takes ownership of the store and disposes it in Dispose.")]
 public sealed class FakeUserManager()
     : UserManager<IdentityUser>(
         new NotSupportedUserStore(),

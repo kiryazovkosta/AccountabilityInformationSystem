@@ -1,6 +1,4 @@
 using AccountabilityInformationSystem.Api.Domain.Entities.Family.Warranty;
-using AccountabilityInformationSystem.Api.Domain.Entities.Flow;
-using AccountabilityInformationSystem.Api.Features.Family.WarrantyBrands.Shared;
 using AccountabilityInformationSystem.Api.Shared.Services.Mapping;
 
 namespace AccountabilityInformationSystem.Api.Features.Family.WarrantyRecords.Shared;
@@ -8,7 +6,7 @@ namespace AccountabilityInformationSystem.Api.Features.Family.WarrantyRecords.Sh
 public sealed record WarrantyRecordResponse : IMapFrom<WarrantyRecord>
 {
     public required string Id { get; init; }
-    public required WarrantyBrandResponse WarrantyBrand { get; init; }
+    public required WarrantyRecordBrandResponse WarrantyBrand { get; init; }
     public required string Model { get; init; }
     public required DateOnly PurchaseDate { get; init; }
     public StorageFileResponse? Receipt { get; init; }

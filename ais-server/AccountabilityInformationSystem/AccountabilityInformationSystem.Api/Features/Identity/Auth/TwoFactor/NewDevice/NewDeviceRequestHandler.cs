@@ -1,17 +1,13 @@
 using AccountabilityInformationSystem.Api.Domain.Entities.Abstraction;
-using AccountabilityInformationSystem.Api.Features.Identity.Auth.Login;
-using Microsoft.AspNetCore.DataProtection;
+using AccountabilityInformationSystem.Api.Features.Identity.Auth.Shared;
 using Microsoft.AspNetCore.Identity;
 
 namespace AccountabilityInformationSystem.Api.Features.Identity.Auth.TwoFactor.NewDevice;
 
 public sealed class NewDeviceRequestHandler(
     UserManager<IdentityUser> userManager,
-    IDataProtectionProvider dataProtectionProvider)
+    TwoFactorSetupTokenProtector setupTokenProtector)
 {
-    private readonly ITimeLimitedDataProtector _setupProtector =
-        dataProtectionProvider.CreateProtector("TwoFactorSetupToken").ToTimeLimitedDataProtector();
-
     public async Task<Result<LoginUserResponse>> Handle(NewDeviceRequest request, CancellationToken cancellationToken)
     {
         _ = cancellationToken;
@@ -42,7 +38,7 @@ public sealed class NewDeviceRequestHandler(
 
         await userManager.SetTwoFactorEnabledAsync(identityUser, false);
 
-        string setupToken = _setupProtector.Protect(identityUser.Id, TimeSpan.FromMinutes(10));
+        string setupToken = setupTokenProtector.Protect(identityUser.Id);
         return Result<LoginUserResponse>.Success(
             new LoginUserResponse(RequiresTwoFactorSetup: true, SetupToken: setupToken),
             ResultSuccessType.Accepted);

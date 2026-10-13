@@ -1,31 +1,21 @@
 using AccountabilityInformationSystem.Api.Domain.Entities.Abstraction;
-using AccountabilityInformationSystem.Api.Domain.Entities.Identity;
 using AccountabilityInformationSystem.Api.Infrastructure.Data;
-using AccountabilityInformationSystem.Api.Shared.Services.UserContexting;
 using Microsoft.EntityFrameworkCore;
 
 namespace AccountabilityInformationSystem.Api.Features.ExciseNoms.Shared.Update;
 
-public class UpdateExciseNomenclatureRequestHandler<TEntity>(
-    UserContext userContext,
+public abstract class UpdateExciseNomenclatureRequestHandler<TEntity, TUpdateRequest>(
     ApplicationDbContext dbContext)
         where TEntity : AuditableEntity, IEntity, IExciseEntity, new()
+        where TUpdateRequest : UpdateExciseNomenclatureRequest
 {
     public async Task<Result> Handle(
-        UpdateExciseNomenclatureCommand<TEntity> command,
+        TUpdateRequest request,
         CancellationToken cancellationToken)
     {
-        User? user = await userContext.GetUserAsync(cancellationToken);
-        if (user is null)
-        {
-            return Result.Failure(
-                new Error("User", "Unauthorized"),
-                ResultFailureType.Unauthorized);
-        }
-
         TEntity? entity = await dbContext
             .Set<TEntity>()
-            .FirstOrDefaultAsync(en => en.Id == command.Id, cancellationToken);
+            .FirstOrDefaultAsync(en => en.Id == request.Id, cancellationToken);
         if (entity is null)
         {
             return Result.Failure(
@@ -35,7 +25,7 @@ public class UpdateExciseNomenclatureRequestHandler<TEntity>(
 
         bool codeExists = await dbContext
             .Set<TEntity>()
-            .AnyAsync(en => en.Code == command.Request.Code && en.Id != entity.Id, cancellationToken);
+            .AnyAsync(en => en.Code == request.Code && en.Id != entity.Id, cancellationToken);
         if (codeExists)
         {
             return Result.Failure(
@@ -43,7 +33,7 @@ public class UpdateExciseNomenclatureRequestHandler<TEntity>(
                 ResultFailureType.Conflict);
         }
 
-        entity.UpdateFromRequest(command.Request);
+        entity.UpdateFromRequest(request);
         await dbContext.SaveChangesAsync(cancellationToken);
         return Result.Success(ResultSuccessType.NoContent);
     }

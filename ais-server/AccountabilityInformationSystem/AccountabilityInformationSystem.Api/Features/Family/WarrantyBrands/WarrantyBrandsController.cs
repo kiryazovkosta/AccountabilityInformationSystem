@@ -8,7 +8,6 @@ using AccountabilityInformationSystem.Api.Features.Family.WarrantyBrands.Shared;
 using AccountabilityInformationSystem.Api.Shared;
 using AccountabilityInformationSystem.Api.Shared.Extensions;
 using Asp.Versioning;
-using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Wolverine;
@@ -46,10 +45,8 @@ public sealed class WarrantyBrandsController(IMessageBus bus) : ApiController
     [Produces(typeof(WarrantyBrandResponse))]
     public async Task<IActionResult> CreateWarrantyBrand(
         [FromForm] CreateWarrantyBrandRequest request,
-        IValidator<CreateWarrantyBrandRequest> validator,
         CancellationToken cancellationToken)
     {
-        await validator.ValidateAndThrowAsync(request, cancellationToken);
         Result<WarrantyBrandResponse> result = await bus.InvokeAsync<Result<WarrantyBrandResponse>>(request, cancellationToken);
         if (result.IsFailure)
         {

@@ -3,27 +3,22 @@ using AccountabilityInformationSystem.Api.Domain.Entities.Identity;
 using AccountabilityInformationSystem.Api.Features.Identity.Auth.Shared;
 using AccountabilityInformationSystem.Api.Infrastructure.Data;
 using AccountabilityInformationSystem.Api.Settings;
-using AccountabilityInformationSystem.Api.Shared.Services.Tokenizing;
-using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
 namespace AccountabilityInformationSystem.Api.Features.Identity.Auth.Login;
 
-public class LoginUserRequestHandler(
+public sealed class LoginUserRequestHandler(
     ApplicationDbContext applicationDbContext,
     ApplicationIdentityDbContext identityDbContext,
     UserManager<IdentityUser> userManager,
     TokenProvider tokenProvider,
     IOptions<JwtAuthOptions> options,
-    IDataProtectionProvider dataProtectionProvider,
+    TwoFactorSetupTokenProtector setupTokenProtector,
     TimeProvider timeProvider)
 {
     private readonly JwtAuthOptions _jwtAuthOptions = options.Value;
-    private readonly ITimeLimitedDataProtector _setupProtector =
-        dataProtectionProvider.CreateProtector("TwoFactorSetupToken").ToTimeLimitedDataProtector();
-
 
     public async Task<Result<LoginUserResponse>> Handle(LoginUserRequest request, CancellationToken cancellationToken)
     {
@@ -50,7 +45,7 @@ public class LoginUserRequestHandler(
                         ResultFailureType.Forbidden);
                 }
 
-                string setupToken = _setupProtector.Protect(identityUser.Id, TimeSpan.FromMinutes(10));
+                string setupToken = setupTokenProtector.Protect(identityUser.Id);
                 return Result<LoginUserResponse>.Success(
                     new LoginUserResponse(RequiresTwoFactorSetup: true, SetupToken: setupToken),
                     ResultSuccessType.Accepted);

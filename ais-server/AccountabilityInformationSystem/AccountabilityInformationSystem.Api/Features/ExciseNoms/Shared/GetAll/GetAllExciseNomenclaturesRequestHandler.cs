@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AccountabilityInformationSystem.Api.Features.ExciseNoms.Shared.GetAll;
 
-public class GetAllExciseNomenclaturesRequestHandler<TEntity>(
+public abstract class GetAllExciseNomenclaturesRequestHandler<TEntity>(
     SortMappingProvider sortMappingProvider,
     DataShapingService dataShapingService,
     ApplicationDbContext dbContext)

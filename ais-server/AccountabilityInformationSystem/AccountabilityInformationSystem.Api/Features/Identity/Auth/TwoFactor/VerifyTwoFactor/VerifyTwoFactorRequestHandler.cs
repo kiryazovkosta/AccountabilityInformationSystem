@@ -1,28 +1,18 @@
-﻿using System.Security.Cryptography;
-using AccountabilityInformationSystem.Api.Domain.Entities.Abstraction;
-using AccountabilityInformationSystem.Api.Features.Identity.Auth.TwoFactor.SetupTwoFactor;
-using Microsoft.AspNetCore.DataProtection;
+﻿using AccountabilityInformationSystem.Api.Domain.Entities.Abstraction;
+using AccountabilityInformationSystem.Api.Features.Identity.Auth.Shared;
 using Microsoft.AspNetCore.Identity;
 
 namespace AccountabilityInformationSystem.Api.Features.Identity.Auth.TwoFactor.VerifyTwoFactor;
 
 public sealed class VerifyTwoFactorRequestHandler(
     UserManager<IdentityUser> userManager,
-    IDataProtectionProvider dataProtectionProvider)
+    TwoFactorSetupTokenProtector setupTokenProtector)
 {
-    private readonly ITimeLimitedDataProtector _setupProtector =
-        dataProtectionProvider.CreateProtector("TwoFactorSetupToken").ToTimeLimitedDataProtector();
-
     public async Task<Result<VerifyTwoFactorResponse>> Handle(VerifyTwoFactorRequest request, CancellationToken cancellationToken)
     {
         _ = cancellationToken;
 
-        string userId = string.Empty;
-        try
-        {
-            userId = _setupProtector.Unprotect(request.SetupToken);
-        }
-        catch(CryptographicException)
+        if (!setupTokenProtector.TryUnprotect(request.SetupToken, out string? userId))
         {
             return Result<VerifyTwoFactorResponse>.Failure(
                 new Error("SetupToken", "Invalid or expired setup token."));

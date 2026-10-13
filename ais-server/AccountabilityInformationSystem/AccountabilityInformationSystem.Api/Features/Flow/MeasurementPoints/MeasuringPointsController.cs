@@ -8,14 +8,16 @@ using AccountabilityInformationSystem.Api.Features.Flow.MeasurementPoints.Deacti
 using AccountabilityInformationSystem.Api.Features.Flow.MeasurementPoints.GetAll;
 using AccountabilityInformationSystem.Api.Features.Flow.MeasurementPoints.GetAllV2;
 using AccountabilityInformationSystem.Api.Features.Flow.MeasurementPoints.GetById;
+using AccountabilityInformationSystem.Api.Features.Flow.MeasurementPoints.GetFlowDirections;
+using AccountabilityInformationSystem.Api.Features.Flow.MeasurementPoints.GetTransports;
 using AccountabilityInformationSystem.Api.Features.Flow.MeasurementPoints.Shared;
 using AccountabilityInformationSystem.Api.Features.Flow.MeasurementPoints.Update;
 using AccountabilityInformationSystem.Api.Infrastructure.Data;
+using AccountabilityInformationSystem.Api.Shared;
 using AccountabilityInformationSystem.Api.Shared.Constants;
 using AccountabilityInformationSystem.Api.Shared.Extensions;
 using AccountabilityInformationSystem.Api.Shared.Models;
 using Asp.Versioning;
-using FluentValidation;
 using Mapster;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -36,7 +38,7 @@ namespace AccountabilityInformationSystem.Api.Features.Flow.MeasurementPoints;
     CustomMediaTypeNames.Application.HateoasJsonV1,
     CustomMediaTypeNames.Application.HateoasJsonV2)]
 public sealed class MeasuringPointsController(
-    IMessageBus bus) : ControllerBase
+    IMessageBus bus) : ApiController
 {
     [HttpGet]
     [MapToApiVersion(1.0)]
@@ -75,11 +77,9 @@ public sealed class MeasuringPointsController(
     [HttpPost]
     public async Task<IActionResult> CreateMeasuringPoint(
         [FromBody] CreateMeasuringPointRequest request,
-        IValidator<CreateMeasuringPointRequest> validator,
         CancellationToken cancellationToken
         )
     {
-        await validator.ValidateAndThrowAsync(request, cancellationToken);
         Result<MeasurementPointResponse> result = await bus.InvokeAsync<Result<MeasurementPointResponse>>(request, cancellationToken);
         if (result.IsFailure)
         {
@@ -93,11 +93,9 @@ public sealed class MeasuringPointsController(
     public async Task<IActionResult> UpdateMeasurementPoint(
         string id,
         [FromBody] UpdateMeasurementPointRequest request,
-        IValidator<UpdateMeasurementPointRequest> validator,
         CancellationToken cancellationToken)
     {
         request = request with { Id = id };
-        await validator.ValidateAndThrowAsync(request, cancellationToken);
         Result result = await bus.InvokeAsync<Result>(request, cancellationToken);
         return result.ToActionResult();
     }
@@ -106,30 +104,28 @@ public sealed class MeasuringPointsController(
     public async Task<IActionResult> DeactivateMeasurementPoint(
         string id,
         [FromBody] DeactivateMeasuringPointRequest request,
-        IValidator<DeactivateMeasuringPointRequest> validator,
         CancellationToken cancellationToken)
     {
         request = request with { Id = id };
-        await validator.ValidateAndThrowAsync(request, cancellationToken);
         Result result = await bus.InvokeAsync<Result>(request, cancellationToken);
         return result.ToActionResult();
     }
 
     [HttpGet("transports")]
-    public ActionResult<List<EnumTypeResponse>> GetTransports()
+    [ProducesResponseType<List<EnumTypeResponse>>(StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetTransports(CancellationToken cancellationToken)
     {
-        List<EnumTypeResponse> transports = [.. Enum
-            .GetValues<TransportType>()
-            .Select(t => t.Adapt<EnumTypeResponse>())];
-        return Ok(transports);
+        Result<List<EnumTypeResponse>> result =
+            await bus.InvokeAsync<Result<List<EnumTypeResponse>>>(new GetTransportsRequest(), cancellationToken);
+        return result.ToActionResult();
     }
 
     [HttpGet("flow-directions")]
-    public ActionResult<List<EnumTypeResponse>> GetFlowDirections()
+    [ProducesResponseType<List<EnumTypeResponse>>(StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetFlowDirections(CancellationToken cancellationToken)
     {
-        List<EnumTypeResponse> transports = [.. Enum
-            .GetValues<FlowDirectionType>()
-            .Select(t => t.Adapt<EnumTypeResponse>())];
-        return Ok(transports);
+        Result<List<EnumTypeResponse>> result =
+            await bus.InvokeAsync<Result<List<EnumTypeResponse>>>(new GetFlowDirectionsRequest(), cancellationToken);
+        return result.ToActionResult();
     }
 }

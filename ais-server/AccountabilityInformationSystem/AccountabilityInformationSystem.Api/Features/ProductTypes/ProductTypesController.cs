@@ -5,11 +5,11 @@ using AccountabilityInformationSystem.Api.Features.ProductTypes.GetAll;
 using AccountabilityInformationSystem.Api.Features.ProductTypes.GetById;
 using AccountabilityInformationSystem.Api.Features.ProductTypes.Shared;
 using AccountabilityInformationSystem.Api.Infrastructure.Data;
+using AccountabilityInformationSystem.Api.Shared;
 using AccountabilityInformationSystem.Api.Shared.Extensions;
 using AccountabilityInformationSystem.Api.Shared.Models;
 using AccountabilityInformationSystem.Api.Shared.Services.DataShaping;
 using Asp.Versioning;
-using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -22,7 +22,7 @@ namespace AccountabilityInformationSystem.Api.Features.ProductTypes;
 [ApiVersion("1.0")]
 [Authorize]
 public sealed class ProductTypesController(
-    IMessageBus bus) : ControllerBase
+    IMessageBus bus) : ApiController
 {
     [HttpGet]
     [MapToApiVersion(1.0)]
@@ -51,10 +51,8 @@ public sealed class ProductTypesController(
     [HttpPost]
     public async Task<IActionResult> CreateProductType(
         [FromBody] CreateProductTypeRequest request,
-        IValidator<CreateProductTypeRequest> validator,
         CancellationToken cancellationToken)
     {
-        await validator.ValidateAndThrowAsync(request, cancellationToken);
         Result<ProductTypeResponse> result = await bus.InvokeAsync<Result<ProductTypeResponse>>(request, cancellationToken);
         if (result.IsFailure)
         {

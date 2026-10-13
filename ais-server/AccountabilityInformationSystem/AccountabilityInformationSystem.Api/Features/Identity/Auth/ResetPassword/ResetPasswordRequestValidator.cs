@@ -2,7 +2,7 @@ using FluentValidation;
 
 namespace AccountabilityInformationSystem.Api.Features.Identity.Auth.ResetPassword;
 
-internal sealed class ResetPasswordRequestValidator : AbstractValidator<ResetPasswordRequest>
+public sealed class ResetPasswordRequestValidator : AbstractValidator<ResetPasswordRequest>
 {
     public ResetPasswordRequestValidator()
     {

@@ -1,13 +1,12 @@
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
-using AccountabilityInformationSystem.Api.Features.Identity.Auth.Shared;
 using AccountabilityInformationSystem.Api.Settings;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 
-namespace AccountabilityInformationSystem.Api.Shared.Services.Tokenizing;
+namespace AccountabilityInformationSystem.Api.Features.Identity.Auth.Shared;
 
 public sealed class TokenProvider(IOptions<JwtAuthOptions> options, TimeProvider timeProvider)
 {

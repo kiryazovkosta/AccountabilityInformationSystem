@@ -2,7 +2,7 @@ using FluentValidation;
 
 namespace AccountabilityInformationSystem.Api.Features.Identity.Auth.TwoFactor.VerifyTwoFactor;
 
-internal sealed class VerifyTwoFactorRequestValidator : AbstractValidator<VerifyTwoFactorRequest>
+public sealed class VerifyTwoFactorRequestValidator : AbstractValidator<VerifyTwoFactorRequest>
 {
     public VerifyTwoFactorRequestValidator()
     {

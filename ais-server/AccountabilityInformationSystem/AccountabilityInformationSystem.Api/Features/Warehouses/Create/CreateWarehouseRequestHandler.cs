@@ -1,29 +1,18 @@
 ﻿using AccountabilityInformationSystem.Api.Domain.Entities.Abstraction;
 using AccountabilityInformationSystem.Api.Domain.Entities.Flow;
-using AccountabilityInformationSystem.Api.Domain.Entities.Identity;
 using AccountabilityInformationSystem.Api.Features.Warehouses.Create;
 using AccountabilityInformationSystem.Api.Features.Warehouses.Shared;
 using AccountabilityInformationSystem.Api.Infrastructure.Data;
-using AccountabilityInformationSystem.Api.Shared.Services.UserContexting;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 
 namespace AccountabilityInformationSystem.Api.Features.Warehouses.Create;
 
 public sealed class CreateWarehouseRequestHandler(
-    ApplicationDbContext dbContext,
-    UserContext userContext)
+    ApplicationDbContext dbContext)
 {
     public async Task<Result<WarehouseResponse>> Handle(CreateWarehouseRequest request, CancellationToken cancellationToken)
     {
-        User? user = await userContext.GetUserAsync(cancellationToken);
-        if (user is null)
-        {
-            return Result<WarehouseResponse>.Failure(
-                new Error("User", "Non existsing or unauthorized user!"), 
-                ResultFailureType.Unauthorized);
-        }
-
         if (await dbContext.Warehouses.AnyAsync(w => w.ExciseNumber == request.ExciseNumber, cancellationToken))
         {
             return Result< WarehouseResponse>.Failure(

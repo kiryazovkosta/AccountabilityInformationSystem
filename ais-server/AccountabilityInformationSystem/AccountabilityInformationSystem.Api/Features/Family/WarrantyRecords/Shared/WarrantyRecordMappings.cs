@@ -14,15 +14,22 @@ internal static class WarrantyRecordMappings
         [
             new SortMapping(nameof(WarrantyRecordListResponse.Model), nameof(WarrantyRecord.Model)),
             new SortMapping(nameof(WarrantyRecordListResponse.PurchaseDate), nameof(WarrantyRecord.PurchaseDate)),
-            new SortMapping(nameof(WarrantyRecordListResponse.WarrantyBrandName), nameof(WarrantyRecord.WarrantyBrand.Name)),
+            new SortMapping(
+                nameof(WarrantyRecordListResponse.WarrantyBrandName),
+                $"{nameof(WarrantyRecord.WarrantyBrand)}.{nameof(WarrantyRecord.WarrantyBrand.Name)}"),
             new SortMapping(nameof(WarrantyRecordListResponse.ReceiptExists), nameof(WarrantyRecord.Receipt)),
             new SortMapping(nameof(WarrantyRecordListResponse.FrontImageExists), nameof(WarrantyRecord.FrontImage)),
             new SortMapping(nameof(WarrantyRecordListResponse.BackImageExists), nameof(WarrantyRecord.BackImage)),
             new SortMapping(nameof(WarrantyRecordListResponse.Duration), nameof(WarrantyRecord.Duration)),
-            new SortMapping(nameof(WarrantyRecordListResponse.EndDate), nameof(WarrantyRecord.EndDate)),
-            new SortMapping(nameof(WarrantyRecordListResponse.Status), nameof(WarrantyRecord.Status))
+            new SortMapping(nameof(WarrantyRecordListResponse.EndDate), EndDateExpression),
+            new SortMapping(nameof(WarrantyRecordListResponse.Status), EndDateExpression, Reverse: true)
         ]
     };
+
+    // EndDate and Status are computed in C# and ignored by EF, so sorting uses the same calculation as a
+    // translatable expression; a later end date means the warranty is (still) active.
+    private const string EndDateExpression =
+        $"{nameof(WarrantyRecord.PurchaseDate)}.{nameof(DateOnly.AddMonths)}({nameof(WarrantyRecord.Duration)})";
 
     public static WarrantyRecordResponse FillFileUrls(
         this WarrantyRecordResponse response,
@@ -42,13 +49,4 @@ internal static class WarrantyRecordMappings
             response.Url = fileStorage.GetReadUrl(file.BlobName, file.IsPrivate).ToString();
         }
     }
-}
-
-public sealed record StorageFileResponse : IMapFrom<StorageFile>
-{
-    public string Id { get; init; }
-    public string OriginalFileName { get; init; }
-    public string ContentType { get; init; }
-    public long SizeBytes { get; init; }
-    public string? Url { get; set; }
 }

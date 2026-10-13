@@ -40,12 +40,15 @@ builder.Eventing.Subscribe<BeforeStartEvent>(async (ev, ct) =>
 
     if (!File.Exists(certPath))
     {
+        // Dev-time helper: the dotnet CLI is deliberately resolved from PATH, like any local tooling.
+#pragma warning disable S4036
         ProcessStartInfo psi = new()
         {
             FileName = "dotnet",
             Arguments = $"dev-certs https --export-path \"{certPath}\" --format Pem --no-password",
             UseShellExecute = false
         };
+#pragma warning restore S4036
         using Process process = Process.Start(psi)!;
         await process.WaitForExitAsync(ct);
     }

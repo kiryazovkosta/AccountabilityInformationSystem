@@ -36,6 +36,7 @@ public static class EntitiesConstants
 
     public static class ApCodeConstants
     {
+        public const string IdPrefix = "ap";
         public const int CodeLength = 4;
         public const string CodePattern = @"^[A-Z]\d{3}$";
         public const int DescriptionMaxlength = 1000;
@@ -44,6 +45,7 @@ public static class EntitiesConstants
 
     public static class BrandNameConstants
     {
+        public const string IdPrefix = "bn";
         public const int CodeLength = 6;
         public const string CodePattern = @"^[A-Z]\d{5}$";
         public const int DescriptionMaxlength = 350;
@@ -52,6 +54,7 @@ public static class EntitiesConstants
 
     public static class CnCodeConstants
     {
+        public const string IdPrefix = "cn";
         public const int CodeLength = 8;
         public const string CodePattern = @"^(?!00000000)\d{8}$";
         public const int DescriptionMaxlength = 1000;

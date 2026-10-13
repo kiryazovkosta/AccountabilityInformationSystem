@@ -11,6 +11,7 @@ using AccountabilityInformationSystem.Api.Features.Flow.MeasurementPoints.Shared
 using AccountabilityInformationSystem.Api.Features.Flow.MeasurementPointsData.Create;
 using AccountabilityInformationSystem.Api.Features.Flow.MeasurementPointsData.Shared;
 using AccountabilityInformationSystem.Api.Features.Identity.Auth.Login;
+using AccountabilityInformationSystem.Api.Features.Identity.Auth.Shared;
 using AccountabilityInformationSystem.Api.Features.ProductTypes.Create;
 using AccountabilityInformationSystem.Api.Features.ProductTypes.Shared;
 using AccountabilityInformationSystem.Api.Features.Warehouses.Create;
@@ -105,7 +106,7 @@ public sealed class CreateMeasuringPointDataTests(AisWithAutoEmailConfirmWebAppl
         Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
     }
 
-    private static object NewRequest(string measurementPointId, string productId, int number) => new CreateMeasuringPointDataRequest
+    private static CreateMeasuringPointDataRequest NewRequest(string measurementPointId, string productId, int number) => new()
     {
         MeasurementPointId = measurementPointId,
         Number = number,

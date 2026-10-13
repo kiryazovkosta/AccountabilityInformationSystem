@@ -1,4 +1,5 @@
 using AccountabilityInformationSystem.Api.Domain.Entities.Abstraction;
+using AccountabilityInformationSystem.Api.Features.Identity.Auth.Shared;
 using AccountabilityInformationSystem.Api.Features.Identity.Auth.TwoFactor.SetupTwoFactor;
 using AccountabilityInformationSystem.UnitTests.Fakes;
 using Microsoft.AspNetCore.DataProtection;
@@ -14,8 +15,8 @@ public sealed class SetupTwoFactorRequestHandlerTests
     public async Task Handle_ShouldFail_WhenSetupTokenCannotBeDecrypted()
     {
         // Arrange - protected with a different provider instance, so the handler's provider cannot decrypt it.
-        FakeUserManager userManager = new();
-        SetupTwoFactorRequestHandler handler = new(userManager, _dataProtectionProvider);
+        using FakeUserManager userManager = new();
+        SetupTwoFactorRequestHandler handler = new(userManager, new TwoFactorSetupTokenProtector(_dataProtectionProvider));
         string tokenFromAnotherProvider = new EphemeralDataProtectionProvider()
             .CreateProtector("TwoFactorSetupToken")
             .ToTimeLimitedDataProtector()
@@ -34,11 +35,11 @@ public sealed class SetupTwoFactorRequestHandlerTests
     public async Task Handle_ShouldReturnNotFound_WhenUserDoesNotExist()
     {
         // Arrange
-        FakeUserManager userManager = new()
+        using FakeUserManager userManager = new()
         {
             FindByIdAsyncFunc = _ => Task.FromResult<IdentityUser?>(null)
         };
-        SetupTwoFactorRequestHandler handler = new(userManager, _dataProtectionProvider);
+        SetupTwoFactorRequestHandler handler = new(userManager, new TwoFactorSetupTokenProtector(_dataProtectionProvider));
 
         // Act
         Result<SetupTwoFactorResponse> result = await handler.Handle(
@@ -55,11 +56,11 @@ public sealed class SetupTwoFactorRequestHandlerTests
     {
         // Arrange
         IdentityUser user = new("user1") { Id = "user-1", TwoFactorEnabled = true };
-        FakeUserManager userManager = new()
+        using FakeUserManager userManager = new()
         {
             FindByIdAsyncFunc = _ => Task.FromResult<IdentityUser?>(user)
         };
-        SetupTwoFactorRequestHandler handler = new(userManager, _dataProtectionProvider);
+        SetupTwoFactorRequestHandler handler = new(userManager, new TwoFactorSetupTokenProtector(_dataProtectionProvider));
 
         // Act
         Result<SetupTwoFactorResponse> result = await handler.Handle(
@@ -76,13 +77,13 @@ public sealed class SetupTwoFactorRequestHandlerTests
     {
         // Arrange
         IdentityUser user = new("user1") { Id = "user-1", TwoFactorEnabled = false };
-        FakeUserManager userManager = new()
+        using FakeUserManager userManager = new()
         {
             FindByIdAsyncFunc = _ => Task.FromResult<IdentityUser?>(user),
             ResetAuthenticatorKeyAsyncFunc = _ => Task.FromResult(IdentityResult.Success),
             GetAuthenticatorKeyAsyncFunc = _ => Task.FromResult<string?>(null)
         };
-        SetupTwoFactorRequestHandler handler = new(userManager, _dataProtectionProvider);
+        SetupTwoFactorRequestHandler handler = new(userManager, new TwoFactorSetupTokenProtector(_dataProtectionProvider));
 
         // Act
         Result<SetupTwoFactorResponse> result = await handler.Handle(
@@ -98,13 +99,13 @@ public sealed class SetupTwoFactorRequestHandlerTests
     {
         // Arrange
         IdentityUser user = new("user1") { Id = "user-1", Email = "user1@example.com", TwoFactorEnabled = false };
-        FakeUserManager userManager = new()
+        using FakeUserManager userManager = new()
         {
             FindByIdAsyncFunc = _ => Task.FromResult<IdentityUser?>(user),
             ResetAuthenticatorKeyAsyncFunc = _ => Task.FromResult(IdentityResult.Success),
             GetAuthenticatorKeyAsyncFunc = _ => Task.FromResult<string?>("ABCDEFGHIJ")
         };
-        SetupTwoFactorRequestHandler handler = new(userManager, _dataProtectionProvider);
+        SetupTwoFactorRequestHandler handler = new(userManager, new TwoFactorSetupTokenProtector(_dataProtectionProvider));
 
         // Act
         Result<SetupTwoFactorResponse> result = await handler.Handle(

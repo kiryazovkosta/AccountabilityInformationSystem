@@ -1,30 +1,31 @@
 using System.Dynamic;
 using AccountabilityInformationSystem.Api.Domain.Entities.Abstraction;
+using AccountabilityInformationSystem.Api.Features.ExciseNoms.Shared.Create;
+using AccountabilityInformationSystem.Api.Features.ExciseNoms.Shared.GetAll;
 using AccountabilityInformationSystem.Api.Features.ExciseNoms.Shared.GetById;
 using AccountabilityInformationSystem.Api.Features.ExciseNoms.Shared.ToggleStatus;
+using AccountabilityInformationSystem.Api.Features.ExciseNoms.Shared.Update;
+using AccountabilityInformationSystem.Api.Shared;
 using AccountabilityInformationSystem.Api.Shared.Extensions;
 using AccountabilityInformationSystem.Api.Shared.Models;
-using Wolverine;
 using Asp.Versioning;
-using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using AccountabilityInformationSystem.Api.Features.ExciseNoms.Shared.GetAll;
-using AccountabilityInformationSystem.Api.Features.ExciseNoms.Shared.Create;
-using AccountabilityInformationSystem.Api.Features.ExciseNoms.Shared.Update;
+using Wolverine;
 
 namespace AccountabilityInformationSystem.Api.Features.ExciseNoms.Shared;
 
-[ResponseCache(Duration = 120)]
+[ResponseCache(Duration = 120, VaryByQueryKeys = ["*"])]
 [Authorize]
 [ApiController]
 [ApiVersion("1.0")]
-public abstract class ExciseNomenclatureController<TEntity, TCreateRequest, TUpdateRequest> : ControllerBase
+public abstract class ExciseNomenclatureController<TEntity, TCreateRequest, TUpdateRequest> : ApiController
     where TEntity : AuditableEntity, IEntity, IExciseEntity, new()
     where TCreateRequest : CreateExciseNomenclatureRequest
     where TUpdateRequest : UpdateExciseNomenclatureRequest
 {
-    protected abstract string EntityIdPrefix { get; }
+    // Each concrete controller merges the route id into its own request type, since `with` needs the concrete record.
+    protected abstract TUpdateRequest WithId(TUpdateRequest request, string id);
 
     [HttpGet]
     [MapToApiVersion(1.0)]
@@ -55,14 +56,11 @@ public abstract class ExciseNomenclatureController<TEntity, TCreateRequest, TUpd
     [MapToApiVersion(1.0)]
     public async Task<IActionResult> Create(
         [FromBody] TCreateRequest request,
-        [FromServices] IValidator<TCreateRequest> validator,
         [FromServices] IMessageBus bus,
         CancellationToken cancellationToken)
     {
-        await validator.ValidateAndThrowAsync(request, cancellationToken);
-
         Result<ExciseNomenclatureResponse> result = await bus.InvokeAsync<Result<ExciseNomenclatureResponse>>(
-            new CreateExciseNomenclatureCommand<TEntity, TCreateRequest>(request, EntityIdPrefix),
+            request,
             cancellationToken);
 
         if (!result.IsSuccess)
@@ -80,15 +78,10 @@ public abstract class ExciseNomenclatureController<TEntity, TCreateRequest, TUpd
     [MapToApiVersion(1.0)]
     public async Task<IActionResult> CreateBatch(
         [FromBody] CreateExciseNomenclatureBatchRequest<TCreateRequest> request,
-        [FromServices] IValidator<CreateExciseNomenclatureBatchRequest<TCreateRequest>> validator,
         [FromServices] IMessageBus bus,
         CancellationToken cancellationToken)
     {
-        await validator.ValidateAndThrowAsync(request, cancellationToken);
-
-        Result result = await bus.InvokeAsync<Result>(
-            new CreateExciseNomenclatureBatchCommand<TEntity, TCreateRequest>(request.Entries, EntityIdPrefix),
-            cancellationToken);
+        Result result = await bus.InvokeAsync<Result>(request, cancellationToken);
         return result.ToActionResult();
     }
 
@@ -97,13 +90,11 @@ public abstract class ExciseNomenclatureController<TEntity, TCreateRequest, TUpd
     public async Task<IActionResult> Update(
         string id,
         [FromBody] TUpdateRequest request,
-        [FromServices] IValidator<TUpdateRequest> validator,
         [FromServices] IMessageBus bus,
         CancellationToken cancellationToken)
     {
-        await validator.ValidateAndThrowAsync(request, cancellationToken);
-        Result result = await bus.InvokeAsync<Result>(
-            new UpdateExciseNomenclatureCommand<TEntity>(id, request), cancellationToken);
+        request = WithId(request, id);
+        Result result = await bus.InvokeAsync<Result>(request, cancellationToken);
         return result.ToActionResult();
     }
 

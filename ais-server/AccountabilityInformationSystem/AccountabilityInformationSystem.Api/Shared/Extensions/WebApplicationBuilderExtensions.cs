@@ -1,23 +1,5 @@
 using System.Reflection;
 using System.Text;
-using AccountabilityInformationSystem.Api.Domain.Entities;
-using AccountabilityInformationSystem.Api.Domain.Entities.Excise;
-using AccountabilityInformationSystem.Api.Domain.Entities.Family.Warranty;
-using AccountabilityInformationSystem.Api.Domain.Entities.Flow;
-using AccountabilityInformationSystem.Api.Features.ExciseNoms.ApCodes.Create;
-using AccountabilityInformationSystem.Api.Features.ExciseNoms.BrandNames.Create;
-using AccountabilityInformationSystem.Api.Features.ExciseNoms.CnCodes.Create;
-using AccountabilityInformationSystem.Api.Features.ExciseNoms.Shared;
-using AccountabilityInformationSystem.Api.Features.ExciseNoms.Shared.Create;
-using AccountabilityInformationSystem.Api.Features.ExciseNoms.Shared.CreateBatch;
-using AccountabilityInformationSystem.Api.Features.Family.WarrantyRecords.Shared;
-using AccountabilityInformationSystem.Api.Features.Flow.Ikunks.Shared;
-using AccountabilityInformationSystem.Api.Features.Flow.MeasurementPoints.Shared;
-using AccountabilityInformationSystem.Api.Features.Flow.MeasurementPointsData.Shared;
-using AccountabilityInformationSystem.Api.Features.Identity.Auth.Login;
-using AccountabilityInformationSystem.Api.Features.Identity.Auth.Shared;
-using AccountabilityInformationSystem.Api.Features.ProductTypes.Shared;
-using AccountabilityInformationSystem.Api.Features.Warehouses.Shared;
 using AccountabilityInformationSystem.Api.Infrastructure.Data;
 using AccountabilityInformationSystem.Api.Infrastructure.Data.Identity;
 using AccountabilityInformationSystem.Api.Interceptors;
@@ -26,13 +8,11 @@ using AccountabilityInformationSystem.Api.Settings;
 using AccountabilityInformationSystem.Api.Shared.Constants;
 using AccountabilityInformationSystem.Api.Shared.Services.CurrentUserAccessing;
 using AccountabilityInformationSystem.Api.Shared.Services.DataShaping;
-using AccountabilityInformationSystem.Api.Shared.Services.Encrypting;
 using AccountabilityInformationSystem.Api.Shared.Services.FileStoraging;
 using AccountabilityInformationSystem.Api.Shared.Services.Linking;
 using AccountabilityInformationSystem.Api.Shared.Services.Messaging;
 using AccountabilityInformationSystem.Api.Shared.Services.Seeding;
 using AccountabilityInformationSystem.Api.Shared.Services.Sorting;
-using AccountabilityInformationSystem.Api.Shared.Services.Tokenizing;
 using AccountabilityInformationSystem.Api.Shared.Services.UserContexting;
 using Asp.Versioning;
 using Azure.Monitor.OpenTelemetry.AspNetCore;
@@ -59,6 +39,7 @@ using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using Wolverine;
+using Wolverine.FluentValidation;
 
 namespace AccountabilityInformationSystem.Api.Shared.Extensions;
 
@@ -136,16 +117,6 @@ public static class WebApplicationBuilderExtensions
     {
         builder.Services.AddValidatorsFromAssemblyContaining<Program>(includeInternalTypes: true);
 
-        // Register generic batch validators for excise nomenclatures
-        builder.Services.AddScoped<IValidator<CreateExciseNomenclatureBatchRequest<CreateApCodeNomenclatureRequest>>,
-            CreateExciseNomenclatureBatchRequestValidator<CreateApCodeNomenclatureRequest>>();
-
-        builder.Services.AddScoped<IValidator<CreateExciseNomenclatureBatchRequest<CreateCnCodeNomenclatureRequest>>,
-            CreateExciseNomenclatureBatchRequestValidator<CreateCnCodeNomenclatureRequest>>();
-
-        builder.Services.AddScoped<IValidator<CreateExciseNomenclatureBatchRequest<CreateBrandNameNomenclatureRequest>>,
-            CreateExciseNomenclatureBatchRequestValidator<CreateBrandNameNomenclatureRequest>>();
-
         return builder;
     }
 
@@ -221,54 +192,16 @@ public static class WebApplicationBuilderExtensions
     public static WebApplicationBuilder AddApplicationServices(this WebApplicationBuilder builder)
     {
         builder.Services.AddTransient<SortMappingProvider>();
-        builder.Services
-            .AddSingleton<ISortMappingDefinition, SortMappingDefinition<MeasurementPointResponse, MeasurementPoint>>(_ =>
-                MeasurementPointMappings.SortMapping);
-        builder.Services
-            .AddSingleton<ISortMappingDefinition, SortMappingDefinition<WarehouseResponse, Warehouse>>(_ =>
-                WarehouseMappings.SortMapping);
-        builder.Services
-            .AddSingleton<ISortMappingDefinition, SortMappingDefinition<IkunkResponse, Ikunk>>(_ =>
-                IkunkMappings.SortMapping);
-        builder.Services
-            .AddSingleton<ISortMappingDefinition, SortMappingDefinition<MeasurementPointDataListResponse, MeasurementPointData>>(_ =>
-                MeasurementPointDataMappings.SortMapping);
-        builder.Services
-            .AddSingleton<ISortMappingDefinition, SortMappingDefinition<ProductTypeResponse, ProductType>>(_ =>
-                ProductTypeMappings.SortMapping);
-
-        builder.Services
-            .AddSingleton<ISortMappingDefinition, SortMappingDefinition<ExciseNomenclatureResponse, ApCode>>(_ =>
-                ExciseNomenclatureMappings.SortMappingApCode);
-
-        builder.Services
-            .AddSingleton<ISortMappingDefinition, SortMappingDefinition<ExciseNomenclatureResponse, BrandName>>(_ =>
-                ExciseNomenclatureMappings.SortMappingBrandName);
-
-        builder.Services
-            .AddSingleton<ISortMappingDefinition, SortMappingDefinition<ExciseNomenclatureResponse, CnCode>>(_ =>
-                ExciseNomenclatureMappings.SortMappingCnCode);
-
-        builder.Services
-            .AddSingleton<ISortMappingDefinition, SortMappingDefinition<WarrantyRecordListResponse, WarrantyRecord>>(_ =>
-                WarrantyRecordMappings.SortMapping);
-
         builder.Services.AddTransient<DataShapingService>();
 
         builder.Services.AddHttpContextAccessor();
         builder.Services.AddTransient<LinkService>();
-        builder.Services.AddTransient<MeasuringPointLinkService>();
-        builder.Services.AddTransient<MeasuringPointDataLinkService>();
 
         builder.Services.AddSingleton(TimeProvider.System);
-        builder.Services.AddTransient<TokenProvider>();
 
         builder.Services.AddMemoryCache();
         builder.Services.AddScoped<UserContext>();
         builder.Services.AddSingleton<CurrentUserAccessor>();
-
-        builder.Services.Configure<EncryptionOptions>(builder.Configuration.GetSection("Encryption"));
-        builder.Services.AddTransient<EncryptionService>();
 
         builder.Services.Configure<SeedingOptions>(builder.Configuration.GetSection(SeedingOptions.SectionName));
         builder.Services.AddHostedService<ApplicationSeedingService>();
@@ -284,8 +217,21 @@ public static class WebApplicationBuilderExtensions
         }
 
         builder.Services.Configure<FrontendOptions>(builder.Configuration.GetSection(FrontendOptions.SectionName));
-        builder.Services.AddTransient<EmailConfirmationService>();
-        builder.Services.AddTransient<PasswordResetEmailService>();
+
+        return builder;
+    }
+
+    public static WebApplicationBuilder AddFeatureModules(this WebApplicationBuilder builder)
+    {
+        IEnumerable<IFeatureModule> modules = typeof(Program).Assembly
+            .GetTypes()
+            .Where(type => type is { IsAbstract: false, IsInterface: false } && type.IsAssignableTo(typeof(IFeatureModule)))
+            .Select(type => (IFeatureModule)Activator.CreateInstance(type)!);
+
+        foreach (IFeatureModule module in modules)
+        {
+            module.Register(builder.Services);
+        }
 
         return builder;
     }
@@ -388,6 +334,7 @@ public static class WebApplicationBuilderExtensions
                  opts.Durability.Mode = DurabilityMode.MediatorOnly;
                  opts.InvokeTracing = InvokeTracingMode.Full;
                  opts.UseRuntimeCompilation();
+                 opts.UseFluentValidation(RegistrationBehavior.ExplicitRegistration);
                  opts.ServiceLocationPolicy = ServiceLocationPolicy.AllowedButWarn;
                  opts.Discovery
                      .IncludeAssembly(typeof(Program).Assembly);

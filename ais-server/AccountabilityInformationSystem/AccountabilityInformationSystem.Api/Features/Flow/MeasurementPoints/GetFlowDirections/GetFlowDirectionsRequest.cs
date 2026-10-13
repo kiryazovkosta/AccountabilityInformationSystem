@@ -1,0 +1,3 @@
+namespace AccountabilityInformationSystem.Api.Features.Flow.MeasurementPoints.GetFlowDirections;
+
+public sealed record GetFlowDirectionsRequest;

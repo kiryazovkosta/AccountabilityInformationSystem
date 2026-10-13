@@ -6,7 +6,7 @@ using AccountabilityInformationSystem.Api.Shared.Services.DataShaping;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 
-namespace AccountabilityInformationSystem.Api.Features.Flow.Ikunks.GetById;
+namespace AccountabilityInformationSystem.Api.Features.Flow.Ikunks.GetByIdV2;
 
 public sealed class GetIkunkV2RequestHandler(
     ApplicationDbContext dbContext,

@@ -4,7 +4,7 @@ using AccountabilityInformationSystem.Api.Shared.Extensions;
 
 namespace AccountabilityInformationSystem.Api.Features.Family.WarrantyRecords.Create;
 
-internal sealed class CreateWarrantyRecordRequestValidator : AbstractValidator<CreateWarrantyRecordRequest>
+public sealed class CreateWarrantyRecordRequestValidator : AbstractValidator<CreateWarrantyRecordRequest>
 {
     public CreateWarrantyRecordRequestValidator()
     {

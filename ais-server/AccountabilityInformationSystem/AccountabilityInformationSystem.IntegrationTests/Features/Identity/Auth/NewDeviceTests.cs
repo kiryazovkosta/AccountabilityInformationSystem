@@ -1,6 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
-using AccountabilityInformationSystem.Api.Features.Identity.Auth.Login;
+using AccountabilityInformationSystem.Api.Features.Identity.Auth.Shared;
 using AccountabilityInformationSystem.Api.Features.Identity.Auth.Register;
 using AccountabilityInformationSystem.Api.Features.Identity.Auth.TwoFactor.NewDevice;
 using AccountabilityInformationSystem.IntegrationTests.Infrastructure;

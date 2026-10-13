@@ -2,7 +2,7 @@
 
 namespace AccountabilityInformationSystem.Api.Features.Identity.Auth.ChangePassword;
 
-public class ChangePasswordRequestValidator : AbstractValidator<ChangePasswordRequest>
+public sealed class ChangePasswordRequestValidator : AbstractValidator<ChangePasswordRequest>
 {
     public ChangePasswordRequestValidator()
     {

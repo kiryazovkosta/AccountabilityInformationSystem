@@ -1,30 +1,18 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using AccountabilityInformationSystem.Api.Domain.Entities.Abstraction;
 using AccountabilityInformationSystem.Api.Domain.Entities.Flow;
-using AccountabilityInformationSystem.Api.Domain.Entities.Identity;
 using AccountabilityInformationSystem.Api.Features.Flow.Ikunks.Shared;
 using AccountabilityInformationSystem.Api.Infrastructure.Data;
-using AccountabilityInformationSystem.Api.Shared.Services.UserContexting;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 
 namespace AccountabilityInformationSystem.Api.Features.Flow.Ikunks.Update;
 
 public sealed class UpdateIkunkRequestHandler(
-    ApplicationDbContext dbContext,
-    UserContext userContext
-    )
+    ApplicationDbContext dbContext)
 {
     public async Task<Result> Handle(UpdateIkunkRequest request, CancellationToken cancellationToken)
     {
-        User? user = await userContext.GetUserAsync(cancellationToken);
-        if (user is null)
-        {
-            return Result.Failure(
-                new Error("user", "Unauthorized"),
-                ResultFailureType.Unauthorized);
-        }
-
         bool nameExists = await dbContext
             .Ikunks
             .AnyAsync(ik => ik.Name == request.Name && ik.Id != request.Id, cancellationToken);

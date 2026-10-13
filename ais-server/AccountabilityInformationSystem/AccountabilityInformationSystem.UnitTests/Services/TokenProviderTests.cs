@@ -1,7 +1,6 @@
 using System.IdentityModel.Tokens.Jwt;
 using AccountabilityInformationSystem.Api.Features.Identity.Auth.Shared;
 using AccountabilityInformationSystem.Api.Settings;
-using AccountabilityInformationSystem.Api.Shared.Services.Tokenizing;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Time.Testing;
 

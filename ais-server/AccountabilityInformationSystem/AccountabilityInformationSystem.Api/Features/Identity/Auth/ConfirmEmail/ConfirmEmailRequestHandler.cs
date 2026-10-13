@@ -1,24 +1,19 @@
 ﻿using System.Text;
 using AccountabilityInformationSystem.Api.Domain.Entities.Abstraction;
 using AccountabilityInformationSystem.Api.Domain.Entities.Identity;
-using AccountabilityInformationSystem.Api.Features.Identity.Auth.Login;
+using AccountabilityInformationSystem.Api.Features.Identity.Auth.Shared;
 using AccountabilityInformationSystem.Api.Infrastructure.Data;
-using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
 
 namespace AccountabilityInformationSystem.Api.Features.Identity.Auth.ConfirmEmail;
 
-public class ConfirmEmailRequestHandler(
+public sealed class ConfirmEmailRequestHandler(
     UserManager<IdentityUser> userManager,
     ApplicationDbContext applicationDbContext,
-    IDataProtectionProvider dataProtectionProvider
-    )
+    TwoFactorSetupTokenProtector setupTokenProtector)
 {
-    private readonly ITimeLimitedDataProtector _setupProtector =
-        dataProtectionProvider.CreateProtector("TwoFactorSetupToken").ToTimeLimitedDataProtector();
-
     public async Task<Result<ConfirmEmailResponse>> Handle(ConfirmEmailRequest request, CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(request.UserId) || string.IsNullOrWhiteSpace(request.Code))
@@ -57,7 +52,7 @@ public class ConfirmEmailRequestHandler(
         // Check if 2FA setup is required
         if (user.Enable2Fa == true && !identityUser.TwoFactorEnabled)
         {
-            string setupToken = _setupProtector.Protect(identityUser.Id, TimeSpan.FromMinutes(10));
+            string setupToken = setupTokenProtector.Protect(identityUser.Id);
             return Result<ConfirmEmailResponse>.Success(new ConfirmEmailResponse(true, setupToken));
         }
 

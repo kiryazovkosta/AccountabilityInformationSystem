@@ -14,7 +14,6 @@ using AccountabilityInformationSystem.Api.Shared.Models;
 using AccountabilityInformationSystem.Api.Shared.Services.DataShaping;
 using AccountabilityInformationSystem.Api.Shared.Services.Sorting;
 using Asp.Versioning;
-using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -52,10 +51,8 @@ public sealed class WarehousesController(IMessageBus bus) : ApiController
     [HttpPost]
     public async Task<IActionResult> CreateWarehouse(
         [FromBody] CreateWarehouseRequest request,
-        IValidator<CreateWarehouseRequest> validator,
         CancellationToken cancellationToken)
     {
-        await validator.ValidateAndThrowAsync(request, cancellationToken);
         Result<WarehouseResponse> result = await bus.InvokeAsync<Result<WarehouseResponse>>(request, cancellationToken);
         if (result.IsFailure)
         {
@@ -69,11 +66,9 @@ public sealed class WarehousesController(IMessageBus bus) : ApiController
     public async Task<IActionResult> UpdateWarehouse(
         string id,
         [FromBody] UpdateWarehouseRequest request,
-        IValidator<UpdateWarehouseRequest> validator,
         CancellationToken cancellationToken)
     {
         request = request with { Id = id };
-        await validator.ValidateAndThrowAsync(request, cancellationToken);
         Result result = await bus.InvokeAsync<Result>(request, cancellationToken);
         return result.ToActionResult();
     }

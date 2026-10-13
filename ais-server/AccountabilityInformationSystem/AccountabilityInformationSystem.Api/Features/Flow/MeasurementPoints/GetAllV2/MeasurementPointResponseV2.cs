@@ -2,7 +2,7 @@ using AccountabilityInformationSystem.Api.Domain.Entities.Flow;
 using AccountabilityInformationSystem.Api.Shared.Models;
 using AccountabilityInformationSystem.Api.Shared.Services.Mapping;
 
-namespace AccountabilityInformationSystem.Api.Features.Flow.MeasurementPoints.Shared;
+namespace AccountabilityInformationSystem.Api.Features.Flow.MeasurementPoints.GetAllV2;
 
 public sealed record MeasurementPointResponseV2 : ILinksResponse, IMapFrom<MeasurementPoint>
 {
