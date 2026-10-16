@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace AccountabilityInformationSystem.Api.Migrations.Application
+namespace AccountabilityInformationSystem.Api.Infrastructure.Migrations.Application
 {
     [DbContext(typeof(ApplicationDbContext))]
     [Migration("20260615070642_ExtendWarrantyRecord")]

@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace AccountabilityInformationSystem.Api.Migrations.Application
+namespace AccountabilityInformationSystem.Api.Infrastructure.Migrations.Application
 {
     /// <inheritdoc />
     public partial class ExtendWarrantyRecord : Migration
