@@ -54,10 +54,6 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json.Serialization;
-using OpenTelemetry;
-using OpenTelemetry.Metrics;
-using OpenTelemetry.Resources;
-using OpenTelemetry.Trace;
 using Wolverine;
 
 namespace AccountabilityInformationSystem.Api.Shared.Extensions;
@@ -192,24 +188,7 @@ public static class WebApplicationBuilderExtensions
 
     public static WebApplicationBuilder AddObservability(this WebApplicationBuilder builder)
     {
-        //builder.Services.AddOpenTelemetry()
-        //    .ConfigureResource(resource => resource.AddService(builder.Environment.ApplicationName))
-        //    .WithTracing(tracing => tracing
-        //        .AddHttpClientInstrumentation()
-        //        .AddAspNetCoreInstrumentation()
-        //        .AddSqlClientInstrumentation()
-        //    )
-        //    .WithMetrics(metrics => metrics
-        //        .AddHttpClientInstrumentation()
-        //        .AddAspNetCoreInstrumentation()
-        //        .AddRuntimeInstrumentation())
-        //    .UseOtlpExporter();
-
-        //builder.Logging.AddOpenTelemetry(options =>
-        //{
-        //    options.IncludeScopes = true;
-        //    options.IncludeFormattedMessage = true;
-        //});
+        // OpenTelemetry tracing, metrics and logging are configured by AddServiceDefaults().
         if (builder.Environment.IsProduction())
         {
             builder.Services.AddOpenTelemetry().UseAzureMonitor();
