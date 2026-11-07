@@ -23,9 +23,17 @@ public class RefreshTokenRequestHandler(
 
     public async Task<Result<AccessTokenResponse>> Handle(RefreshTokenRequest request, CancellationToken cancellationToken)
     {
+        if (string.IsNullOrWhiteSpace(request.RefreshToken))
+        {
+            return Result<AccessTokenResponse>.Failure(
+                new Error("Unauthorized", "Token expired or invalid."),
+                ResultFailureType.Unauthorized);
+        }
+
+        string tokenHash = RefreshTokenHasher.Hash(request.RefreshToken);
         RefreshToken? storedToken = await identityDbContext.RefreshTokens
             .Include(rt => rt.User)
-            .FirstOrDefaultAsync(rt => rt.Token == request.RefreshToken, cancellationToken);
+            .FirstOrDefaultAsync(rt => rt.Token == tokenHash, cancellationToken);
 
         if (storedToken == null || storedToken.ExpiresAt < timeProvider.GetUtcNow().UtcDateTime)
         {
@@ -42,7 +50,7 @@ public class RefreshTokenRequestHandler(
 
         AccessTokenResponse response = tokenProvider.Create(accessTokenRequest);
 
-        storedToken.Token = response.RefreshToken;
+        storedToken.Token = RefreshTokenHasher.Hash(response.RefreshToken);
         storedToken.ExpiresAt = timeProvider.GetUtcNow().UtcDateTime.AddDays(_jwtAuthOptions.RefreshTokenExpirationDays);
         identityDbContext.RefreshTokens.Update(storedToken);
         await identityDbContext.SaveChangesAsync(cancellationToken);

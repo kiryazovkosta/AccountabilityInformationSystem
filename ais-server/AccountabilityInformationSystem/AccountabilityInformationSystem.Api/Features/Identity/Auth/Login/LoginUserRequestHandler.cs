@@ -87,7 +87,7 @@ public class LoginUserRequestHandler(
         {
             Id = $"rt_{Guid.CreateVersion7()}",
             UserId = identityUser.Id,
-            Token = response.RefreshToken,
+            Token = RefreshTokenHasher.Hash(response.RefreshToken),
             ExpiresAt = timeProvider.GetUtcNow().UtcDateTime.AddDays(_jwtAuthOptions.RefreshTokenExpirationDays)
         };
 

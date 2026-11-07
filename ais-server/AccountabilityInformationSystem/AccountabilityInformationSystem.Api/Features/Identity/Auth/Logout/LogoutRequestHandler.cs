@@ -1,5 +1,6 @@
 using AccountabilityInformationSystem.Api.Domain.Entities.Abstraction;
 using AccountabilityInformationSystem.Api.Infrastructure.Data;
+using AccountabilityInformationSystem.Api.Shared.Services.Tokenizing;
 using Microsoft.EntityFrameworkCore;
 
 namespace AccountabilityInformationSystem.Api.Features.Identity.Auth.Logout;
@@ -13,8 +14,9 @@ public sealed class LogoutRequestHandler(ApplicationIdentityDbContext identityDb
             return Result.Success();
         }
 
+        string tokenHash = RefreshTokenHasher.Hash(request.RefreshTokenValue);
         var refreshToken = await identityDbContext.RefreshTokens
-            .FirstOrDefaultAsync(rt => rt.Token == request.RefreshTokenValue, cancellationToken);
+            .FirstOrDefaultAsync(rt => rt.Token == tokenHash, cancellationToken);
 
         if (refreshToken is null || refreshToken.ExpiresAt < DateTime.UtcNow)
         {

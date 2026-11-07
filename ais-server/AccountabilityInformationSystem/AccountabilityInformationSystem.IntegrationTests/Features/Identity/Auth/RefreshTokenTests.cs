@@ -2,8 +2,12 @@ using System.Net;
 using System.Net.Http.Json;
 using AccountabilityInformationSystem.Api.Features.Identity.Auth.Login;
 using AccountabilityInformationSystem.Api.Features.Identity.Auth.Register;
+using AccountabilityInformationSystem.Api.Infrastructure.Data;
+using AccountabilityInformationSystem.Api.Shared.Services.Tokenizing;
 using AccountabilityInformationSystem.IntegrationTests.Infrastructure;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace AccountabilityInformationSystem.IntegrationTests.Features.Identity.Auth;
 
@@ -78,6 +82,47 @@ public sealed class RefreshTokenTests(AisWithAutoEmailConfirmWebApplicationFacto
         Assert.Null(body.RefreshToken);
         Assert.False(string.IsNullOrEmpty(loginResponse.GetCookieValue("accessToken")));
         Assert.False(string.IsNullOrEmpty(loginResponse.GetCookieValue("refreshToken")));
+    }
+
+    [Fact]
+    public async Task Login_ShouldStoreOnlyHashOfRefreshToken()
+    {
+        // Arrange
+        HttpClient client = factory.CreateClient(new WebApplicationFactoryClientOptions { HandleCookies = false });
+
+        // Act
+        HttpResponseMessage loginResponse = await RegisterAndLoginAsync(client);
+        string refreshToken = loginResponse.GetCookieValue("refreshToken");
+
+        // Assert
+        using IServiceScope scope = factory.Services.CreateScope();
+        ApplicationIdentityDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationIdentityDbContext>();
+
+        bool plaintextStored = await dbContext.RefreshTokens
+            .AnyAsync(rt => rt.Token == refreshToken, TestContext.Current.CancellationToken);
+        string expectedHash = RefreshTokenHasher.Hash(refreshToken);
+        bool hashStored = await dbContext.RefreshTokens
+            .AnyAsync(rt => rt.Token == expectedHash, TestContext.Current.CancellationToken);
+
+        Assert.False(plaintextStored);
+        Assert.True(hashStored);
+    }
+
+    [Fact]
+    public async Task Refresh_ShouldRejectOldToken_AfterRotation()
+    {
+        // Arrange
+        HttpClient client = factory.CreateClient(new WebApplicationFactoryClientOptions { HandleCookies = false });
+        HttpResponseMessage loginResponse = await RegisterAndLoginAsync(client);
+        string oldRefreshToken = loginResponse.GetCookieValue("refreshToken");
+        HttpResponseMessage firstRefresh = await SendRefreshAsync(client, oldRefreshToken);
+        Assert.Equal(HttpStatusCode.NoContent, firstRefresh.StatusCode);
+
+        // Act
+        HttpResponseMessage response = await SendRefreshAsync(client, oldRefreshToken);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
     }
 
     private static async Task<HttpResponseMessage> SendRefreshAsync(HttpClient client, string refreshToken)
