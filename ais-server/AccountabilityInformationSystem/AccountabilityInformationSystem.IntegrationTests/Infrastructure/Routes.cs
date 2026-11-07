@@ -11,6 +11,7 @@ public static class Routes
         public const string Register = "/api/identity/auth/register";
         public const string Login = "/api/identity/auth/login";
         public const string Refresh = "/api/identity/auth/refresh";
+        public const string Logout = "/api/identity/auth/logout";
         public const string ForgotPassword = "/api/identity/auth/forgot-password";
         public const string ResetPassword = "/api/identity/auth/reset-password";
         public const string ChangePassword = "/api/identity/auth/change-password";

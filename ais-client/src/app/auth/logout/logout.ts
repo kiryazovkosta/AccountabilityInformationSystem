@@ -15,7 +15,7 @@ export class Logout {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
 
-  private readonly logoutResult = toSignal(this.authService.logout(), { initialValue: null });
+  protected readonly logoutResult = toSignal(this.authService.logout(), { initialValue: null });
 
   constructor() {
     effect(() => {

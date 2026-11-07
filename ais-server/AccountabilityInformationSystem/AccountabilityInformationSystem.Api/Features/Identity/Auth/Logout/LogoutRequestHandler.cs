@@ -7,6 +7,8 @@ namespace AccountabilityInformationSystem.Api.Features.Identity.Auth.Logout;
 
 public sealed class LogoutRequestHandler(ApplicationIdentityDbContext identityDbContext)
 {
+    // Logout is best-effort: an unknown or expired refresh token means there is nothing
+    // left to revoke, so it still succeeds and the caller clears the auth cookies.
     public async Task<Result> Handle(LogoutRequest request, CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(request.RefreshTokenValue))
@@ -18,15 +20,11 @@ public sealed class LogoutRequestHandler(ApplicationIdentityDbContext identityDb
         var refreshToken = await identityDbContext.RefreshTokens
             .FirstOrDefaultAsync(rt => rt.Token == tokenHash, cancellationToken);
 
-        if (refreshToken is null || refreshToken.ExpiresAt < DateTime.UtcNow)
+        if (refreshToken is not null)
         {
-            return Result.Failure(
-                new Error("Unauthorized", "Unauthorized"),
-                ResultFailureType.Unauthorized);
+            identityDbContext.RefreshTokens.Remove(refreshToken);
+            await identityDbContext.SaveChangesAsync(cancellationToken);
         }
-
-        identityDbContext.RefreshTokens.Remove(refreshToken);
-        await identityDbContext.SaveChangesAsync(cancellationToken);
 
         return Result.Success();
     }

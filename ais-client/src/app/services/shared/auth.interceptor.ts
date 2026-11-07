@@ -6,7 +6,8 @@ import { AuthService } from './auth.service';
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
     const authService = inject(AuthService);
 
-    if (req.url.includes('/auth/refresh')) {
+    // Logout is anonymous on the server, so it never needs a refreshed access token
+    if (req.url.includes('/auth/refresh') || req.url.includes('/auth/logout')) {
         return next(req);
     }
 

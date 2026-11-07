@@ -207,23 +207,22 @@ public sealed class AuthController(
         return NoContent();
     }
 
+    // Anonymous on purpose: the session is identified by the refresh token cookie, and the
+    // cookies must be cleared even when the access token has already expired.
     [HttpPost("logout")]
-    [Authorize]
+    [AllowAnonymous]
     [IgnoreAntiforgeryToken]
     public async Task<IActionResult> Logout(CancellationToken cancellationToken)
     {
         HttpContext.Request.Cookies.TryGetValue("refreshToken", out string? refreshTokenValue);
         Result result = await bus.InvokeAsync<Result>(new LogoutRequest(refreshTokenValue), cancellationToken);
-        if (result.IsFailure)
-        {
-            return result.ToActionResult();
-        }
 
         SetAccessTokenCookie("accessToken", string.Empty, -1440, HttpContext);
         SetAccessTokenCookie("refreshToken", string.Empty, -1440, HttpContext);
         SetAccessTokenCookie("XSRF-TOKEN", string.Empty, -1440, HttpContext);
+        SetAccessTokenCookie(".AspNetCore.Antiforgery.AIS", string.Empty, -1440, HttpContext);
 
-        return result.ToActionResult();
+        return result.IsSuccess ? NoContent() : result.ToActionResult();
     }
 
     private void SetCookies(string accessToken, string refreshToken)
