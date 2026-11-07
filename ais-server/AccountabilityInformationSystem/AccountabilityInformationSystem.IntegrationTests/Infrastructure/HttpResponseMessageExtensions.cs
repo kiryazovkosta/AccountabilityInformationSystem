@@ -11,7 +11,8 @@ public static class HttpResponseMessageExtensions
             string? cookie = cookies.FirstOrDefault(c => c.StartsWith(prefix, StringComparison.Ordinal));
             if (cookie is not null)
             {
-                return cookie[prefix.Length..].Split(';', 2)[0];
+                // ASP.NET Core URL-encodes cookie values (e.g. '+' in Base64 becomes %2B)
+                return Uri.UnescapeDataString(cookie[prefix.Length..].Split(';', 2)[0]);
             }
         }
 

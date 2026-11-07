@@ -128,7 +128,7 @@ public sealed class RefreshTokenTests(AisWithAutoEmailConfirmWebApplicationFacto
     private static async Task<HttpResponseMessage> SendRefreshAsync(HttpClient client, string refreshToken)
     {
         using HttpRequestMessage request = new(HttpMethod.Post, Routes.Auth.Refresh);
-        request.Headers.Add("Cookie", $"refreshToken={refreshToken}");
+        request.Headers.Add("Cookie", $"refreshToken={Uri.EscapeDataString(refreshToken)}");
 
         return await client.SendAsync(request, TestContext.Current.CancellationToken);
     }
