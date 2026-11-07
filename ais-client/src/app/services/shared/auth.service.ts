@@ -65,10 +65,9 @@ export class AuthService {
     readonly resendEmailConfirmation = rxResource({
         params: () => this.resendPayload(),
         stream: ({ params }) =>
-            this.httpClient.post(
+            this.httpClient.get(
                 `${environment.apiBaseUrl}${Endpoints.resendConfirmationEmail}`,
-                params,
-                { withCredentials: true }
+                { params: { email: params.email }, withCredentials: true }
             )
     });
 
