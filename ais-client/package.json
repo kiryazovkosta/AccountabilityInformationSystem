@@ -3,9 +3,14 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
+    "build-info": "node scripts/generate-build-info.mjs",
+    "prestart": "npm run build-info",
     "start": "ng serve",
+    "prebuild": "npm run build-info",
     "build": "ng build",
+    "prewatch": "npm run build-info",
     "watch": "ng build --watch --configuration development",
+    "pretest": "npm run build-info",
     "test": "ng test"
   },
   "prettier": {
