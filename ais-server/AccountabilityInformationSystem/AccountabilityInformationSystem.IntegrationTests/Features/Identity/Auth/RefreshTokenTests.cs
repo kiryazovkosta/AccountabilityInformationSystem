@@ -24,8 +24,10 @@ public sealed class RefreshTokenTests(AisWithAutoEmailConfirmWebApplicationFacto
         HttpResponseMessage response = await SendRefreshAsync(client, refreshToken);
 
         // Assert
+        string body = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
         Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
-        Assert.Empty(await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
+        Assert.Empty(body);
+        Assert.DoesNotMatch("(?i)accessToken|refreshToken", body);
         Assert.False(string.IsNullOrEmpty(response.GetCookieValue("accessToken")));
         Assert.NotEqual(refreshToken, response.GetCookieValue("refreshToken"));
     }

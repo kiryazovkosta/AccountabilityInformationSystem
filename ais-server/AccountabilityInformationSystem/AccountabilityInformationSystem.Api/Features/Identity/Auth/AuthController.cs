@@ -52,6 +52,7 @@ public sealed class AuthController(
 
     [HttpPost("register")]
     [AllowAnonymous]
+    [IgnoreAntiforgeryToken]
     public async Task<IActionResult> Register(
         RegisterUserRequest registerRequest,
         IValidator<RegisterUserRequest> validator,
@@ -64,6 +65,7 @@ public sealed class AuthController(
 
     [HttpPost("login")]
     [AllowAnonymous]
+    [IgnoreAntiforgeryToken]
     public async Task<IActionResult> Login(
         LoginUserRequest request,
         IValidator<LoginUserRequest> validator,
@@ -76,6 +78,7 @@ public sealed class AuthController(
 
     [HttpPost("refresh")]
     [AllowAnonymous]
+    [IgnoreAntiforgeryToken]
     public async Task<IActionResult> Refresh(CancellationToken cancellationToken)
     {
         if (!HttpContext.Request.Cookies.TryGetValue("refreshToken", out string? refreshTokenValue) 
@@ -100,6 +103,7 @@ public sealed class AuthController(
 
     [HttpGet("confirm-email", Name = "ConfirmEmailRoute")]
     [AllowAnonymous]
+    [IgnoreAntiforgeryToken]
     public async Task<IActionResult> ConfirmEmail(string userId, string code, CancellationToken cancellationToken)
     {
         ConfirmEmailRequest request = new(userId, code);
@@ -109,6 +113,7 @@ public sealed class AuthController(
 
     [HttpPost("2fa/setup")]
     [AllowAnonymous]
+    [IgnoreAntiforgeryToken]
     public async Task<IActionResult> SetupTwoFactor(
         SetupTwoFactorRequest request,
         IValidator<SetupTwoFactorRequest> validator,
@@ -121,6 +126,7 @@ public sealed class AuthController(
 
     [HttpPost("2fa/verify")]
     [AllowAnonymous]
+    [IgnoreAntiforgeryToken]
     public async Task<IActionResult> VerifyTwoFactor(
         VerifyTwoFactorRequest request,
         IValidator<VerifyTwoFactorRequest> validator,
@@ -133,6 +139,7 @@ public sealed class AuthController(
 
     [HttpPost("2fa/new-device")]
     [AllowAnonymous]
+    [IgnoreAntiforgeryToken]
     public async Task<IActionResult> NewDevice(
         NewDeviceRequest request,
         IValidator<NewDeviceRequest> validator,
@@ -145,6 +152,7 @@ public sealed class AuthController(
 
     [HttpPost("forgot-password")]
     [AllowAnonymous]
+    [IgnoreAntiforgeryToken]
     public async Task<IActionResult> ForgotPassword(
         ForgotPasswordRequest request,
         IValidator<ForgotPasswordRequest> validator,
@@ -157,6 +165,7 @@ public sealed class AuthController(
 
     [HttpPost("reset-password")]
     [AllowAnonymous]
+    [IgnoreAntiforgeryToken]
     public async Task<IActionResult> ResetPassword(
         ResetPasswordRequest request,
         IValidator<ResetPasswordRequest> validator,
@@ -169,6 +178,7 @@ public sealed class AuthController(
 
     [HttpGet("resend-email-confirmation", Name = "ResendEmailConfirmationRoute")]
     [AllowAnonymous]
+    [IgnoreAntiforgeryToken]
     public async Task<IActionResult> ResendEmailConfirmation(string email, CancellationToken cancellationToken)
     {
         ResendEmailConfirmationRequest request = new(email);
@@ -199,6 +209,7 @@ public sealed class AuthController(
 
     [HttpPost("logout")]
     [Authorize]
+    [IgnoreAntiforgeryToken]
     public async Task<IActionResult> Logout(CancellationToken cancellationToken)
     {
         HttpContext.Request.Cookies.TryGetValue("refreshToken", out string? refreshTokenValue);
