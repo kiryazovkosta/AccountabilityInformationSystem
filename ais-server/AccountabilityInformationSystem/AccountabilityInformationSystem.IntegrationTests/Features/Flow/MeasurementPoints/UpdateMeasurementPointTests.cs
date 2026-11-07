@@ -187,9 +187,8 @@ public sealed class UpdateMeasurementPointTests(AisWithAutoEmailConfirmWebApplic
             TestContext.Current.CancellationToken);
         loginResponse.EnsureSuccessStatusCode();
 
-        LoginUserResponse loginResult =
-            (await loginResponse.Content.ReadFromJsonAsync<LoginUserResponse>(TestContext.Current.CancellationToken))!;
-        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResult.AccessToken);
+        string accessToken = loginResponse.GetCookieValue("accessToken");
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
         return client;
     }

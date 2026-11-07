@@ -110,8 +110,8 @@ public class AisAuthWebApplicationFactory : WebApplicationFactory<Program>, IAsy
             new LoginUserRequest { Username = username, Password = password });
         loginResponse.EnsureSuccessStatusCode();
 
-        LoginUserResponse loginResult = (await loginResponse.Content.ReadFromJsonAsync<LoginUserResponse>())!;
-        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResult.AccessToken);
+        string accessToken = loginResponse.GetCookieValue("accessToken");
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
         return client;
     }

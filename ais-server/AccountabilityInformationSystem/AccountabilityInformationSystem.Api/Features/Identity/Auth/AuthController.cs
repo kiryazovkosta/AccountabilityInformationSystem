@@ -92,6 +92,7 @@ public sealed class AuthController(
         if (result.IsSuccessWith(ResultSuccessType.Ok))
         {
             SetCookies(result.Value!.AccessToken, result.Value.RefreshToken);
+            return NoContent();
         }
 
         return result.ToActionResult();
@@ -139,11 +140,7 @@ public sealed class AuthController(
     {
         await validator.ValidateAndThrowAsync(request, cancellationToken);
         Result<LoginUserResponse> result = await bus.InvokeAsync<Result<LoginUserResponse>>(request, cancellationToken);
-        if (result.IsSuccessWith(ResultSuccessType.Ok) && result.Value is not null)
-        {
-            SetCookies(result.Value.AccessToken!, result.Value.RefreshToken!);
-        }
-        return result.ToActionResult();
+        return ToWebLoginResult(result);
     }
 
     [HttpPost("forgot-password")]
@@ -261,13 +258,13 @@ public sealed class AuthController(
     }
 
     private IActionResult ToWebLoginResult(Result<LoginUserResponse> result)
-{
-    if (result.IsSuccessWith(ResultSuccessType.Ok) && result.Value?.AccessToken is not null)
     {
-        SetCookies(result.Value.AccessToken, result.Value.RefreshToken!);
-        return Ok(result.Value with { AccessToken = null, RefreshToken = null });
-    }
-    return result.ToActionResult();
-}
+        if (result.IsSuccessWith(ResultSuccessType.Ok) && result.Value?.AccessToken is not null)
+        {
+            SetCookies(result.Value.AccessToken, result.Value.RefreshToken!);
+            return Ok(result.Value with { AccessToken = null, RefreshToken = null });
+        }
 
+        return result.ToActionResult();
+    }
 }
