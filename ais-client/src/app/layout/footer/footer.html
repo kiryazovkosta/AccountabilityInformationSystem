@@ -1,5 +1,10 @@
 <footer>
     <div>
-        &copy; 2025 - {{ currentYear() }} <a href="https://github.com/kiryazovkosta">Kosta Kiryazov</a>. All rights reserved. Build on {{ buildDate() | date: 'dd.MM.yyyy' }}
+        &copy; 2025 - {{ currentYear() }} <a href="https://github.com/kiryazovkosta">Kosta Kiryazov</a>. All rights reserved.
+        @if (buildDate()) {
+            Build on {{ buildDate() | date: 'dd.MM.yyyy' }}
+        } @else {
+            Development build
+        }
     </div>
 </footer>
