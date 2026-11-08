@@ -1,6 +1,8 @@
-import { ChangeDetectionStrategy, Component, effect, inject, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, input } from '@angular/core';
+import { httpResource } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { WarrantyBrandsService } from '../../warranty-records/services/warranty-brands.service';
+import { WarrantyBrandResponse } from '../models/warranty-brand.response';
+import { apiUrl, Endpoints } from '../../../../core/http/endpoints-config';
 
 @Component({
   selector: 'app-warranty-brand',
@@ -11,13 +13,13 @@ import { WarrantyBrandsService } from '../../warranty-records/services/warranty-
 })
 export class WarrantyBrand {
   readonly #router = inject(Router);
-  protected readonly warrantyBrandsService = inject(WarrantyBrandsService);
 
   readonly id = input.required<string>();
 
-  constructor() {
-    effect(() => this.warrantyBrandsService.warrantyBrandId.set(this.id()));
-  }
+  /** Owned by this page, so opening another brand never shows the previous one first. */
+  protected readonly warrantyBrand = httpResource<WarrantyBrandResponse>(() => ({
+    url: apiUrl(Endpoints.warrantyBrands, this.id()),
+  }));
 
   protected onBack(): void {
     this.#router.navigate(['/family/warranty-brands']);

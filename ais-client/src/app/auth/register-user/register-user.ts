@@ -1,13 +1,13 @@
-import { Home } from './../../layout/home/home';
 import { ChangeDetectionStrategy, Component, inject, input, linkedSignal, signal } from '@angular/core';
 import { RegisterUserRequest, RegisterUserFormRequest, toRegisterUserFormRequest, toRegisterUserRequest } from './register-user.request';
-import { email, form, maxLength, minLength, required, SchemaPath, validate, submit, FormField } from '@angular/forms/signals';
-import { Router, RouterLink, Routes } from '@angular/router';
-import { AuthService } from '../../services/shared/auth.service';
+import { email, form, maxLength, minLength, required, validate, submit, FormField } from '@angular/forms/signals';
+import { Router, RouterLink } from '@angular/router';
+import { AuthService } from '../../core/auth/auth.service';
 import { firstValueFrom } from 'rxjs';
-import { HttpErrorResponse } from '@angular/common/http';
-import { APP_ROUTES } from '../../common/app-routes';
-import { ToastService } from '../../common/toast/toast-service';
+import { APP_ROUTES } from '../../core/app-routes';
+import { ToastService } from '../../shared/toast/toast-service';
+import { HttpErrorService } from '../../core/http/http-error.service';
+import { PASSWORD_HINT, passwordPolicy } from '../../shared/validation/password';
 
 @Component({
   selector: 'app-register-user',
@@ -22,6 +22,8 @@ export class RegisterUser {
   private readonly router: Router = inject(Router);
   private readonly auth: AuthService = inject(AuthService);
   private readonly toaster = inject(ToastService);
+  protected readonly httpErrorService = inject(HttpErrorService);
+  protected readonly passwordHint = PASSWORD_HINT;
 
   registerError = signal<string | null>(null);
   loading = signal<boolean>(false);
@@ -58,8 +60,7 @@ export class RegisterUser {
     minLength(schemaPath.lastName, 3, {message: 'LastName must be at least 3 characters'});
     maxLength(schemaPath.lastName, 32, {message: 'LastName must be at maximum 32 characters'});
 
-    required(schemaPath.password, {message: 'Password is required'});
-    minLength(schemaPath.password, 8, {message: 'Password must be at least 8 characters'});
+    passwordPolicy(schemaPath.password);
 
     required(schemaPath.confirmPassword, {message: 'Confirm password is required'});
     validate(schemaPath.confirmPassword, ({value, valueOf}) => {
@@ -81,6 +82,7 @@ export class RegisterUser {
     await submit(this.registerForm, async() => {
       this.loading.set(true);
       this.registerError.set(null);
+      this.httpErrorService.clear();
       try {
         const success = await firstValueFrom(
           this.auth.register(toRegisterUserRequest(this.registerForm().value())));
@@ -94,15 +96,8 @@ export class RegisterUser {
         } else {
           this.registerError.set('Registration failed. Please try again.');
         }
-      } catch (err) {
-        if (err instanceof HttpErrorResponse) {
-          const detail: string = err.error?.detail ?? 'Registration failed. Please try again.';
-          const errors: Record<string, string> = err.error?.errors ?? {};
-          const errorLines = Object.values(errors).join('\n');
-          this.registerError.set(errorLines ? `${detail}\n${errorLines}` : detail);
-        } else {
-          this.registerError.set('Registration failed. Please try again.');
-        }
+      } catch {
+        // The error interceptor records the problem details (shown above the form, no toast).
       } finally {
         this.loading.set(false);
       }

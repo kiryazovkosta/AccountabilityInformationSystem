@@ -3,9 +3,9 @@ import { form, FormField, required, submit } from '@angular/forms/signals';
 import { RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { ForgotPasswordRequest } from './forgot-password.request';
-import { AuthService } from '../../services/shared/auth.service';
-import { HttpErrorService } from '../../services/shared/http-error.service';
-import { APP_ROUTES } from '../../common/app-routes';
+import { AuthService } from '../../core/auth/auth.service';
+import { HttpErrorService } from '../../core/http/http-error.service';
+import { APP_ROUTES } from '../../core/app-routes';
 
 @Component({
   selector: 'app-forgot-password',

@@ -3,11 +3,12 @@ import { Router, RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { form, FormField, FormRoot, schema, required, FieldTree } from '@angular/forms/signals';
 import { FormError } from '../../shared/form-error/form-error';
-import { AuthService } from '../../services/shared/auth.service';
-import { HttpErrorService } from '../../services/shared/http-error.service';
-import { ToastService } from '../../common/toast/toast-service';
-import { APP_ROUTES } from '../../common/app-routes';
+import { AuthService } from '../../core/auth/auth.service';
+import { HttpErrorService } from '../../core/http/http-error.service';
+import { ToastService } from '../../shared/toast/toast-service';
+import { APP_ROUTES } from '../../core/app-routes';
 import { NewDeviceRequest } from './new-device.request';
+import { TwoFactorSetupStore } from '../two-factor-setup.store';
 
 const initialState: NewDeviceRequest = {
   username: '',
@@ -32,6 +33,7 @@ export class NewDevice {
   readonly #authService = inject(AuthService);
   readonly #router = inject(Router);
   readonly #toastService = inject(ToastService);
+  readonly #twoFactorSetupStore = inject(TwoFactorSetupStore);
   protected readonly httpErrorService = inject(HttpErrorService);
   protected readonly Paths = APP_ROUTES;
 
@@ -47,13 +49,14 @@ export class NewDevice {
           try {
             const result = await firstValueFrom(this.#authService.loginWithRecoveryCode(this.newDeviceRequest()));
             if ('requiresTwoFactorSetup' in result) {
-              await this.#router.navigate([APP_ROUTES.SETUP_2FA], { state: { setupToken: result.setupToken } });
+              this.#twoFactorSetupStore.set(result.setupToken);
+              await this.#router.navigate([APP_ROUTES.SETUP_2FA]);
             } else {
               this.#toastService.show('Logged in successfully!', 'success');
               await this.#router.navigate([APP_ROUTES.HOME]);
             }
           } catch {
-            // interceptor handles error display
+            // The error interceptor records the problem details; the template shows them.
           }
         },
       },

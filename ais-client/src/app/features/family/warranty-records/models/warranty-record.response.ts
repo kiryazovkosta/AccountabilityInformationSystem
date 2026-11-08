@@ -1,4 +1,4 @@
-import { WarrantyBrandResponse } from './warranty-brand.response';
+import { WarrantyBrandResponse } from '../../warranty-brands/models/warranty-brand.response';
 
 export interface StorageFileResponse {
   id: string;
@@ -12,11 +12,12 @@ export interface WarrantyRecordResponse {
   id: string;
   warrantyBrand: WarrantyBrandResponse;
   model: string;
-  purchaseDate: Date;
+  /** ISO 8601 date string as sent by the API. */
+  purchaseDate: string;
   duration: number;
-  endDate: Date;
+  /** ISO 8601 date string as sent by the API. */
+  endDate: string;
   receipt?: StorageFileResponse;
   frontImage?: StorageFileResponse;
   backImage?: StorageFileResponse;
-
 }

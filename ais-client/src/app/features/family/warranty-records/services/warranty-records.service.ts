@@ -1,65 +1,57 @@
 import { HttpClient, httpResource } from '@angular/common/http';
-import { inject, Injectable, signal } from '@angular/core';
+import { effect, inject, Injectable, signal } from '@angular/core';
 import { Observable } from 'rxjs';
-import { environment } from '../../../../../environments/environment';
 import { CreateWarrantyRecordRequest } from '../models/create-warranty-record.request';
 import { WarrantyRecordResponse } from '../models/warranty-record.response';
-
-export interface LinkResponse {
-    href: string;
-    rel: string;
-    method: string;
-}
-
-export interface PaginationResponse<T> {
-  page: number;
-  pageSize: number;
-  totalCount: number;
-  totalPages: number;
-  hasPreviousPage: boolean;
-  hasNextPage: boolean;
-  items: T[];
-  links?: LinkResponse[]; 
-}
+import { AuthService } from '../../../../core/auth/auth.service';
+import { apiUrl, Endpoints } from '../../../../core/http/endpoints-config';
+import { inlineErrors } from '../../../../core/http/http-context';
+import { PaginationResponse } from '../../../../shared/pagination/pagination-response.model';
 
 export interface WarrantyRecordListResponse {
   id: string;
   warrantyBrandName: string;
   model: string;
-  purchaseDate: Date;
+  /** ISO 8601 date string as sent by the API. */
+  purchaseDate: string;
   duration: number;
-  endDate: Date;
+  /** ISO 8601 date string as sent by the API. */
+  endDate: string;
   receiptExists: boolean;
   frontImageExists: boolean;
   backImageExists: boolean;
-    status: string;
+  status: string;
 }
 
 @Injectable({ providedIn: 'root' })
 export class WarrantyRecordsService {
   readonly #http = inject(HttpClient);
+  readonly #authService = inject(AuthService);
 
   readonly page = signal(1);
   readonly pageSize = signal(10);
-  readonly warrantyId = signal<string | undefined>(undefined);
 
-  readonly warrantyRecords = httpResource<PaginationResponse<WarrantyRecordListResponse>>(() => ({
-    url: `${environment.apiBaseUrl}api/family/warranty-records`,
-    params: {
-      page: this.page(),
-      pageSize: this.pageSize(),
-    },
-    withCredentials: true,
-}));
-
-  readonly warrantyRecord = httpResource<WarrantyRecordResponse>(() =>
-    this.warrantyId()
+  /**
+   * Keyed on the signed-in user: the resource goes idle and drops its value on logout and
+   * refetches for the next user, so one user's warranties never show up for another.
+   */
+  readonly warrantyRecords = httpResource<PaginationResponse<WarrantyRecordListResponse>>(() =>
+    this.#authService.userId()
       ? {
-          url: `${environment.apiBaseUrl}api/family/warranty-records/${this.warrantyId()}`,
-          withCredentials: true,
+          url: apiUrl(Endpoints.warrantyRecords),
+          params: { page: this.page(), pageSize: this.pageSize() },
         }
       : undefined
   );
+
+  constructor() {
+    // A new session starts on the first page.
+    effect(() => {
+      if (!this.#authService.userId()) {
+        this.page.set(1);
+      }
+    });
+  }
 
   create(request: CreateWarrantyRecordRequest): Observable<WarrantyRecordResponse> {
     const formData = new FormData();
@@ -78,17 +70,12 @@ export class WarrantyRecordsService {
       formData.append('backImage', request.backImage);
     }
 
-    return this.#http.post<WarrantyRecordResponse>(
-      `${environment.apiBaseUrl}api/family/warranty-records`,
-      formData,
-      { withCredentials: true }
-    );
+    return this.#http.post<WarrantyRecordResponse>(apiUrl(Endpoints.warrantyRecords), formData, {
+      context: inlineErrors(),
+    });
   }
 
   delete(id: string): Observable<void> {
-    return this.#http.delete<void>(
-      `${environment.apiBaseUrl}api/family/warranty-records/${id}`,
-      { withCredentials: true }
-    );
+    return this.#http.delete<void>(apiUrl(Endpoints.warrantyRecords, id));
   }
 }

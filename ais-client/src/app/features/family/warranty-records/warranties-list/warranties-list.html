@@ -37,9 +37,9 @@
               </td>
               <td>{{ warranty.warrantyBrandName }}</td>
               <td>{{ warranty.model }}</td>
-              <td>{{ warranty.purchaseDate }}</td>
+              <td>{{ warranty.purchaseDate | date: 'mediumDate' }}</td>
               <td>{{ warranty.duration }}</td>
-              <td>{{ warranty.endDate }}</td>
+              <td>{{ warranty.endDate | date: 'mediumDate' }}</td>
               <td>
                 <span [class]="warranty.receiptExists ? 'app-badge-success' : 'app-badge-muted'">
                   {{ warranty.receiptExists ? 'Yes' : 'No' }}
@@ -61,7 +61,13 @@
         </tbody>
       </table>
 
-      <app-pagination></app-pagination>
+      @if (warrantiesService.warrantyRecords.value(); as result) {
+        <app-pagination
+          [page]="result.page"
+          [totalPages]="result.totalPages"
+          [totalCount]="result.totalCount"
+          (pageChange)="onPageChange($event)" />
+      }
     </div>
 
   }
