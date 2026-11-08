@@ -40,7 +40,7 @@
     "@angular/cli": "^22.2.6",
     "@angular/compiler-cli": "^22.2.5",
     "@tailwindcss/postcss": "^4.1.12",
-    "@types/tailwindcss": "^3.0.11",
+    "@types/tailwindcss": "^3.1.0",
     "baseline-browser-mapping": "^2.9.19",
     "jsdom": "^27.0.0",
     "postcss": "^8.5.3",
