@@ -65,6 +65,12 @@ public class AisAuthWebApplicationFactory : WebApplicationFactory<Program>, IAsy
             "ConnectionStrings:AccountabilityInformationSystemDb",
             _mssqlContainer.GetConnectionString());
 
+        // CI passes the real keys from repository secrets, but workflows that cannot read
+        // secrets (Dependabot and fork PRs) get empty values, which made every register/login
+        // fail with 500. Fall back to fixed, test-only keys so the suite is self-contained.
+        builder.UseSetting("Jwt:Key", SettingOrDefault("Jwt__Key", TestJwtKey));
+        builder.UseSetting("Encryption:Key", SettingOrDefault("Encryption__Key", TestEncryptionKey));
+
         builder.ConfigureServices(services =>
         {
             services.RemoveAll<IEmailSender>();
@@ -78,6 +84,16 @@ public class AisAuthWebApplicationFactory : WebApplicationFactory<Program>, IAsy
                 options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
             });
         });
+    }
+
+    // Test-only values. Never used outside the integration tests.
+    private const string TestJwtKey = "integration-tests-only-jwt-signing-key-0123456789abcdef";
+    private const string TestEncryptionKey = "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8="; // 32 bytes, base64
+
+    private static string SettingOrDefault(string environmentVariable, string fallback)
+    {
+        string? value = Environment.GetEnvironmentVariable(environmentVariable);
+        return string.IsNullOrWhiteSpace(value) ? fallback : value;
     }
 
     public async Task<HttpClient> CreateAuthenticatedClientWithout2FaAsync(
