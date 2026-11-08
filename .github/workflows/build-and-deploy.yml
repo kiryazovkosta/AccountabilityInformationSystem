@@ -29,7 +29,7 @@ jobs:
                 working-directory: ${{ env.WORKING_DIRECTORY }}
 
         steps:
-            - uses: actions/checkout@v6
+            - uses: actions/checkout@v7
 
             - name: Setup .NET
               uses: actions/setup-dotnet@v5
@@ -71,7 +71,7 @@ jobs:
                 working-directory: ${{ env.WORKING_DIRECTORY }}
 
         steps:
-            - uses: actions/checkout@v6
+            - uses: actions/checkout@v7
 
             - name: Setup .NET
               uses: actions/setup-dotnet@v5
@@ -133,7 +133,7 @@ jobs:
 
         steps:
             - name: Checkout code
-              uses: actions/checkout@v6
+              uses: actions/checkout@v7
 
             - name: Set up Node.js
               uses: actions/setup-node@v6
@@ -169,7 +169,7 @@ jobs:
 
         steps:
             - name: Checkout code
-              uses: actions/checkout@v6
+              uses: actions/checkout@v7
               with:
                 submodules: true
                 lfs: true
