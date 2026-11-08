@@ -1,7 +1,9 @@
-import { ChangeDetectionStrategy, Component, effect, inject, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, input } from '@angular/core';
 import { DatePipe } from '@angular/common';
+import { httpResource } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { WarrantyRecordsService } from '../services/warranty-records.service';
+import { WarrantyRecordResponse } from '../models/warranty-record.response';
+import { apiUrl, Endpoints } from '../../../../core/http/endpoints-config';
 
 @Component({
   selector: 'app-warranty',
@@ -12,13 +14,13 @@ import { WarrantyRecordsService } from '../services/warranty-records.service';
 })
 export class Warranty {
   readonly #router = inject(Router);
-  protected readonly warrantiesService = inject(WarrantyRecordsService);
 
   readonly id = input.required<string>();
 
-  constructor() {
-    effect(() => this.warrantiesService.warrantyId.set(this.id()));
-  }
+  /** Owned by this page, so opening another record never shows the previous one first. */
+  protected readonly warrantyRecord = httpResource<WarrantyRecordResponse>(() => ({
+    url: apiUrl(Endpoints.warrantyRecords, this.id()),
+  }));
 
   protected onBack(): void {
     this.#router.navigate(['/family/warranties']);

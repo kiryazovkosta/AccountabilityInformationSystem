@@ -2,8 +2,9 @@ import { Component, inject, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { form, FormField, schema, FormRoot, required, FieldTree, validate } from '@angular/forms/signals';
 import { FormError } from "../../shared/form-error/form-error";
-import { AuthService } from '../../services/shared/auth.service';
-import { HttpErrorService } from '../../services/shared/http-error.service';
+import { AuthService } from '../../core/auth/auth.service';
+import { HttpErrorService } from '../../core/http/http-error.service';
+import { PASSWORD_HINT, passwordPolicy } from '../../shared/validation/password';
 
 export interface ChangePasswordRequest {
   oldPassword: string,
@@ -22,7 +23,7 @@ const initialState: ChangePasswordRequest = {
 export const changePasswordSchema = schema<ChangePasswordRequest>(
   (path) => {
     required(path.oldPassword, { message: 'Current password is required!'});
-    required(path.newPassword, { message: 'New password is required!'});
+    passwordPolicy(path.newPassword, 'New password');
     required(path.confirmPassword, { message: 'Confirming of new password is required!'});
     validate(path.confirmPassword, ({value, valueOf}) => {
       const confirmPassword = value();
@@ -47,6 +48,7 @@ export const changePasswordSchema = schema<ChangePasswordRequest>(
 export class ChangePassword {
   readonly #authService = inject(AuthService);
   protected readonly httpErrorService = inject(HttpErrorService);
+  protected readonly passwordHint = PASSWORD_HINT;
   protected readonly changePasswordRequest = signal<ChangePasswordRequest>(initialState);
   protected readonly changePasswordForm = form(
     this.changePasswordRequest,

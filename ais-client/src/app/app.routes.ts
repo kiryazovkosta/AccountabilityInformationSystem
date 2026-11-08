@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
+import { adminGuard } from './core/guards/admin.guard';
 
 export const routes: Routes = [
     { path: '', loadComponent: () => import('./features/home/home').then(m => m.Home) },
@@ -14,7 +15,8 @@ export const routes: Routes = [
             { path: 'login', loadComponent: () => import('./auth/login/login').then(l => l.Login) },
             { path: 'user-profile', loadComponent: () => import('./auth/user-profile/user-profile').then(l => l.UserProfile), canActivate: [authGuard] },
             { path: 'change-password', loadComponent: () => import('./auth/change-password/change-password').then(cp => cp.ChangePassword), canActivate: [authGuard] },
-            { path: 'logout', loadComponent: () => import('./auth/logout/logout').then(l => l.Logout) },
+            // Logout is a header button (POST), not a page; keep old links harmless.
+            { path: 'logout', redirectTo: '/home' },
             { path: 'forgot-password', loadComponent: () => import('./auth/forgot-password/forgot-password').then(m => m.ForgotPassword) },
             { path: 'reset-password', loadComponent: () => import('./auth/reset-password/reset-password').then(m => m.ResetPassword) },
             { path: 'new-device', loadComponent: () => import('./auth/new-device/new-device').then(m => m.NewDevice) }
@@ -22,6 +24,7 @@ export const routes: Routes = [
     },
     {
         path: 'admin',
+        canMatch: [adminGuard],
         children: [
             { path: 'users', loadComponent: () => import('./features/admin/users/users-list/users-list').then(m => m.UsersList), canActivate: [authGuard] },
         ]

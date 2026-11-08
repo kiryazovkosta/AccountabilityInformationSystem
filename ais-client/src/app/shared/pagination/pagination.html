@@ -1,1 +1,23 @@
-<p>pagination works!</p>
+@if (totalPages() > 1) {
+  <nav class="pagination" aria-label="Pagination">
+    <button type="button" class="app-action-button" (click)="goTo(page() - 1)" [disabled]="!hasPrevious()">
+      Previous
+    </button>
+    @for (p of pages(); track p) {
+      <button
+        type="button"
+        class="app-action-button"
+        [class.pagination-current]="p === page()"
+        [attr.aria-current]="p === page() ? 'page' : null"
+        (click)="goTo(p)">
+        {{ p }}
+      </button>
+    }
+    <button type="button" class="app-action-button" (click)="goTo(page() + 1)" [disabled]="!hasNext()">
+      Next
+    </button>
+    @if (totalCount() !== null) {
+      <span class="pagination-summary">Page {{ page() }} of {{ totalPages() }} ({{ totalCount() }} items)</span>
+    }
+  </nav>
+}

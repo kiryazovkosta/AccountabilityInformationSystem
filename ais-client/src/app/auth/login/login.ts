@@ -1,11 +1,12 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, input, signal } from '@angular/core';
 import { form, FormField, required, submit } from '@angular/forms/signals'
 import { Router, RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { LoginUserRequest } from './login-user.request';
-import { AuthService } from '../../services/shared/auth.service';
-import { HttpErrorService } from '../../services/shared/http-error.service';
-import { APP_ROUTES } from '../../common/app-routes';
+import { AuthService } from '../../core/auth/auth.service';
+import { HttpErrorService } from '../../core/http/http-error.service';
+import { APP_ROUTES } from '../../core/app-routes';
+import { TwoFactorSetupStore } from '../two-factor-setup.store';
 
 @Component({
   selector: 'app-login',
@@ -17,7 +18,11 @@ import { APP_ROUTES } from '../../common/app-routes';
 export class Login {
   private readonly authService: AuthService = inject(AuthService);
   private readonly router: Router = inject(Router);
+  private readonly twoFactorSetupStore = inject(TwoFactorSetupStore);
   protected readonly httpErrorService = inject(HttpErrorService);
+
+  /** Where to go after logging in (`?returnUrl=` set by the guards and on session expiry). */
+  readonly returnUrl = input<string | undefined>(undefined);
 
   loginRequest = signal<LoginUserRequest>({
     username: '',
@@ -42,15 +47,23 @@ export class Login {
       try {
         const loginResult = await firstValueFrom(this.authService.login(this.loginRequest()));
         if ('success' in loginResult) {
-          this.router.navigate([APP_ROUTES.HOME]);
+          this.router.navigateByUrl(this.safeReturnUrl());
         } else if ('requiresTwoFactorSetup' in loginResult) {
-          this.router.navigate([APP_ROUTES.SETUP_2FA], { state: { setupToken: loginResult.setupToken } });
+          this.twoFactorSetupStore.set(loginResult.setupToken);
+          this.router.navigate([APP_ROUTES.SETUP_2FA]);
         }
       } catch {
-        // interceptor already handled the error and showed a toast
+        // The error interceptor records the problem details (including a 401 for wrong
+        // credentials) and the template shows them above the form.
       } finally {
         this.loading.set(false);
       }
     });
+  }
+
+  /** Only same-app paths, never an absolute or protocol-relative URL (open redirect). */
+  private safeReturnUrl(): string {
+    const url = this.returnUrl();
+    return url && url.startsWith('/') && !url.startsWith('//') ? url : APP_ROUTES.HOME;
   }
 }

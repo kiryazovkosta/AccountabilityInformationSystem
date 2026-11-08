@@ -4,10 +4,9 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { form, FormField, schema, FormRoot, required, FieldTree } from '@angular/forms/signals';
 import { FormError } from '../../../../shared/form-error/form-error';
-import { HttpErrorService } from '../../../../services/shared/http-error.service';
-import { ToastService } from '../../../../common/toast/toast-service';
-import { WarrantyBrandsService } from '../../warranty-records/services/warranty-brands.service';
-import { CreateWarrantyBrandRequest } from '../../warranty-records/models/create-warranty-brand.request';
+import { HttpErrorService } from '../../../../core/http/http-error.service';
+import { WarrantyBrandsService } from '../services/warranty-brands.service';
+import { CreateWarrantyBrandRequest } from '../models/create-warranty-brand.request';
 
 const initialState: CreateWarrantyBrandRequest = {
   name: '',
@@ -28,7 +27,6 @@ const createWarrantyBrandSchema = schema<CreateWarrantyBrandRequest>((path) => {
 export class CreateWarrantyBrand {
   readonly #service = inject(WarrantyBrandsService);
   readonly #router = inject(Router);
-  readonly #toastService = inject(ToastService);
   protected readonly httpErrorService = inject(HttpErrorService);
 
   protected readonly formData = signal<CreateWarrantyBrandRequest>(initialState);
@@ -45,15 +43,14 @@ export class CreateWarrantyBrand {
             await firstValueFrom(this.#service.create(this.warrantyBrandForm().value()));
           } catch (error) {
             if (error instanceof HttpErrorResponse && error.status === 409) {
-              // The name is already taken (often by a previous attempt that actually
-              // succeeded) — the data the user wanted now exists, so treat this as
-              // a success rather than leaving them on a form that looks broken.
-              this.httpErrorService.clear();
-              this.#toastService.show(`A brand named "${name}" already exists.`, 'info');
-            } else {
-              // interceptor handles error display
-              return;
+              // Keep the user on the form: nothing was created, the name is taken.
+              this.httpErrorService.currentError.set({
+                status: 409,
+                detail: `A brand named "${name}" already exists. Choose another name.`,
+              });
             }
+            // Other errors are recorded by the error interceptor and shown inline.
+            return;
           }
           this.#service.warrantyBrands.reload();
           await this.#router.navigate(['/family/warranty-brands']);

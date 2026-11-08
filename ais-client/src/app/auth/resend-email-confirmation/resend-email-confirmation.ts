@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/cor
 import { ResendEmailConfirmationRequest } from './resend-email-confirmation-request';
 import { email, form, FormField, FormRoot, required, schema } from '@angular/forms/signals';
 import { FormError } from "../../shared/form-error/form-error";
-import { AuthService } from '../../services/shared/auth.service';
+import { AuthService } from '../../core/auth/auth.service';
 
 const initialState: ResendEmailConfirmationRequest = {
   email: ''
@@ -31,7 +31,6 @@ export class ResendEmailConfirmation {
     {
       submission: {
         action: async (form) => {
-          console.log("resending...");
           this.authService.resendEmail(this.resendForm().value())
         }
       },

@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { WarrantyBrandsService } from '../../warranty-records/services/warranty-brands.service';
-import { ConfirmDialogService } from '../../../../common/confirm-dialog/confirm-dialog-service';
+import { WarrantyBrandsService } from '../services/warranty-brands.service';
+import { ConfirmDialogService } from '../../../../shared/confirm-dialog/confirm-dialog-service';
 
 @Component({
   selector: 'app-warranty-brands-list',

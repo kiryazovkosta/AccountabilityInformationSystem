@@ -1,3 +1,7 @@
+import { environment } from '../../../environments/environment';
+
+// All API paths, relative to environment.apiBaseUrl.
+// csrfInterceptor sets withCredentials on every request, so services do not need to.
 export const Endpoints = {
   login: 'api/identity/auth/login',
   register: 'api/identity/auth/register',
@@ -12,4 +16,14 @@ export const Endpoints = {
   resetPassword: 'api/identity/auth/reset-password',
   changePassword: 'api/identity/auth/change-password',
   newDevice2fa: 'api/identity/auth/2fa/new-device',
+
+  adminUsers: 'api/admin/users',
+  warrantyRecords: 'api/family/warranty-records',
+  warrantyBrands: 'api/family/warranty-brands',
+  ikunks: 'api/flow/ikunks',
 } as const;
+
+export function apiUrl(path: string, ...segments: string[]): string {
+  const suffix = segments.map(encodeURIComponent).join('/');
+  return `${environment.apiBaseUrl}${path}${suffix ? `/${suffix}` : ''}`;
+}

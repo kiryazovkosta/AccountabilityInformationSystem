@@ -3,9 +3,10 @@ import { form, FormField, required, submit, validate } from '@angular/forms/sign
 import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { ResetPasswordFormData } from './reset-password.request';
-import { AuthService } from '../../services/shared/auth.service';
-import { HttpErrorService } from '../../services/shared/http-error.service';
-import { APP_ROUTES } from '../../common/app-routes';
+import { AuthService } from '../../core/auth/auth.service';
+import { HttpErrorService } from '../../core/http/http-error.service';
+import { APP_ROUTES } from '../../core/app-routes';
+import { PASSWORD_HINT, passwordPolicy } from '../../shared/validation/password';
 
 @Component({
   selector: 'app-reset-password',
@@ -22,11 +23,12 @@ export class ResetPassword {
   userId = input.required<string>();
   code = input.required<string>();
 
+  protected readonly passwordHint = PASSWORD_HINT;
   protected readonly loading = signal(false);
   protected readonly formData = signal<ResetPasswordFormData>({ newPassword: '', confirmPassword: '' });
 
   protected readonly resetForm = form(this.formData, (p) => {
-    required(p.newPassword, { message: 'New password is required.' });
+    passwordPolicy(p.newPassword, 'New password');
     required(p.confirmPassword, { message: 'Please confirm your password.' });
     validate(p.confirmPassword, ({ value, valueOf }) => {
       if (value() !== valueOf(p.newPassword)) {

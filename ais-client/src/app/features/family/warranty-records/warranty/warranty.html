@@ -4,11 +4,11 @@
     <button type="button" class="app-primary-button" (click)="onBack()">Back to list</button>
   </div>
 
-  @if (warrantiesService.warrantyRecord.isLoading()) {
+  @if (warrantyRecord.isLoading()) {
     <p class="text-ink/60 font-sans text-sm">Loading...</p>
-  } @else if (warrantiesService.warrantyRecord.error()) {
+  } @else if (warrantyRecord.error()) {
     <div class="error-summary">Failed to load the warranty record. Please try again.</div>
-  } @else if (warrantiesService.warrantyRecord.value(); as warranty) {
+  } @else if (warrantyRecord.value(); as warranty) {
     <dl class="warranty-details">
       <div class="warranty-details-row">
         <dt>Brand</dt>

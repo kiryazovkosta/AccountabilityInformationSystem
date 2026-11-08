@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { httpResource } from '@angular/common/http';
-import { environment } from '../../../../../environments/environment';
-import { AuthService } from '../../../../services/shared/auth.service';
+import { apiUrl, Endpoints } from '../../../../core/http/endpoints-config';
+import { AuthService } from '../../../../core/auth/auth.service';
 import { UserListResponse } from './user-list.response';
 
 @Injectable()
@@ -10,7 +10,7 @@ export class UsersService {
 
   readonly users = httpResource<UserListResponse[]>(() =>
     this.authService.isAdministrator()
-      ? { url: `${environment.apiBaseUrl}api/admin/users`, withCredentials: true }
+      ? { url: apiUrl(Endpoints.adminUsers) }
       : undefined
   );
 }

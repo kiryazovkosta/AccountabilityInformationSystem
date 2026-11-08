@@ -1,7 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { UsersService } from './users.service';
-import { APP_ROUTES } from '../../../../common/app-routes';
+import { APP_ROUTES } from '../../../../core/app-routes';
 
 @Component({
   selector: 'app-users-list',

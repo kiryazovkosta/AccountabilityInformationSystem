@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, HostListener, inject, signal } from '@angular/core';
-import { RouterLink, RouterLinkActive } from '@angular/router';
-import { AuthService } from '../../services/shared/auth.service';
+import { Router, RouterLink, RouterLinkActive } from '@angular/router';
+import { APP_ROUTES } from '../../core/app-routes';
+import { AuthService } from '../../core/auth/auth.service';
 
 @Component({
   selector: 'app-header',
@@ -11,6 +12,7 @@ import { AuthService } from '../../services/shared/auth.service';
 })
 export class Header {
   private readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
 
   readonly isLoggedIn = this.authService.isLoggedIn;
   readonly isAdministrator = this.authService.isAdministrator;
@@ -24,6 +26,12 @@ export class Header {
     if (!opening) {
       this.openSubmenuId.set(null);
     }
+  }
+
+  logout(): void {
+    this.closeMenu();
+    // AuthService.logout() never errors and clears the local session either way.
+    this.authService.logout().subscribe(() => this.router.navigate([APP_ROUTES.HOME]));
   }
 
   closeMenu(): void {

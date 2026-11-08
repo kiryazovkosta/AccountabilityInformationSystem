@@ -93,6 +93,10 @@ app-root {
     @apply text-red-800 text-xs whitespace-pre-line italic;
   }
 
+  .password-hint {
+    @apply block mt-1 font-sans text-xs text-ink/60;
+  }
+
   .error-summary {
     @apply rounded-xl border px-5 py-4 mb-5 font-sans text-sm font-semibold whitespace-pre-line;
     background-color: var(--color-error-surface);

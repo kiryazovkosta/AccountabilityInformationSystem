@@ -3,12 +3,12 @@
     <h1 class="app-header-1">Login</h1>
     <h3 class="app-header-3">Use this form to login if you have account</h3>
     @if (httpErrorService.errorDetail()) {
-      <div class=error-summary>{{httpErrorService.errorDetail()}}</div>
+      <div class="error-summary" role="alert">{{httpErrorService.errorDetail()}}</div>
     }
     <form class="app-form">
       <label class="app-form-label">
         Username:
-        <input type="username" class="app-form-input" [formField]="loginForm.username" autocomplete="username" />
+        <input type="text" class="app-form-input" [formField]="loginForm.username" autocomplete="username" />
       </label>
       @if (loginForm.username().touched() && loginForm.username().invalid()) {
       <div class="form-error-message">
@@ -47,7 +47,7 @@
 
       <div>
         <p>
-          Does not receieve confirmation email? <a class="link" routerLink="{{ Paths.RESEND_CONFIRMATION }}">Recend again</a>
+          Did not receive the confirmation email? <a class="link" routerLink="{{ Paths.RESEND_CONFIRMATION }}">Resend it</a>
         </p>
         <p>
           Forgot your password? <a class="link" routerLink="{{ Paths.FORGOT_PASSWORD }}">Reset it here</a>

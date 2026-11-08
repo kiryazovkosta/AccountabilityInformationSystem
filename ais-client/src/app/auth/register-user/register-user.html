@@ -2,8 +2,8 @@
   <div class="app-auth-card">
     <h1 class="app-header-1">Register</h1>
     <h3 class="app-header-3 text-center">Use this form to register if you don't have account</h3>
-    @if (registerError()) {
-      <div class="error-summary">{{ registerError() }}</div>
+    @if (registerError() || httpErrorService.errorDetail()) {
+      <div class="error-summary" role="alert">{{ registerError() ?? httpErrorService.errorDetail() }}</div>
     }
     <form class="app-form">
       <div class="flex flex-wrap -mx-3 mb-6">
@@ -144,6 +144,7 @@
               class="app-form-input"
             />
           </label>
+          <small class="password-hint">{{ passwordHint }}</small>
           @if (registerForm.password().touched() && registerForm.password().invalid()) {
             <div class="form-error-message">
               @for (error of registerForm.password().errors(); track error.message) {

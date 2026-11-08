@@ -186,7 +186,8 @@ nav a.active {
   display: block;
 }
 
-.submenu a {
+.submenu a,
+.submenu .logout-btn {
   padding: 12px 16px;
   display: block;
   border-bottom: 1px solid #f0e0d6;
@@ -195,11 +196,26 @@ nav a.active {
   transition: background-color 0.2s ease;
 }
 
-.submenu li:last-child a {
+.submenu li:last-child a,
+.submenu li:last-child .logout-btn {
   border-bottom: none;
 }
 
-.submenu a:hover {
+/* Logout is a button (it POSTs), styled like the other menu links. */
+.submenu .logout-btn {
+  width: 100%;
+  text-align: left;
+  background: none;
+  border-left: none;
+  border-right: none;
+  border-top: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.submenu a:hover,
+.submenu .logout-btn:hover {
   background-color: #f0e0d6;
   color: #2C2C2C !important;
   border-bottom-color: #f0e0d6;
@@ -326,7 +342,8 @@ nav a.active {
     background: transparent;
   }
 
-  .submenu li a {
+  .submenu li a,
+  .submenu li .logout-btn {
     padding-left: 40px;
     font-size: 14px;
     border-bottom: 1px solid #f0e0d6;

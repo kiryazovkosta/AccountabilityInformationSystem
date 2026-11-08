@@ -3,9 +3,9 @@ import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { form, FormField, schema, FormRoot, required, FieldTree, min } from '@angular/forms/signals';
 import { FormError } from '../../../../shared/form-error/form-error';
-import { HttpErrorService } from '../../../../services/shared/http-error.service';
+import { HttpErrorService } from '../../../../core/http/http-error.service';
 import { WarrantyRecordsService } from '../services/warranty-records.service';
-import { WarrantyBrandsService } from '../services/warranty-brands.service';
+import { WarrantyBrandsService } from '../../warranty-brands/services/warranty-brands.service';
 import { CreateWarrantyRecordRequest } from '../models/create-warranty-record.request';
 
 const initialState: CreateWarrantyRecordRequest = {
@@ -50,7 +50,6 @@ export class CreateWarrantyRecord {
         action: async () => {
           this.httpErrorService.clear();
           try {
-            console.log(this.warrantyForm().value());
             await firstValueFrom(this.#service.create(this.warrantyForm().value()));
             this.#service.warrantyRecords.reload();
             await this.#router.navigate(['/family/warranties']);
