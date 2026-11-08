@@ -8,6 +8,11 @@ updates:
       angular:
         patterns:
           - "@angular/*"
+    ignore:
+      # Angular pins the TypeScript range it supports (22.x: >=6.0 <6.1). Move TypeScript
+      # only together with an Angular upgrade, never on its own.
+      - dependency-name: typescript
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
   - package-ecosystem: github-actions
     directory: /
     schedule:
