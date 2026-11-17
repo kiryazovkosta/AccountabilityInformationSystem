@@ -5,7 +5,7 @@ import { rxResource } from '@angular/core/rxjs-interop';
 import { LoginUserRequest } from '../../auth/login/login-user.request';
 import { Observable, of } from 'rxjs';
 import { catchError, finalize, map, shareReplay, switchMap, tap } from 'rxjs/operators';
-import { anonymousRequest, inlineErrors } from '../http/http-context';
+import { anonymousRequest, inlineErrors, silentRequest } from '../http/http-context';
 import { ToastService } from '../../shared/toast/toast-service';
 import { APP_ROUTES } from '../app-routes';
 import { RegisterUserRequest } from '../../auth/register-user/register-user.request';
@@ -194,7 +194,9 @@ export class AuthService {
 
         const wasLoggedIn = this._isLoggedIn();
         this.refreshInFlight$ = this.httpClient.post(`${environment.apiBaseUrl}${Endpoints.refresh}`, {},
-            { observe: 'response', context: anonymousRequest() }
+            // No error toast: a failed refresh is handled below. A visitor who never signed in
+            // gets a 401 here on every page load, and must not see "Session expired".
+            { observe: 'response', context: silentRequest(anonymousRequest()) }
         ).pipe(
             map(response => response.ok),
             catchError(() => of(false)),

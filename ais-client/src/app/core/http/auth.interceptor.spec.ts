@@ -11,6 +11,7 @@ import { AuthService } from '../auth/auth.service';
 import { HttpErrorService } from './http-error.service';
 import { environment } from '../../../environments/environment';
 import { Endpoints } from './endpoints-config';
+import { ToastService } from '../../shared/toast/toast-service';
 
 const api = (path: string) => `${environment.apiBaseUrl}${path}`;
 
@@ -110,5 +111,35 @@ describe('authInterceptor', () => {
 
     expect((await result).status).toBe(401);
     expect(TestBed.inject(HttpErrorService).errorDetail()).toBe('Invalid username or password.');
+  });
+  it('shows no toast when an anonymous visitor loads the app', async () => {
+    const toast = vi.spyOn(TestBed.inject(ToastService), 'show');
+    const result = firstValueFrom(auth.checkAuth());
+
+    backend.expectOne(api(Endpoints.checkAuth)).flush(null, { status: 401, statusText: 'Unauthorized' });
+    backend.expectOne(api(Endpoints.refresh)).flush(
+      { status: 401, detail: 'Refresh token missing.' },
+      { status: 401, statusText: 'Unauthorized' }
+    );
+
+    expect(await result).toBe(false);
+    expect(auth.isLoggedIn()).toBe(false);
+    expect(toast).not.toHaveBeenCalled();
+    expect(TestBed.inject(Router).navigate).not.toHaveBeenCalled();
+  });
+
+  it('shows "Session expired" once when a signed-in session cannot be refreshed', async () => {
+    const toast = vi.spyOn(TestBed.inject(ToastService), 'show');
+    const signedIn = firstValueFrom(auth.checkAuth());
+    backend.expectOne(api(Endpoints.checkAuth)).flush({ id: '1', username: 'u' });
+    expect(await signedIn).toBe(true);
+
+    const result = firstValueFrom(http.get(api('api/a'))).catch(e => e);
+    backend.expectOne(api('api/a')).flush(null, { status: 401, statusText: 'Unauthorized' });
+    backend.expectOne(api(Endpoints.refresh)).flush(null, { status: 401, statusText: 'Unauthorized' });
+
+    expect((await result).status).toBe(401);
+    expect(toast).toHaveBeenCalledTimes(1);
+    expect(toast).toHaveBeenCalledWith('Session expired. Please log in.', 'warning');
   });
 });
