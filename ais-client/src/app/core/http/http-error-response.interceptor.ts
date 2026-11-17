@@ -2,7 +2,7 @@ import { HttpErrorResponse, HttpInterceptorFn } from "@angular/common/http";
 import { inject } from "@angular/core";
 import { catchError, throwError } from "rxjs";
 import { HttpErrorService } from "./http-error.service";
-import { SKIP_ERROR_TOAST, SKIP_REFRESH } from "./http-context";
+import { SILENT_ERRORS, SKIP_ERROR_TOAST, SKIP_REFRESH } from "./http-context";
 
 /**
  * Outermost interceptor: sees the final result after any refresh-and-retry.
@@ -14,7 +14,7 @@ export const httpErrorResponseInterceptor: HttpInterceptorFn = (req, next) => {
 
     return next(req).pipe(
         catchError((error) => {
-            if (error instanceof HttpErrorResponse) {
+            if (error instanceof HttpErrorResponse && !req.context.get(SILENT_ERRORS)) {
                 const sessionExpired = error.status === 401 && !req.context.get(SKIP_REFRESH);
                 if (!sessionExpired) {
                     httpErrorService.handle(error, { toast: !req.context.get(SKIP_ERROR_TOAST) });

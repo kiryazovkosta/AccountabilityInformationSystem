@@ -75,7 +75,9 @@ export class HttpErrorService {
                 this.toastService.show(detail ?? DEFAULT_MESSAGES[400], 'warning');
                 break;
             case 401:
-                this.toastService.show('Session expired. Please log in.', 'warning');
+                // Only 401s from anonymous endpoints (login, 2FA, ...) get here; an expired
+                // session is reported by AuthService, so this is not "Session expired".
+                this.toastService.show(detail ?? DEFAULT_MESSAGES[401], 'warning');
                 break;
             case 403:
                 this.toastService.show(DEFAULT_MESSAGES[403], 'warning');
