@@ -66,6 +66,15 @@ jobs:
         runs-on: ubuntu-latest
         if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
 
+        # Needed by azure/login to sign in to Azure with OpenID Connect (no stored password).
+        permissions:
+            contents: read
+            id-token: write
+
+        env:
+            # A unique name, so parallel or re-run jobs never remove each other's rule.
+            FIREWALL_RULE_NAME: gh-runner-${{ github.run_id }}-${{ github.run_attempt }}
+
         defaults:
             run:
                 working-directory: ${{ env.WORKING_DIRECTORY }}
@@ -89,6 +98,30 @@ jobs:
                 dotnet ef migrations bundle --startup-project ${{ env.API_PROJECT_PATH }} --project ${{ env.API_PROJECT_PATH }} --context ApplicationDbContext --configuration Release --output app-bundle
                 dotnet ef migrations bundle --startup-project ${{ env.API_PROJECT_PATH }} --project ${{ env.API_PROJECT_PATH }} --context ApplicationIdentityDbContext --configuration Release --output identity-bundle
 
+            # GitHub-hosted runners no longer run only on Azure: some jobs now land on AWS, whose
+            # addresses the SQL server's "Allow Azure services" rule does not cover. Open the
+            # firewall for this runner's own address for the length of the job, then close it.
+            - name: Azure login
+              uses: azure/login@v2
+              with:
+                client-id: ${{ secrets.AZURE_CLIENT_ID }}
+                tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+                subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+            - name: Allow this runner through the SQL firewall
+              run: |
+                RUNNER_IP=$(curl -fsS --retry 3 https://api.ipify.org)
+                echo "Runner IP: $RUNNER_IP"
+                az sql server firewall-rule create \
+                  --resource-group "${{ secrets.AZURE_SQL_RESOURCE_GROUP }}" \
+                  --server "${{ secrets.AZURE_SQL_SERVER_NAME }}" \
+                  --name "$FIREWALL_RULE_NAME" \
+                  --start-ip-address "$RUNNER_IP" \
+                  --end-ip-address "$RUNNER_IP" \
+                  --output none
+                # A new firewall rule can take a short while to take effect.
+                sleep 30
+
             - name: Apply app migrations
               run: ./app-bundle --connection "${{ secrets.DATABASE_CONNECTION_STRING }}"
               env:
@@ -102,6 +135,15 @@ jobs:
                 Jwt__Key: ${{ secrets.JWT_KEY }}
                 Encryption__Key: ${{ secrets.ENCRYPTION_KEY }}
                 ConnectionStrings__AccountabilityInformationSystemDb: ${{ secrets.DATABASE_CONNECTION_STRING }}
+
+            - name: Remove this runner from the SQL firewall
+              if: always()
+              run: |
+                az sql server firewall-rule delete \
+                  --resource-group "${{ secrets.AZURE_SQL_RESOURCE_GROUP }}" \
+                  --server "${{ secrets.AZURE_SQL_SERVER_NAME }}" \
+                  --name "$FIREWALL_RULE_NAME" \
+                  --output none || true
 
     deploy:
         name: "Backend: Deploy to Azure"
