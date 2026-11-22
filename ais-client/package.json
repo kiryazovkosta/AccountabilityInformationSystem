@@ -41,7 +41,7 @@
     "@angular/localize": "^22.2.6",
     "@tailwindcss/postcss": "^4.1.12",
     "@types/tailwindcss": "^3.1.0",
-    "baseline-browser-mapping": "^2.11.37",
+    "baseline-browser-mapping": "^2.11.38",
     "jsdom": "^31.0.0",
     "postcss": "^8.5.3",
     "tailwindcss": "^4.2.1",
